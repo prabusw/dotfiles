@@ -1,0 +1,7 @@
+[Unit]
+Description= beanbk service - Backup beancount folder as tar files as daily,weekly and monthly 
+# Documentation=
+
+[Service]
+Type=simple
+ExecStart=/data/docs/prabu/linux_config/scripts/backup_beancount

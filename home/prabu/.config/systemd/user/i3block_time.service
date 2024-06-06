@@ -1,0 +1,14 @@
+# This service unit updates time in i3blocks time
+# By Prabu Anand
+# Licensed under GPL V2
+#
+
+[Unit]
+Description=Updates time in i3blocks time block 
+Wants=i3block_time.timer
+
+[Service]
+Type=oneshot
+ExecStart=pkill -RTMIN+3 i3blocks
+
+

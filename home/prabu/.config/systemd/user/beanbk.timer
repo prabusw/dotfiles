@@ -1,0 +1,11 @@
+[Unit]
+Description= beanbk timer - starts beanbk user service 
+
+[Timer]
+OnCalendar=daily
+AccuracySec=12min
+Persistent=true
+Unit=beanbk.service
+
+[Install]
+WantedBy=timers.target

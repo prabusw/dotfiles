@@ -1,0 +1,62 @@
+# https://github.com/hex46/dotfiles-Nordic-Sway/blob/main/mako/config
+# [settings]
+# group-by=summary
+# group-by=app-name
+
+# Timout
+sort=-time
+default-timeout=10000
+# ignore-timeout=1
+layer=overlay
+# icon-path="/usr/share/icons/Nordzy:/usr/share/icons/Nordzy-dark:/usr/share/icons/Mint-Y"
+# icon-path="/usr/share/icons/Nordzy:/usr/share/icons/Nordzy-dark:/usr/share/icons/Mint-Y"
+icon-path=/usr/share/icons/Mint-Y:/usr/share/icons/Nordzy:/usr/share/icons/Nordzy-dark
+max-icon-size=64
+height=300
+# STYLE OPTIONS
+# https://github.com/hex46/dotfiles-Nordic-Sway/blob/main/mako/config
+# font=Cantarell 11
+# background-color=#4c566a
+# border-color=#88c0d0
+
+# https://github.com/ayamir/nord-and-light/blob/master/.config/mako/config
+# font=Sarasa UI SC 10
+# background-color=#e5e9f0dd
+# text-color=#2e3440
+# border-color=#eceff4
+# border-radius=7
+
+# background-color=#3b4252
+background-color=#4c566a
+progress-color=over #5e81ac
+padding=0,5,20
+
+# Borders
+border-color=#88c0d0
+border-radius=20
+
+# Text
+# format=<b>%s</b>\n%b
+# format=<span font="Cantarell 12" line_height="0.01" rise="5pt" color="#eceff4">%s</span>\n%b
+# format=<span font="Symbols Nerd Font 13" line_height="0.01" rise="5pt" color="#b48ead">%s</span>\n%b
+format=<span font="Symbols Nerd Font 13" rise="5pt" color="#b48ead">%s</span>\n%b
+text-alignment=center
+
+# [app-name="Test" actionable]
+# on-notify=exec mpv /usr/share/sounds/freedesktop/stereo/message.oga
+# on-button-left=invoke-action mail-reply-sender
+# on-button-middle=exec mpv /usr/share/sounds/freedesktop/stereo/message.oga
+# on-button-right=exec tofi-run
+# makoctl menu dmenu
+# on-button-right=exec zenity --calendar --date-format=%Y%Y%Y%Y-%M%M-%D%D
+# notify-send --app-name="Test" text1 --action="action1=exec"
+
+[grouped]
+# format =(%g) <b>%s</b>\n%b
+# format= <span font="Symbols Nerd Font 13" line_height="0.01" rise="5pt" color="#b48ead" font-weight="700">%s</span>\n%b
+format= <span font="Symbols Nerd Font 13" rise="5pt" color="#b48ead" font-weight="700">%s</span>\n%b
+
+[urgency=critical]
+border-color=#bf616a
+default-timeout=0
+

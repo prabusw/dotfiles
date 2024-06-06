@@ -1,0 +1,14 @@
+# This timer unit is for triggering time update in i3blocks time
+# By Prabu Anand K
+#
+
+[Unit]
+Description=Triggers update of time in i3blocks time 
+# Requires=myMonitor.service
+
+[Timer]
+# Unit=myMonitor.service
+OnCalendar=*-*-* *:*:00
+
+[Install]
+WantedBy=timers.target
