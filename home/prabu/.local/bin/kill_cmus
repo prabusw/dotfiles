@@ -1,0 +1,3 @@
+pkill cmus
+sway-notify -i multimedia-audio-player "cmus closed"
+player_script.sh

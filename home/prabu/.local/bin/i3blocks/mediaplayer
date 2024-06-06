@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+
+# Check player status
+player_status=$(playerctl status 2>/dev/null)
+
+if [ -z "$player_status" ]; then
+    # Handle the case when no players are found by checking if the player_status variable is empty or null
+    echo " "
+else
+    # Player status has changed
+    if [ "$player_status" == "Paused" ]; then
+        echo ""
+    elif [ "$player_status" == "Playing" ]; then
+        # echo ""
+        echo ""
+    elif [ "$player_status" == "Stopped" ]; then
+        echo ""
+    fi
+fi
+# 1 Left click: display current song info
+# 2 Middle click: Toggle play-pause
+# 3 Right click: show scratchpad (effective only if cmus is running there)
+# 4 Wheel up: Next song
+# 5 Wheel down: Prev song
+
+function handle_button {
+    case "$BLOCK_BUTTON" in
+        1) ( current_song.sh ) > /dev/null ;;
+        2) ( playerctl play-pause && pkill -RTMIN+2 i3blocks) > /dev/null ;;
+        3) ( swaymsg scratchpad show ) > /dev/null ;;
+        4) ( playerctl next && sway-notify "Song skipped" && current_song.sh ) > /dev/null ;;
+        5) ( playerctl previous && sway-notify "previous Song" && current_song.sh ) > /dev/null ;;        
+    esac
+}
+
+handle_button &

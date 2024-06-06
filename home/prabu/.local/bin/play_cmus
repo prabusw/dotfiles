@@ -1,0 +1,6 @@
+#!/bin/bash
+sway-notify -i multimedia-audio-player "cmus started"
+/usr/bin/systemd-inhibit /usr/bin/cmus
+# playerctl play-pause && pkill -RTMIN+2 i3blocks
+# player_script.sh
+

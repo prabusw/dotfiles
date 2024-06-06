@@ -1,0 +1,34 @@
+#!/bin/bash
+
+get_volume(){
+    volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)
+    volumep=$(echo $(wpctl get-volume @DEFAULT_AUDIO_SINK@ | tr -dc '0-9')| sed 's/^0*//')
+}
+
+function print_block {
+    get_volume
+    if [[ "$volume" == *"MUTED"* ]]; then
+        echo ""
+    else
+        echo ""
+    fi
+}
+
+# Left click: display current volume
+# Middle click: Toggle mute
+# Right click: Select sink - Not implemented yet
+# Wheel up: increase volume
+# Wheel down: decrease volume
+function handle_button {
+    case "$BLOCK_BUTTON" in
+        1) ( sway-volume-notify ) > /dev/null ;;
+        2) ( sway-volume-notify "0" ) > /dev/null ;;
+        4) ( sway-volume-notify "+" ) > /dev/null ;;
+        5) ( sway-volume-notify "-" ) > /dev/null ;;
+        # 3) ( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null 2>&1 && setsid ./pipewire-sink.sh ) > /dev/null ;;        
+    esac
+}
+
+handle_button &
+print_block
+

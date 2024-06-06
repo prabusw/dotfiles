@@ -1,0 +1,67 @@
+#!/bin/bash
+# player_status=$(playerctl status 2>/dev/null)
+
+SHOWNAME_PATH=~/.cache/i3block-mpd-showname
+
+exec-mpc() {
+    mpc $* &> /dev/null
+}
+
+
+player_status=$(mpc status | sed -n 's/^\[\([^])]*\)\].*$/\1/p')
+
+if [ -z "$player_status" ]; then
+    # Handle the case when no players are found by checking if the player_status variable is empty or null
+    echo " "
+else
+    # Player status has changed
+    if [ "$player_status" == "paused" ]; then
+        echo ""
+    elif [ "$player_status" == "playing" ]; then
+        # echo ""
+        echo ""
+    # else [ "$player_status" == "Stopped" ]; then
+    #     echo ""
+    fi
+fi
+# 1 Left click: display current song info
+# 2 Middle click: Toggle play-pause
+# 3 Right click: show scratchpad (effective only if cmus is running there)
+# 4 Wheel up: Next song
+# 5 Wheel down: Prev song
+
+function handle_button {
+    case "$BLOCK_BUTTON" in
+        1) ( current_song.sh ) > /dev/null ;;
+        2) ( exec-mpc toggle && pkill -RTMIN+3 i3blocks) > /dev/null ;;
+        3) ( exec-mpc stop && pkill -RTMIN+3 i3blocks) > /dev/null ;;
+        4) ( exec-mpc next && sway-notify "Song skipped" && current_song.sh ) > /dev/null ;;
+        5) ( exec-mpc pre && sway-notify "previous Song" && current_song.sh ) > /dev/null ;;        
+    esac
+}
+
+handle_button &
+
+
+
+# showname=$([ -f $SHOWNAME_PATH ] && cat $SHOWNAME_PATH || echo 0)
+
+# case $BLOCK_BUTTON in
+#   1) exec-mpc toggle ;;
+#   2) exec-mpc stop   ;;
+#   # 3) showname=$((!$showname)); echo $showname > $SHOWNAME_PATH ;;
+#   4) exec-mpc pre    ;;
+#   5) exec-mpc next   ;;
+# esac
+
+
+# if [ $showname = '1' ]; then
+#   mpc current | awk -F ' - ' '{printf "【%s】", substr($2, 0, 20)}'
+# fi
+
+# status=$(mpc status | sed -n 's/^\[\([^])]*\)\].*$/\1/p')
+# case $status in
+#   playing) echo -n $playing ;;
+#   paused)  echo -n $paused  ;;
+#   *)       echo -n $stopped ;;
+# esac

@@ -1,0 +1,31 @@
+#!/bin/sh -eu
+# https://git.sr.ht/~emersion/dotfiles/tree/master/item/bin/menu
+in_pipe="$XDG_RUNTIME_DIR/menu-in.$$.pipe"
+out_pipe="$XDG_RUNTIME_DIR/menu-out.$$.pipe"
+
+mkfifo "$in_pipe" "$out_pipe"
+trap "rm -f $in_pipe $out_pipe" EXIT
+
+app_id=menu
+chooser="fzf <$in_pipe >$out_pipe"
+
+# case "$TERM" in
+# alacritty)
+# 	alacritty --class "$app_id" --command sh -c "$chooser" &
+# 	;;
+# foot)
+# 	foot --app-id "$app_id" -- sh -c "$chooser" &
+# 	;;
+# termite)
+# 	termite --name "$app_id" -e "sh -c '$chooser'" &
+# 	;;
+# *)
+# 	echo >&2 "menu: unsupported terminal: $TERMINAL"
+# 	exit 1
+# esac
+foot --app-id "$app_id" -- sh -c "$chooser" &
+# ;;
+
+
+cat >"$in_pipe"
+cat <"$out_pipe"

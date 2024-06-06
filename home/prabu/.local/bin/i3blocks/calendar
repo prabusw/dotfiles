@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+echo "$LABEL$(date "$DATEFMT")"
+# Left click: Display Date and Time
+# Middle click: Display calendar
+# Right click: NA
+# Wheel up: NA
+# Wheel down: NA
+
+function handle_button {
+    case "$BLOCK_BUTTON" in
+        1) ( current_date.sh ) > /dev/null ;;
+        2) ( date_show.sh ) > /dev/null ;;
+        # 4) ( sway-volume-notify "+" ) > /dev/null ;;
+        # 5) ( sway-volume-notify "-" ) > /dev/null ;;
+        # # 3) ( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null 2>&1 && setsid ./pipewire-sink.sh ) > /dev/null ;;        
+    esac
+}
+handle_button &
+

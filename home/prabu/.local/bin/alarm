@@ -1,0 +1,22 @@
+#!/bin/bash
+#run the tool snore until the user specified time. On expiry play the sound
+timer="[0-9]m"
+alarmtime="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+audio=/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga
+currentime=`date "+%H:%M"`
+if [[ $1 =~ $timer ]]; then
+    sleep $1 && mpv --loop $audio
+elif [[ $1 =~ $alarmtime ]]; then
+    alarm_s=$(date --date="$1" +%s);
+    ctime_s=$(date --date="$currentime" +%s);
+    atimer=$((alarm_s-ctime_s))
+    if (( "$atimer" <= "3600")) && (( "$atimer" >= "0")); then
+        sleep $atimer && mpv -loop $audio
+    else
+    	echo "Alarm can only be set to 60 mins from now"
+    fi
+elif [[ $1 =~ "stop" ]]; then
+    pkill mpv
+else
+    echo "usage: ${0##*/} 00m|hh:mm  i.e alarm 10m or alarm 17:20"
+fi

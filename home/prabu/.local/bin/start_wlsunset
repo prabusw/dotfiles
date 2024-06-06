@@ -1,0 +1,9 @@
+#!/bin/bash
+# https://www.reddit.com/r/hyprland/comments/16skqzv/i_make_a_shell_script_that_control_wlsunset_from/?rdt=59258
+if
+    pgrep -x "wlsunset" > /dev/null
+then
+    pkill wlsunset > /dev/null 2>&1
+else
+    wlsunset -t 2500  > /dev/null 2>&1 &
+fi
