@@ -1,0 +1,14 @@
+#!/bin/bash
+# Check for Arch updates. Depending on the result either update or clear the file /tmp/update_notification
+# This script is called by system service named update-check.service
+# The /tmp/update_notification file is checked and sway-bar be updated accordingly by /usr/local/bin/sway_bar.sh
+
+sleep $((RANDOM%4))
+CHK=$(checkupdates)
+if [ ${#CHK} -gt 0 ]; then
+    # Updaate the content of the file with the string "updates_available" when there are updates
+	echo "updates_available" > /tmp/update_notification
+else
+    # Clear the content of the file when there are no updates
+    echo "" > /tmp/update_notification
+fi

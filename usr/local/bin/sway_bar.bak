@@ -1,0 +1,60 @@
+#!/usr/bin/bash
+# https://sburris.xyz/posts/swaybar-configuration/
+# https://www.nerdfonts.com/cheat-sheet
+# Additional help sought and obtained from chatgptV3.5
+
+# Initialize variables
+prev_player_status=""
+prev_mute_status=""
+FILE=/tmp/update_nofitication
+
+while true; do
+    time=$(date +'%F %R')
+
+   # Read Arch update information from the file
+    update_info=$(cat /tmp/update_notification 2>/dev/null)
+
+    # if [ "$update_info" == "updates_available" ]; then
+    if [[ -f $FILE ]]; then    
+        update="\\uf303"
+    else
+           update=""
+    fi   
+    # Display update information on sway bar
+    # echo "$update_info"
+
+
+    # Check player status
+    player_status=$(playerctl status 2>/dev/null)
+
+    if [ "$player_status" != "$prev_player_status" ]; then
+        # Player status has changed
+        prev_player_status="$player_status"
+        if [ "$player_status" == "Paused" ]; then
+            pause="\\uf04c"
+        else
+            pause=""
+        fi
+    fi
+
+    # Check volume mute status
+    mute_status=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{if($3 == "[MUTED]") print "muted";}')
+
+    if [ "$mute_status" != "$prev_mute_status" ]; then
+        # Mute status has changed
+        prev_mute_status="$mute_status"
+        if [ "$mute_status" == "muted" ]; then
+            mute="\\ueb24"
+        else
+            mute=""
+        fi
+    fi
+
+    # Display status
+    status_text="$update $pause $mute $time"
+    echo -e "$status_text"
+
+    # Introduce a delay before the next iteration
+    sleep 5
+done
+
