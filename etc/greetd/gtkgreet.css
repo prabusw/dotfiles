@@ -1,0 +1,65 @@
+/* https://github.com/openSUSE/openSUSEway/blob/main/greetd/style.css */
+window {
+    background-color: transparent; 
+    /* background-image: url("file:///usr/share/wallpapers/default-1920x1080.jpg"); */
+    background-image: url("file:///usr/share/backgrounds/nordic/nord_lake.png");
+    background-size: cover;
+    background-position: center;
+    /* color: rgba(53, 185, 171, 1); */
+}
+entry {
+    /* color: rgba(115, 186, 37, 1); */
+    color: #d8dee9;
+    /* background: rgba(23, 63, 79, 1); */
+    background: #2e3440;
+	
+}
+combobox * {
+    /* color: rgba(115, 186, 37, 1); */
+    /* color: #d8dee9; */
+    color:#5e81ac;
+    /* background: rgba(23, 63, 79, 1); */
+    background: #2e3440;
+    
+}
+button {
+    /* color: rgba(115, 186, 37, 1); */
+    /* color: #d8dee9; */
+    color:#5e81ac;
+    /* background: rgba(23, 63, 79, 1); */
+    background: #2e3440;
+    
+    /* border-color: rgba(33, 164, 223, 1); */
+    border-color: #3b4252
+}
+
+
+/* https://github.com/senabi/dotfiles/blob/main/root/etc/greetd/gtkgreet.css */
+/* window { */
+/*     background-color: #202020; */
+/*     color: #ebcb8b; */
+/* } */
+/* box#body { */
+/*     background-color: grey; */
+/*     /\* color: #eceff4; *\/ */
+/*     color: black; */
+/*     border-radius: 10px; */
+/*     padding: 50px; */
+/* } */
+/* textview text { */
+/*   background-color: black; */
+/*   color: white; */
+/* } */
+/* .view text selection { */
+/*   background-color: blue; */
+/*   color: yellow; */
+/* } */
+
+/* https://lists.sr.ht/~kennylevinsen/greetd/%3C20201127172729.191467-1-alebastr89%40gmail.com%3E */
+
+/* window { background-color: transparent; } */
+/* box#body { */
+/*     background-color: #353535; */
+/*     box-shadow: 1 0 0 1px rgba(27, 27, 27, 0.9); */
+/*     padding: 50px; */
+/* } */
