@@ -3,6 +3,7 @@
 Dotfiles related to all the tools listed below can be found in this repository. Most of them have been are based on online resources and sources are cited in most cases.
 
 ## Sway configuration Details
+
 Sway configuration uses the following tools
 * foot - terminal
 * mako - notification daemon
