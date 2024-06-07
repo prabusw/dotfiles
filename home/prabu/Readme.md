@@ -1,36 +1,16 @@
-Approach1
+# Sway dotfiles using Nord theme
 
-Local Bare Repositories
-1. Personal Dotfiles
-git init --bare $HOME/.dotfiles
-git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME/ config --local status.showUntrackedFiles no
-alias config='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME/'
-config add .vimrc
-config commit -m "Add vimrc"
-config add .bashrc
-config commit -m "Add bashrc"
-git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME/ remote add origin git@github.com:prabusw/dotfiles.git
-git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME/ remote add origin https://github.com/prabusw/dotfiles.git
-2. System Files
-Initialize a bare repository for your system files:
-git init --bare $HOME/.systemconf
-alias sysconfig='git --git-dir=$HOME/.systemconf/ --work-tree=/'
-Add your system configuration files:
-sudo sysconfig add /etc/some-config-file
-sudo sysconfig commit -m "Add some config file"
-sudo sysconfig add /usr/local/bin/your_script
-sudo sysconfig commit -m "Add script to /usr/local/bin"
-git --git-dir=$HOME/.systemconf/ --work-tree=/ remote add origin https://github.com/prabusw/dotfiles.git
-sysconfig remote add system git@github.com:prabusw/systemfiles.git
-sysconfig push system master
+## Tracking swaywm dotfiles using a bare git repository 
+To track changes to config files and saving them for future needs(restoration) git is commonly used. By keeping the dotfiles in github or similar online hosting providers, one can share the configuration with others.
 
-Approach2:
+The only tool used here is git. Normal user account is used for adding files as long as the user has Read permission. Only for deleting files added from system folders and when the default user does not have Read permission, sudo needs to be used with full command.
 
-The below approach works for most use cases. Only for deleting in
-system folders, sudo needs to be used with full command.
-
+Create a bare git directory
 prabu@homepc2 ~> git init --bare $HOME/.systemfiles
 prabu@homepc2 ~> alias sysconfig='git --git-dir=$HOME/.systemfiles --work-tree=/'
+prabu@homepc2 ~> echo "alias sysconfig='git --git-dir=/home/prabu/.systemfiles --work-tree=/'" >> ~/.co
+nfig/fish/config.fish
+prabu@homepc2 ~> source ~/.config/fish/config.fish
 prabu@homepc2 ~> sysconfig add /etc/btrbk/btrbk.conf
 prabu@homepc2 ~> sysconfig add Readme.md
 prabu@homepc2 ~> sudo git --git-dir=/home/prabu/.systemfiles --work-tree=/ rm /usr/local/bin/current_song.sh~
@@ -38,28 +18,33 @@ prabu@homepc2 ~> sysconfig status
 prabu@homepc2 ~> sysconfig commit -m "added Readme.md"
 prabu@homepc2 ~> sysconfig push origin master
 
-prabu@homepc2 ~> systemctl list-units --state=running | grep -v systemd | awk '{print $1}' | grep service
-dbus-broker.service
-greetd.service
-iwd.service
-polkit.service
-rpc-statd.service
-rpcbind.service
-rtkit-daemon.service
-seatd.service
-sshd.service
-upower.service
-user@1000.service
-
+### To view the currently running systemd services 
 prabu@homepc2 ~> systemctl --user list-units --state=running | grep -v systemd | awk '{print $1}' | grep service
-at-spi-dbus-bus.service
-dbus-:1.26-org.a11y.atspi.Registry@0.service
-dbus-broker.service
-dconf.service
-gvfs-daemon.service
-pipewire-pulse.service
-pipewire.service
-wireplumber.service
-xdg-desktop-portal.service
-xdg-document-portal.service
-xdg-permission-store.service
+* at-spi-dbus-bus.service
+* dbus-:1.26-org.a11y.atspi.Registry@0.service
+* dbus-broker.service
+* dconf.service
+* gvfs-daemon.service
+* pipewire-pulse.service
+* pipewire.service
+* wireplumber.service
+* xdg-desktop-portal.service
+* xdg-document-portal.service
+* xdg-permission-store.service
+
+### prabu@homepc2 ~> systemctl list-units --state=running | grep -v systemd | awk '{print $1}' | grep service
+* dbus-broker.service
+* greetd.service
+* iwd.service
+* polkit.service
+* rpc-statd.service
+* rpcbind.service
+* rtkit-daemon.service
+* seatd.service
+* sshd.service
+* upower.service
+* user@1000.service
+
+Source:https://news.ycombinator.com/item?id=11071754
+https://www.atlassian.com/git/tutorials/dotfiles
+
