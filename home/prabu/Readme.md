@@ -62,3 +62,29 @@ Writing objects: 100% (5/5), 1003 bytes | 1003.00 KiB/s, done.
 Total 5 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
 To github.com:prabusw/dotfiles.git
    caa1e88..67ca35e  master -> master
+
+prabu@homepc2 ~> systemctl list-units --state=running | grep -v systemd | awk '{print $1}' | grep service
+dbus-broker.service
+greetd.service
+iwd.service
+polkit.service
+rpc-statd.service
+rpcbind.service
+rtkit-daemon.service
+seatd.service
+sshd.service
+upower.service
+user@1000.service
+
+prabu@homepc2 ~> systemctl --user list-units --state=running | grep -v systemd | awk '{print $1}' | grep service
+at-spi-dbus-bus.service
+dbus-:1.26-org.a11y.atspi.Registry@0.service
+dbus-broker.service
+dconf.service
+gvfs-daemon.service
+pipewire-pulse.service
+pipewire.service
+wireplumber.service
+xdg-desktop-portal.service
+xdg-document-portal.service
+xdg-permission-store.service
