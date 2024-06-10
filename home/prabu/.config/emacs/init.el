@@ -713,6 +713,7 @@ e.g. Sunday, September 17, 2000."
         ))
 )
 ;;;; projectile
+;; Needed for platformio-mode
 (use-package projectile
   :ensure t
   :init
@@ -720,8 +721,41 @@ e.g. Sunday, September 17, 2000."
   :bind (:map projectile-mode-map
               ("s-p" . projectile-command-map)
               ("C-c p" . projectile-command-map)))
+;;;;
+;; https://github.com/ZachMassia/platformio-mode
+;; https://nickgeorge.net/programming/platformio-emcas/
+;; Code from nickgeorge website converted by chatgpt
+;; Enable irony for all c++ files, and platformio-mode only
+;; when needed (platformio.ini present in project root).
+(defun my/c++-mode-setup ()
+  (when (derived-mode-p 'c++-mode)
+    (irony-mode)
+    (irony-eldoc)
+    (platformio-conditionally-enable)))
 
+(use-package irony-eldoc
+  :ensure t
+  )
+(use-package irony
+  :ensure t
+  :config
+  (add-hook 'irony-mode-hook 'irony-eldoc)
+  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+  (add-hook 'c++-mode-hook 'my/c++-mode-setup)
+  :init
+  (eval-after-load 'irony
+    '(progn
+       (define-key irony-mode-map [remap completion-at-point] 'irony-completion-at-point-async)
+       (define-key irony-mode-map [remap complete-symbol] 'irony-completion-at-point-async)))
+  )
 
+(use-package arduino-mode
+  :ensure t
+  :mode ("\\.ino$" . arduino-mode)
+  )
 
+(use-package platformio-mode
+  :ensure t
+  )
 
 

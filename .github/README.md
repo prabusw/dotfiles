@@ -1,6 +1,6 @@
 # Sway dotfiles using Nord theme
 
-Dotfiles related to all the tools listed below can be found in this repository. Most of them have been are based on online resources and sources are cited in most cases.
+Dotfiles related to sway desktop and all the related tools listed below can be found in this repository. Most of configuration is based on online resources. Sources are cited in the individual files.
 
 ## Sway configuration Details
 
