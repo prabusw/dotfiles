@@ -44,7 +44,10 @@ UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /var/cache/pacman/pkg     btrfs   comp
 # 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14,x-systemd.idle-timeout=1min 0 0
 # 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs  _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14, 0 0
 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14, 0 0
-
+# 192.168.1.1:/mnt/sda1/espsite /data/docs/prabu/espsite nfs _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14, 0 0
 # Mount the external seagate using automount option with btrfs compression
 # https://askubuntu.com/questions/220015/how-to-use-btrfs-with-compression-on-external-usb-hard-drive
 UUID=40250d10-abaa-4f0a-8da6-38251b813fb0 /mnt/ext_part1 btrfs noauto,compress=zlib:3,subvol=/ 0 0
+# Mount the pi zero nfs
+# 192.168.1.197:/lib/motion   /mnt/motion   nfs4   defaults,_netdev   0   0
+192.168.1.197:/lib/motion   /mnt/motion   nfs4   _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14 0 0

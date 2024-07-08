@@ -733,21 +733,21 @@ e.g. Sunday, September 17, 2000."
     (irony-eldoc)
     (platformio-conditionally-enable)))
 
-(use-package irony-eldoc
-  :ensure t
-  )
-(use-package irony
-  :ensure t
-  :config
-  (add-hook 'irony-mode-hook 'irony-eldoc)
-  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-  (add-hook 'c++-mode-hook 'my/c++-mode-setup)
-  :init
-  (eval-after-load 'irony
-    '(progn
-       (define-key irony-mode-map [remap completion-at-point] 'irony-completion-at-point-async)
-       (define-key irony-mode-map [remap complete-symbol] 'irony-completion-at-point-async)))
-  )
+;; (use-package irony-eldoc
+;;   :ensure t
+;;   )
+;; (use-package irony
+;;   :ensure t
+;;   :config
+;;   (add-hook 'irony-mode-hook 'irony-eldoc)
+;;   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+;;   (add-hook 'c++-mode-hook 'my/c++-mode-setup)
+;;   :init
+;;   (eval-after-load 'irony
+;;     '(progn
+;;        (define-key irony-mode-map [remap completion-at-point] 'irony-completion-at-point-async)
+;;        (define-key irony-mode-map [remap complete-symbol] 'irony-completion-at-point-async)))
+;;   )
 
 (use-package arduino-mode
   :ensure t
@@ -756,6 +756,6 @@ e.g. Sunday, September 17, 2000."
 
 (use-package platformio-mode
   :ensure t
+  :hook (c++-mode . platformio-conditionally-enable)
   )
-
 
