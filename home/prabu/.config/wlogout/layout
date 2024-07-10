@@ -1,12 +1,12 @@
 {
     "label" : "lock",
-    "action" : "swaylock",
+    "action" : "loginctl lock-session",
     "text" : "Lock",
     "keybind" : "l"
 }
 {
     "label" : "hibernate",
-    "action" : "powerctl disk",
+    "action" : "systemctl hibernate",
     "text" : "Hibernate",
     "keybind" : "h"
 }
@@ -24,7 +24,7 @@
 }
 {
     "label" : "suspend",
-    "action" : "powerctl mem",
+    "action" : "systemctl suspend",
     "text" : "Suspend",
     "keybind" : "u"
 }

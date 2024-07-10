@@ -10,14 +10,11 @@ set {
   $menu tofi-run | xargs swaymsg exec --
   # $menu dmenu_path | menu | xargs swaymsg exec
 
-
 # Launch via Sway
   $drun tofi-drun | xargs swaymsg exec --
 
 # Modes
-
   $power_mode  "Power: (F2)SCRNOFF | (F3)LCK | (F4)RBT | (F5)POFF"
-  
   
 # Nord theme
  $nord0   #2E3440
@@ -344,7 +341,8 @@ exec_always {
 # clipboard
 # https://wiki.archlinux.org/title/sway#Clipboard
           # exec wl-paste -t text --watch clipman store --no-persist
-          exec wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json" 1>> ~/.var/log/clipman.log 2>&1 &
+          # exec wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json" 1>> ~/.var/log/clipman.log 2>&1 &
+          exec wl-paste --watch cliphist store
           # bindsym  $mod+c exec foot clipman pick --print0 --tool=CUSTOM --tool-args="fzf --prompt 'pick > ' --bind 'tab:up' --cycle --read0"
 
 # wlsunset aka redshift
