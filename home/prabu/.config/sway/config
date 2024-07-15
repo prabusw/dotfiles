@@ -347,7 +347,8 @@ exec_always {
 
 # wlsunset aka redshift
 # https://www.reddit.com/r/swaywm/comments/np9cfe/how_do_i_pause_wlsunset/
-          bindsym $mod+F2       exec toggle_wlsunset 
+          bindsym $mod+F2       exec toggle_wlsunset
+          
 
 # gnome-calculator
 # https://www.reddit.com/r/swaywm/comments/14mc3f4/calculator_for_sway/?rdt=58986
@@ -432,3 +433,4 @@ bindsym $mod+F1 exec cat ~/.config/sway/config |grep bindsym |grep -v "^#"| sed 
 
 # Sources:
 # https://github.com/Crandel/home/blob/master/.config/sway/config
+exec_always wlsunset -g 0.9

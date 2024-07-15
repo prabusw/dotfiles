@@ -5,5 +5,5 @@ if
 then
     pkill wlsunset > /dev/null 2>&1
 else
-    wlsunset -t 2500 -T 2501 > /dev/null 2>&1 &
+    wlsunset -t 2500 -T 2501 -g 0.9 > /dev/null 2>&1 &
 fi
