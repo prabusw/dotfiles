@@ -1,321 +1,204 @@
 # Read `man 5 sway` for a complete reference.
 
-### set Variables
-set {
-# Logo key. Use Mod1 for Alt. Mod4 for Super
-  $mod Mod4
-# Your preferred terminal emulator
-  $term foot
-# Your preferred application launcher = tofi
-  $menu tofi-run | xargs swaymsg exec --
-  # $menu dmenu_path | menu | xargs swaymsg exec
+# ========================
+# Variables
+# ========================
+set $mod Mod4
+set $term foot
+set $menu tofi-run | xargs swaymsg exec --
+set $drun tofi-drun | xargs swaymsg exec --
 
-# Launch via Sway
-  $drun tofi-drun | xargs swaymsg exec --
-
-# Modes
-  $power_mode  "Power: (F2)SCRNOFF | (F3)LCK | (F4)RBT | (F5)POFF"
-  
-# Nord theme
- $nord0   #2E3440
- $nord1   #3B4252
- $nord2   #434C5E
- $nord3   #4C566A
- $nord4   #D8DEE9
- $nord5   #E5E9F0
- $nord6   #ECEFF4
- $nord7   #8FBCBB
- $nord8   #88C0D0
- $nord9   #81A1C1
- $nord10  #5E81AC
- $nord11  #BF616A
- $nord12  #D08770
- $nord13  #EBCB8B
- $nord14  #A3BE8C
- $nord15  #B48EAD
+# Nord Color Scheme Configuration
+# This configuration uses the Nord color scheme for consistent aesthetics.
+# Reference: https://www.nordtheme.com/
+set $nord0 #2E3440   
+set $nord1 #3B4252   
+set $nord2 #434C5E   
+set $nord3 #4C566A   
+set $nord4 #D8DEE9   
+set $nord5 #E5E9F0   
+set $nord6 #ECEFF4   
+set $nord7 #8FBCBB   
+set $nord8 #88C0D0   
+set $nord9 #81A1C1   
+set $nord10 #5E81AC  
+set $nord11 #BF616A  
+set $nord12 #D08770  
+set $nord13 #EBCB8B  
+set $nord14 #A3BE8C  
+set $nord15 #B48EAD  
 
 
- $bar-bg    $nord0
- $text   $nord10
- $active-bg   $nord3
- $wb-focused     #8fbcbb
- $border-focused #b48ead
- $wb-active      #5e81ac
- $wb-inactive    #5e81ac
- $wb-unfocused   #5e81ac
- $clear #ffffff
-} 
+# Color Variables (Adjusted for Nord Scheme)
+set $bar-bg $nord0   
+set $text $nord4     
+set $active-bg $nord2
+set $wb-focused $nord8
+set $border-focused $nord10
+set $wb-active $nord9
+set $wb-inactive $nord1   
+set $wb-unfocused $nord3  
+set $clear $nord6         
 
-# Output configuration
-# https://wiki.archlinux.org/title/sway section 3.4
-output * bg #2e3440 solid_color
-# output DP-1 resolution 1360x768 position 0,0 scale 1
-# output * bg /usr/share/backgrounds/nordic/Minimal-Nord.png center #2e3440
+# ========================
+# Output Configuration
+# ========================
+output * bg $nord0 solid_color
 
-### Idle configuration
+# ========================
+# Idle Configuration
+# ========================
 exec swayidle -w \
-         timeout 300 "swaylock" \
-         timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-         timeout 600 "systemctl suspend" \
-         before-sleep "swaylock"
-#
-# This will lock your screen after 300 seconds of inactivity, then
-# turn off your displays after another 300 seconds, and turn your
-# screens back on when resumed. It will also lock your screen before
-# your computer goes to sleep.
+    timeout 300 "swaylock" \
+    timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+    timeout 600 "systemctl suspend" \
+    before-sleep "swaylock"
 
-# https://www.reddit.com/r/swaywm/comments/skpcmo/method_for_starting_applications_on_startup_on/
-#Autostart
+# ========================
+# Autostart Applications
+# ========================
 # exec "foot --server"
 # exec inactive-windows-transparency.py -o 0.4
 
-### Key bindings
-#
-# Basics:
-#
+# ========================
+# Key Bindings
+# ========================
+# Basics
+bindsym $mod+Shift+Return exec $term
+bindsym $mod+Shift+c kill
+bindsym $mod+d exec $menu
+bindsym $mod+Shift+d exec $drun
+floating_modifier $mod normal
+bindsym $mod+shift+q exec wlogout
 
-    # Start a terminal. Default $mod+Return
-    bindsym $mod+Shift+Return exec $term 
+# Moving Around
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
 
-    # Kill focused window. Changed from default binding $mod4+Shift+q.
-    # Original binding $mod4+shift+c reloaded sway configuration file. Now no binding exists for sway reload 
-    bindsym $mod+Shift+c kill
-
-    # # Start your launcher
-    bindsym $mod+d exec $menu
-    bindsym $mod+Shift+d exec $drun
-    # bindsym $mod+Alt+d exec $term /usr/local/bin/launcher.sh
-      
-    # Drag floating windows by holding down $mod and left mouse button.
-    # Resize them with right mouse button + $mod.
-    # Despite the name, also works for non-floating windows.
-    # Change normal to inverse to use left mouse button for resizing and right
-    # mouse button for dragging.
-    floating_modifier $mod normal
-    
-    # Shifted sway exit from swaynag to wlogout. swaynagmode was used when using swaynag
-  
-    bindsym $mod+shift+q exec wlogout   #exit or quit sway
-    
-#
-# Moving around:
-#
-    # Move your focus around
-    bindsym $mod+Left focus left
-    bindsym $mod+Down focus down
-    bindsym $mod+Up focus up
-    bindsym $mod+Right focus right
-
-    # Move the focused window with the same, but add Shift
-    bindsym $mod+Shift+Left move left
-    bindsym $mod+Shift+Down move down
-    bindsym $mod+Shift+Up move up
-    bindsym $mod+Shift+Right move right
-#
-# Workspaces:
-#
+# Workspaces
+# Note: workspaces can have any name you want, not just numbers.
     # Switch to workspace
-    bindsym $mod+1 workspace number 1
-    bindsym $mod+2 workspace number 2
-    bindsym $mod+3 workspace number 3
-    bindsym $mod+4 workspace number 4
-    bindsym $mod+5 workspace number 5
-    bindsym $mod+6 workspace number 6
-    bindsym $mod+7 workspace number 7
-    bindsym $mod+8 workspace number 8
-    bindsym $mod+9 workspace number 9
-    bindsym $mod+0 workspace number 10
-    # Move focused container to workspace
-    bindsym $mod+Shift+1 move container to workspace number 1
-    bindsym $mod+Shift+2 move container to workspace number 2
-    bindsym $mod+Shift+3 move container to workspace number 3
-    bindsym $mod+Shift+4 move container to workspace number 4
-    bindsym $mod+Shift+5 move container to workspace number 5
-    bindsym $mod+Shift+6 move container to workspace number 6
-    bindsym $mod+Shift+7 move container to workspace number 7
-    bindsym $mod+Shift+8 move container to workspace number 8
-    bindsym $mod+Shift+9 move container to workspace number 9
-    bindsym $mod+Shift+0 move container to workspace number 10
-    # Note: workspaces can have any name you want, not just numbers.
-    # We just use 1-10 as the default.
-#
-# Layout stuff:
-#
-    # You can "split" the current object of your focus with
-    # $mod+h or $mod+v, for horizontal(default) and vertical splits
-    # respectively. Changed he default binding from $mod+b to $mod+h
-    bindsym $mod+h splith
-    bindsym $mod+v splitv
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+# Move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
 
-    # Switch the current container between different layout
-    # styles. Changed the binding for tabbed from $mod+w to $mod+t
-    bindsym $mod+s layout stacking
-    bindsym $mod+t layout tabbed
-    bindsym $mod+e layout toggle split
-    
-    # Make the current focus fullscreen
-    bindsym $mod+f fullscreen
+# Layout Management
+bindsym $mod+h splith
+bindsym $mod+v splitv
+bindsym $mod+s layout stacking
+bindsym $mod+t layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+a focus prev
+bindsym $mod+m resize set width 60
 
-    # Toggle the current focus between tiling and floating mode
-    bindsym $mod+Shift+space floating toggle
+# Scratchpad
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
 
-    # Swap focus between the tiling area and the floating area
-    bindsym $mod+space focus mode_toggle
-
-    # Move focus to the parent container
-    # bindsym $mod+a focus parent
-    bindsym $mod+a focus prev
-
-    # Resize focused tiled container to 60% of output
-    bindsym $mod+m resize set width 60
-#
-# Scratchpad:
-
-    # Sway has a "scratchpad", which is a bag of holding for windows.
-    # You can send windows there and get them back later.
-
-    # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+minus move scratchpad
-    
-    # Show the next scratchpad window or hide the focused scratchpad window.
-    # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+minus scratchpad show
-    
-    # custom shortcuts for scratchpad - use app_id from swaymsg -t get_tree
-# https://aaronlauterer.com/blog/2018/01/i3-scratchpad-to-access-often-used-applications/
-    # bindsym $mod+equal [class="Emacs"] scratchpad show
-
-
-#
-# Resizing containers:
-#
-
+# Resize Mode
 mode "resize" {
-    # Resize the container with arrow keys in resize mode
     bindsym Left resize shrink width 10px
     bindsym Down resize grow height 10px
     bindsym Up resize shrink height 10px
     bindsym Right resize grow width 10px
-    
-    # Return to default mode
     bindsym Return mode "default"
     bindsym Escape mode "default"
     bindsym $mod+r mode "default"
 }
-    bindsym $mod+r mode "resize" 
-    
-mode "cmusic" {
+bindsym $mod+r mode "resize"
 
+# Custom Music Mode
+mode "cmusic" {
     bindsym 0 exec current_song.sh
     bindsym 9 exec current_queue.sh
-
     bindsym Left exec playerctl previous && exec current_song.sh
-    # bindsym Down exec playerctl previous && exec current_song.sh
-    # bindsym Up exec playerctl next && exec current_song.sh
     bindsym Right exec playerctl next && exec current_song.sh
-
     bindsym p exec playerctl play-pause
     bindsym space exec playerctl play-pause
     bindsym q exec playerctl stop
-    
     bindsym s exec playerctl shuffle toggle
     bindsym l exec playerctl loop Track
     bindsym Shift+l exec playerctl loop Playlist
-
     bindsym c scratchpad show
-
-    # Return to default mode
     bindsym Return mode "default"
     bindsym Escape mode "default"
     bindsym $mod+c mode "default"
 }
-    bindsym $mod+c mode "cmusic" 
+bindsym $mod+c mode "cmusic"
 
 
-#
-# Status Bar:
-#
-# Read `man 5 sway-bar` for more information about this section.
-# https://www.reddit.com/r/i3wm/comments/onzwvn/any_way_to_highlight_the_active_workspace_so_you/
-                                     
+# Application launchers
+bindsym $mod+F2 exec toggle_wlsunset
+bindsym $mod+w exec firefox assign [app_id="firefox"] 1
+bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
 
-#bar configuration. Uncomment below line for yambar and disable the bar section completely if using yambar
-# exec_always sh -c "killall yambar; yambar &"
 
+# ========================
+# Status Bar Configuration
+# ========================
+# i3blocks displays status information to swaybar
 bar {
     position top
     font pango:Symbols Nerd Font Bold 13
     status_edge_padding 10
     status_padding 5
     status_command i3blocks
-    # status_command i3status-rs ~/.config/i3status-rs/config.toml
-    # status_command i3status
 
+    # Color settings for the status bar
     colors {
-        # colorclass        <border>    <background>       <text>
-        statusline $text
-        background         $bar-bg                                            
-        focused_workspace  $wb-focused     $active-bg         $text 
-        # active_workspace   $wb-active      $bar-bg         $wb-active               
-        inactive_workspace $wb-inactive    $bar-bg    $text
-        urgent_workspace $wb-focused    $active-bg    $nord11
-           }
-     # separator_symbol ""
-     # tray {
-     #      # icon_theme "awesome6"
-     #      icon_theme "Symbols Nerd Font"
-     #      bindsym {
-     #         # button3 exec iwgtk -i ; exec pasystray -m 100 -i 5 -g
-     #              }
-     #       }
-    
+        statusline $text    
+        background $bar-bg  
+        focused_workspace $wb-focused $active-bg $text
+        inactive_workspace $wb-inactive $bar-bg $text
+        urgent_workspace $wb-focused $active-bg $nord11
+    }
 }
 
-# include /etc/sway/config-vars.d/*
-include /etc/sway/config.d/*
-# include ~/.config/sway/config.d/*
-
-# Alternate approach
-         bindsym $mod+b exec swaymsg bar mode toggle
-         
-# https://www.reddit.com/r/swaywm/comments/qnz4mk/highlight_currently_focused_window/
-# https://github.com/Iss-in/dotfiles-v2/blob/master/.config/sway/config_latest#L95
-            default_border pixel 1
-            # default_border none
-             smart_borders on
-             
-             
-# client.<class> <border> <background> <text> [<indicator> [<child_border>]]
-# Default settings are listed here for info only
-       # client.focused   #4c7899  #285577     #ffffff  #2e9ef4    #285577
- # https://github.com/lokesh-krishna/dotfiles/blob/master/nord-v3/config/sway/config      
-## Window decoration
-# class                 border  backgr. text    indicator child_border
-# client.focused          #88c0d0 #434c5e #eceff4 #8fbcbb   #88c0d0
-# client.focused_inactive #88c0d0 #2e3440 #d8dee9 #4c566a   #4c566a
-# client.unfocused        #88c0d0 #2e3440 #d8dee9 #4c566a   #4c566a
-# client.urgent           #ebcb8b #ebcb8b #2e3440 #8fbcbb   #ebcb8b
+# ========================
+# Window Decorations
+# ========================
+default_border pixel 1
+smart_borders on
+client.focused $nord10 $nord2 $nord6 $wb-focused $nord10
+client.focused_inactive $nord10 $nord0 $nord4 $nord8 $nord2
+client.unfocused $nord10 $nord0 $nord4 $nord8 $nord3
 
 
+# ========================
+# Miscellaneous Settings
+# ========================
+xwayland disable
 
-
-# class                 border  backgr. text    indicator child_border
-client.focused          #5e81ac  #434c5e #eceff4 #8fbcbb   #5e81ac
-client.focused_inactive #5e81ac  #2e3440 #d8dee9 #88c0d0   #4c566a
-client.unfocused        #5e81ac  #2e3440 #d8dee9 #88c0d0   #4c566a
-
-
-# disable xwayland so that only wayland apps work and X11 compatibilty is removed
-        xwayland disable
-
-
-# Cursor theme setting
-
-# Found mismatch in cursor theme. Gtk apps like emacs and sway title bar differed.
-# https://github.com/swaywm/sway/issues/6931
-# https://github.com/swaywm/sway/wiki/GTK-3-settings-on-Wayland
-
-# seat seat0 xcursor_theme Adwaita
+# ========================
+# Theme settings
+# ========================
 set $gnome-schema org.gnome.desktop.interface
 exec_always {
     gsettings set org.gnome.desktop.wm.preferences button-layout 'menu:close'
@@ -325,112 +208,63 @@ exec_always {
     gsettings set $gnome-schema color-scheme 'prefer-dark'
     gsettings set $gnome-schema font-name 'Cantarell 11'
 }
-# Sets  font to use for the title bars refer man 5 sway
-     font pango:Cantarell 11
-     
-# firefox browser
-           bindsym $mod+w exec firefox
-           assign [app_id="firefox"] 1
-# Emacs           
-           assign [app_id="emacs"] 3
-           
-# nnn filemanager
-# https://www.reddit.com/r/swaywm/comments/skpcmo/method_for_starting_applications_on_startup_on/
-           bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
+font pango:Cantarell 11
 
-# clipboard
-# https://wiki.archlinux.org/title/sway#Clipboard
-          # exec wl-paste -t text --watch clipman store --no-persist
-          # exec wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json" 1>> ~/.var/log/clipman.log 2>&1 &
-          exec wl-paste --watch cliphist store
-          # bindsym  $mod+c exec foot clipman pick --print0 --tool=CUSTOM --tool-args="fzf --prompt 'pick > ' --bind 'tab:up' --cycle --read0"
+# ========================
+# Clipboard
+# ========================
+exec wl-paste --watch cliphist store
 
-# wlsunset aka redshift
-# https://www.reddit.com/r/swaywm/comments/np9cfe/how_do_i_pause_wlsunset/
-          bindsym $mod+F2       exec toggle_wlsunset
-          
-
-# gnome-calculator
-# https://www.reddit.com/r/swaywm/comments/14mc3f4/calculator_for_sway/?rdt=58986
-          for_window [app_id="org.gnome.Calculator"] floating enable, border normal, move position cursor
-          for_window [app_id="org.twosheds.iwgtk"] floating enable, move position 900 0   
-          for_window [app_id="nemo"] floating enable
-          # for_window [app_id="^menu$"] floating enable, border none
-
-
-# Volume Control of pipewire using wireplumber and sway-volume-notify script
-# https://github.com/swaywm/sway/wiki#how-can-i-setup-keyboard-volume-keys
-          bindsym --locked F11 exec sway-volume-notify "-"
-          bindsym --locked $mod+F11 exec sway-volume-notify "+"
-          bindsym --locked F12 exec sway-volume-notify "0"
-# Media player controls
-     # cmus
-         bindsym $mod+Alt+F12 exec foot -T play_cmus_in_scratch play_cmus         
-         bindsym $mod+F12 exec playerctl play-pause && pkill -RTMIN+2 i3blocks
-         bindsym $mod+Shift+F12 exec /usr/local/bin/player_skip.sh
-     # mpc    
-         # bindsym $mod+F12 exec mpc toggle && pkill -RTMIN+3 i3blocks
-         # bindsym $mod+Shift+F12 exec mpc next
-         
-      # obsolete
-         
-         # exec sway-notify "cmus started"
-# cmus
-        for_window [title="play_cmus_in_scratch"] {
+# ========================
+# Application Specific Rules
+# ========================
+# assign [app_id="emacs"] 3
+for_window [app_id="emacs"] move to workspace 3
+for_window [app_id="org.gnome.Calculator"] floating enable, border normal, move position cursor
+for_window [app_id="org.twosheds.iwgtk"] floating enable, move position 900 0
+for_window [app_id="nemo"] floating enable
+for_window [app_id="xed"] floating enable, focus, resize set width 30 ppt height 40 ppt, border pixel 2
+for_window [title="play_cmus_in_scratch"] {
             move scratchpad
             inhibit_idle open
             }   
+# ========================
+# Volume Control
+# ========================
+bindsym --locked F11 exec sway-volume-notify "-"
+bindsym --locked $mod+F11 exec sway-volume-notify "+"
+bindsym --locked F12 exec sway-volume-notify "0"
+bindsym $mod+Alt+F12 exec foot -T play_cmus_in_scratch play_cmus
+bindsym $mod+F12 exec playerctl play-pause && pkill -RTMIN+2 i3blocks
+bindsym $mod+Shift+F12 exec /usr/local/bin/player_skip.sh
+# ========================
+# Screenshots
+# ========================
+bindsym Print exec sway-notify "Select an Area" && grimshot save area - | swappy -f -
+bindsym Shift+Print exec grimshot --notify save screen ~/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy
+bindsym $mod+Print exec grimshot save active - | swappy -f -
+bindsym $mod+Shift+Print exec sway-notify "Select a window" && grimshot --notify save window ~/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy
+bindsym $mod+Alt+Print exec grimshot --notify save output ~/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy
 
-  
-# screenshots
+# ========================
+# Help
+# ========================
+bindsym $mod+F1 exec cat ~/.config/sway/config |grep bindsym |grep -v "^#"| sed 's/^[[:space:]]*//'|sed 's/bindsym//'| tofi
 
-# enable screenshot based on grim, grimshot and swappy
+# References:
+# https://github.com/Crandel/home/blob/master/.config/sway/config
+# https://wiki.archlinux.org/title/sway#Manage_Sway-specific_daemons_with_systemd
+# https://www.reddit.com/r/swaywm/comments/wzfkxf/how_do_i_remember_all_the_shortcuts/?rdt=36334
 # https://www.reddit.com/r/swaywm/comments/bb4dam/take_screenshot_to_clipboard
 # https://www.reddit.com/r/swaywm/comments/1arbob4/comment/kqjmp7v
-# capture the specified screen area to clipboard    
-          # bindsym Print exec grim -g "$(slurp)" -t png - | wl-copy -t image/png
-          bindsym Print exec sway-notify "Select an Area" && grimshot save area - | swappy -f -
-# Save all screens to clipboard (this is different from output)
-          bindsym Shift+Print exec grimshot --notify save screen ~/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png |wl-copy
-# Capture the currently active window.
-          bindsym $mod+Print exec grimshot save active - | swappy -f -
-# window Manually selecting a single window (by clicking on it), and captures it.
-          bindsym $mod+Shift+Print exec sway-notify "Select a window" && grimshot --notify save window ~/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png |wl-copy
-# screen Captures the current output.
-          bindsym $mod+Alt+Print  exec grimshot --notify save output ~/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png |wl-copy
-
-
-
-
-# https://i3wm.org/docs/userguide.html#_opening_terminals_and_moving_around
-# Press $mod+o followed by either f, t, Escape or Return to launch firefox,
-# thunderbird or return to the default mode, respectively.
-# set $mode_launcher Launch: [f]irefox [c]hromim [e]macs
-# bindsym $mod+o mode "$mode_launcher"
-
-# mode "$mode_launcher" {
-#     bindsym f exec firefox
-#     bindsym c exec chromium
-#     bindsym e exec emacs
-#     bindsym Escape mode "default"
-#     bindsym Return mode "default"
-# }
-
-# Help for sway shortcuts
-# https://www.reddit.com/r/swaywm/comments/wzfkxf/how_do_i_remember_all_the_shortcuts/?rdt=36334
-bindsym $mod+F1 exec cat ~/.config/sway/config |grep bindsym |grep -v "^#"| sed 's/^[[:space:]]*//'|sed 's/bindsym//'| tofi
-   
-# https://wiki.archlinux.org/title/sway#Manage_Sway-specific_daemons_with_systemd
-# include statements can be found right below sway bar configuration
-# https://github.com/swaywm/sway/wiki/Systemd-integration#managing-user-applications-with-systemd
-# The below command has become part of .config/sway/config.d/50-systemd-user.conf
-# exec_always systemctl --user start sway-session.target
-
-# i3blocks Testing
-
-# bindsym --release Caps_Lock exec pkill -SIGRTMIN+10 i3blocks
-
-
-# Sources:
-# https://github.com/Crandel/home/blob/master/.config/sway/config
-exec_always wlsunset -g 0.9
+# https://github.com/swaywm/sway/wiki#how-can-i-setup-keyboard-volume-keys
+# https://www.reddit.com/r/swaywm/comments/14mc3f4/calculator_for_sway/?rdt=58986
+# https://www.reddit.com/r/swaywm/comments/np9cfe/how_do_i_pause_wlsunset/
+# https://www.reddit.com/r/swaywm/comments/skpcmo/method_for_starting_applications_on_startup_on/
+# https://github.com/swaywm/sway/issues/6931
+# https://github.com/swaywm/sway/wiki/GTK-3-settings-on-Wayland
+# https://github.com/lokesh-krishna/dotfiles/blob/master/nord-v3/config/sway/config
+# https://www.reddit.com/r/swaywm/comments/qnz4mk/highlight_currently_focused_window/
+# https://github.com/Iss-in/dotfiles-v2/blob/master/.config/sway/config_latest#L95
+# https://aaronlauterer.com/blog/2018/01/i3-scratchpad-to-access-often-used-applications/
+# https://www.reddit.com/r/i3wm/comments/onzwvn/any_way_to_highlight_the_active_workspace_so_you/
