@@ -55,10 +55,49 @@ exec swayidle -w \
     before-sleep "swaylock"
 
 # ========================
-# Autostart Applications
+# Status Bar Configuration
 # ========================
-# exec "foot --server"
-# exec inactive-windows-transparency.py -o 0.4
+# i3blocks displays status information to swaybar
+bar {
+    position top
+    font pango:Symbols Nerd Font Bold 13
+    status_edge_padding 10
+    status_padding 5
+    status_command i3blocks
+
+    # Color settings for the status bar
+    colors {
+        statusline $text    
+        background $bar-bg  
+        focused_workspace $wb-focused $active-bg $text
+        inactive_workspace $wb-inactive $bar-bg $text
+        urgent_workspace $wb-focused $active-bg $nord11
+    }
+}
+
+# ========================
+# Window Decorations
+# ========================
+default_border pixel 1
+smart_borders on
+client.focused $nord10 $nord2 $nord6 $wb-focused $nord10
+client.focused_inactive $nord10 $nord0 $nord4 $nord8 $nord2
+client.unfocused $nord10 $nord0 $nord4 $nord8 $nord3
+
+
+# ========================
+# Theme settings
+# ========================
+font pango:Cantarell 11
+set $gnome-schema org.gnome.desktop.interface
+exec_always {
+    gsettings set org.gnome.desktop.wm.preferences button-layout 'menu:close'
+    gsettings set org.gnome.desktop.wm.preferences theme 'Nordic'
+    gsettings set $gnome-schema gtk-theme 'Nordic'
+    gsettings set $gnome-schema icon-theme 'Nordzy-dark'
+    gsettings set $gnome-schema color-scheme 'prefer-dark'
+    gsettings set $gnome-schema font-name 'Cantarell 11'
+}
 
 # ========================
 # Key Bindings
@@ -154,71 +193,16 @@ mode "cmusic" {
 bindsym $mod+c mode "cmusic"
 
 
-# Application launchers
+# Application launchers with keybindings 
 bindsym $mod+F2 exec toggle_wlsunset
-bindsym $mod+w exec firefox assign [app_id="firefox"] 1
+bindsym $mod+w exec firefox 
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
-
-
-# ========================
-# Status Bar Configuration
-# ========================
-# i3blocks displays status information to swaybar
-bar {
-    position top
-    font pango:Symbols Nerd Font Bold 13
-    status_edge_padding 10
-    status_padding 5
-    status_command i3blocks
-
-    # Color settings for the status bar
-    colors {
-        statusline $text    
-        background $bar-bg  
-        focused_workspace $wb-focused $active-bg $text
-        inactive_workspace $wb-inactive $bar-bg $text
-        urgent_workspace $wb-focused $active-bg $nord11
-    }
-}
-
-# ========================
-# Window Decorations
-# ========================
-default_border pixel 1
-smart_borders on
-client.focused $nord10 $nord2 $nord6 $wb-focused $nord10
-client.focused_inactive $nord10 $nord0 $nord4 $nord8 $nord2
-client.unfocused $nord10 $nord0 $nord4 $nord8 $nord3
-
-
-# ========================
-# Miscellaneous Settings
-# ========================
-xwayland disable
-
-# ========================
-# Theme settings
-# ========================
-set $gnome-schema org.gnome.desktop.interface
-exec_always {
-    gsettings set org.gnome.desktop.wm.preferences button-layout 'menu:close'
-    gsettings set org.gnome.desktop.wm.preferences theme 'Nordic'
-    gsettings set $gnome-schema gtk-theme 'Nordic'
-    gsettings set $gnome-schema icon-theme 'Nordzy-dark'
-    gsettings set $gnome-schema color-scheme 'prefer-dark'
-    gsettings set $gnome-schema font-name 'Cantarell 11'
-}
-font pango:Cantarell 11
-
-# ========================
-# Clipboard
-# ========================
-exec wl-paste --watch cliphist store
 
 # ========================
 # Application Specific Rules
 # ========================
 # assign [app_id="emacs"] 3
+assign [app_id="firefox"] 1
 for_window [app_id="emacs"] move to workspace 3
 for_window [app_id="org.gnome.Calculator"] floating enable, border normal, move position cursor
 for_window [app_id="org.twosheds.iwgtk"] floating enable, move position 900 0
@@ -227,7 +211,26 @@ for_window [app_id="xed"] floating enable, focus, resize set width 30 ppt height
 for_window [title="play_cmus_in_scratch"] {
             move scratchpad
             inhibit_idle open
-            }   
+            }
+            
+# ========================
+# Miscellaneous Settings
+# ========================
+xwayland disable
+
+# ========================
+# Autostart Applications
+# ========================
+# exec "foot --server"
+# exec inactive-windows-transparency.py -o 0.4
+exec_always wlsunset -g 0.9
+
+# ========================
+# Clipboard
+# ========================
+exec wl-paste --watch cliphist store
+
+
 # ========================
 # Volume Control
 # ========================
