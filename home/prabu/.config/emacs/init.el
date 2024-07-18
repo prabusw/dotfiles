@@ -73,6 +73,11 @@
 ;; (set-face-attribute 'default nil :font "Monaco-16" )
 ;; (set-face-attribute 'default nil :font "Hack-13:embolden=true" )
 (set-face-attribute 'default nil :font "Hack-13" )
+
+
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+(setq display-line-numbers-type 'relative)
+
 ;; To make Tab-width consistent with all OS as per "Learning Emacs" 3rd Edition pg175
 (setq-default tab-width 4)
 ;;;; transparency
@@ -139,6 +144,7 @@ e.g. Sunday, September 17, 2000."
   ;; (insert (format-time-string "%A, %B %e, %Y"))
   (insert (format-time-string "%F"))
   )
+
 
 ;; https://emacs.stackexchange.com/questions/77295/org-roam-case-insensitive-search
 (defun case-insensitive-org-roam-node-read (orig-fn &rest args)

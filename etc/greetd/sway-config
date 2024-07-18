@@ -9,6 +9,6 @@ exec "regreet; swaymsg exit"
 # 	-b 'Reboot' 'systemctl reboot' \
 # 	-b 'Suspend' 'systemctl suspend'
 
-bindsym Mod4+shift+q exec wlogout
+# bindsym Mod4+shift+q exec wlogout
 
 include /etc/sway/config.d/*
