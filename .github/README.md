@@ -4,9 +4,9 @@ Dotfiles related to sway desktop and all the related tools listed
 below can be found in this repository. Most of configuration is based
 on online resources. Sources are cited in the individual files.
 
-The dotfiles in this repository in the home folder are used in a pc
-which dual boots between Arch and Alpine Linux. So anything related to
-systemd will not work on Alpine.
+The dotfiles in this repository are used in a pc which dual boots
+between Arch and Alpine Linux. So anything related to systemd will not
+work on Alpine.
 
 ## Sway configuration Details
 
