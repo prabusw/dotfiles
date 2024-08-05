@@ -1,14 +1,20 @@
 # Sway dotfiles using Nord theme
 
-Dotfiles related to sway desktop and all the related tools listed below can be found in this repository. Most of configuration is based on online resources. Sources are cited in the individual files.
+Dotfiles related to sway desktop and all the related tools listed
+below can be found in this repository. Most of configuration is based
+on online resources. Sources are cited in the individual files.
+
+The dotfiles in this repository in the home folder are used in a pc
+which dual boots between Arch and Alpine Linux. So anything related to
+systemd will not work on Alpine.
 
 ## Sway configuration Details
 
 Sway configuration uses the following tools
 * foot - terminal
 * mako - notification daemon
-* greetd - login manager
-* nwg-hello -greeter for the greetd
+* greetd - login manager(optional)
+* nwg-hello -greeter for the greetd(optional)
 * swaylock - locking tool
 * i3blocks - feed generator for swaybar
 * tofi - dynamic menu
@@ -24,10 +30,14 @@ Sway configuration uses the following tools
 
 ## Tracking swaywm dotfiles using a bare git repository 
 
-The only tool used here is git. Normal user account is used for adding files as long as the user has Read permission. Only for deleting files added from system folders and when the default user does not have Read permission, sudo needs to be used with full command.
+The only tool used here is git. Normal user account is used for adding
+files as long as the user has Read permission. Only for deleting files
+added from system folders and when the default user does not have Read
+permission, sudo needs to be used with full command.
 
 
-The below steps will suffice to keep track of dotfiles for single desktop. For detailed explanation refer to the sources
+The below steps will suffice to keep track of dotfiles for single
+desktop. For detailed explanation refer to the sources
 
 ```
 prabu@homepc2 ~> git init --bare $HOME/.systemfiles
@@ -40,37 +50,6 @@ prabu@homepc2 ~> sudo git --git-dir=/home/prabu/.systemfiles --work-tree=/ rm /u
 prabu@homepc2 ~> sysconfig status
 prabu@homepc2 ~> sysconfig commit -m "added Readme.md"
 prabu@homepc2 ~> sysconfig push origin master
-```
-## Information on current system status
-### View the currently running user systemd services 
-```
-prabu@homepc2 ~> systemctl --user list-units --state=running | grep -v systemd | awk '{print $1}' | grep service
-* at-spi-dbus-bus.service
-* dbus-:1.26-org.a11y.atspi.Registry@0.service
-* dbus-broker.service
-* dconf.service
-* gvfs-daemon.service
-* pipewire-pulse.service
-* pipewire.service
-* wireplumber.service
-* xdg-desktop-portal.service
-* xdg-document-portal.service
-* xdg-permission-store.service
-```
-### View the currently running systemd services 
-```
-prabu@homepc2 ~> systemctl list-units --state=running | grep -v systemd | awk '{print $1}' | grep service
-* dbus-broker.service
-* greetd.service
-* iwd.service
-* polkit.service
-* rpc-statd.service
-* rpcbind.service
-* rtkit-daemon.service
-* seatd.service
-* sshd.service
-* upower.service
-* user@1000.service
 ```
 Sources:
 * https://news.ycombinator.com/item?id=11071754
