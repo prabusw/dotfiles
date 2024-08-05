@@ -1,5 +1,5 @@
 ;;; init.el -*- lexical-binding: t; -*-
-;;; initialization 
+;;; initialization
 ;;;; files and folders
 ;; https://stackoverflow.com/questions/2079095/how-to-modularize-an-emacs-configuration/2079146
 (defconst user-init-dir
@@ -43,7 +43,7 @@
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install 'use-package)
-  
+
   (use-package use-package-ensure
     :config  (setq use-package-always-ensure t)))
 
@@ -60,6 +60,16 @@
 
 
 ;;; settings
+;;;; Trailing whitespace and Tabs
+;; Use tabs for indentation in APKBUILD files
+(add-hook 'sh-mode-hook
+          (lambda ()
+            (when (and buffer-file-name
+                       (string-match-p "APKBUILD\\'" buffer-file-name))
+              (setq indent-tabs-mode t))))
+
+;; Remove trailing whitespace before saving
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;;;; smooth scrolling
 
 (pixel-scroll-precision-mode)
@@ -109,22 +119,23 @@
 (setq-default inhibit-startup-screen t)
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
-(setq initial-scratch-message "")       
-;; (setq initial-buffer-choice "/home/prabu/newfile.txt") 
+(setq initial-scratch-message "")
+;; (setq initial-buffer-choice "/home/prabu/newfile.txt")
 (setq initial-major-mode 'fundamental-mode)
 ;;;; theme
 
 ;; https://github.com/rougier/elegant-emacs  ;;Webiste to make emacs more elegant
 ;; https://github.com/jmdeldin/ir-black-theme.el/blob/master/ir-black-theme.el   ;;yet another theme
-(setq custom-theme-directory "/home/prabu/.emacs.d/themes")
+;; (setq custom-theme-directory "/home/prabu/.emacs.d/themes")
 ;; (load-theme 'material t)
-(load-theme 'nord t)
+;; Refer to nord-theme under packages for current theme
+;; (load-theme 'nord t)
 ;; Found about better-defaults from
 ;; https://linuxhint.com/configuring_emacs_python/
 ;; https://git.sr.ht/~technomancy/better-defaults
 
 ;; (add-to-list 'load-path "better-defaults")
-(add-to-list 'load-path "/home/prabu/.emacs.d/better-defaults") 
+(add-to-list 'load-path "/home/prabu/.emacs.d/better-defaults")
 (require 'better-defaults)
 
 ;;;; custom functions
@@ -182,6 +193,12 @@ e.g. Sunday, September 17, 2000."
 ;;   ("v" flycheck-verify-setup))
 
 ;;; packages
+;;;; nord-theme
+(use-package nord-theme
+  :ensure t
+  :config
+  (load-theme 'nord t)
+  )
 ;;;; helpful
 ;; https://github.com/jeffkreeftmeijer/.emacs.d/blob/main/emacs-configuration.org
 (use-package helpful
@@ -322,7 +339,7 @@ e.g. Sunday, September 17, 2000."
          ;; ([S-f10] . helm-recentf)
          )
   )
-;; Helm can resize its buffer automatically to fit the number of candidates 
+;; Helm can resize its buffer automatically to fit the number of candidates
 ;; (setq ;;helm-autoresize-mode t
 ;;       helm-autoresize-max-height                80   ; it is %.
 ;;       helm-autoresize-min-height                20   ; it is %.
@@ -333,14 +350,14 @@ e.g. Sunday, September 17, 2000."
 ;; https://www.reddit.com/r/emacs/comments/dv02lk/how_to_force_emacs_to_prefer_manually_installed/
 
 (use-package org
-  ;; :quelpa 
+  ;; :quelpa
   :pin gnu
   :mode (("\\.org$" . org-mode))
   :ensure t
   :requires oc
   :requires org-id
   :custom
-  ;; (org-directory (file-truename "/data/docs/prabu/Dropbox/org")) 
+  ;; (org-directory (file-truename "/data/docs/prabu/Dropbox/org"))
   (org-cite-global-bibliography '("~/org/Resources/my_library.bib"))
   (org-cite-csl-styles-dir '("~/Zotero/styles"))
   :bind (
@@ -364,7 +381,7 @@ e.g. Sunday, September 17, 2000."
 (setq org-agenda-files (quote ("/data/docs/prabu/Dropbox/org") ;; ("~/org1") folders can be added
                               )
       )
-;; Undefine keys "C-c [" and "C-c ]" which expands the agenda list files 
+;; Undefine keys "C-c [" and "C-c ]" which expands the agenda list files
 (add-hook 'org-mode-hook
 	      '(lambda ()
 	         (org-defkey org-mode-map "\C-c[" 'undefined)
@@ -372,7 +389,7 @@ e.g. Sunday, September 17, 2000."
 	      'append)
 
 ;;;; org-roam
-;;;;; comments 
+;;;;; comments
 ;; Install and configure org-roam as per following sources
 ;; https://www.orgroam.com/manual.html and for dailies
 ;; https://www.orgroam.com/manual.html#org_002droam_002ddailies
@@ -388,7 +405,7 @@ e.g. Sunday, September 17, 2000."
   ;; (org-roam-completion-everywhere t)
   (setq org-roam-completion-system 'helm)
   :custom
-  (org-roam-directory (file-truename "/data/docs/prabu/Dropbox/org/Resources")) 
+  (org-roam-directory (file-truename "/data/docs/prabu/Dropbox/org/Resources"))
   ;; (setq org-roam-directory (file-truename "~/org/Resources"))
   (org-roam-dailies-directory "daily")
   (org-roam-dailies-capture-templates
@@ -403,7 +420,7 @@ e.g. Sunday, September 17, 2000."
   ;; (require 'org-roam-dailies)
   :bind (
          ("C-c n f" . org-roam-node-find)
-         ("C-c n r" . org-roam-node-random)		    
+         ("C-c n r" . org-roam-node-random)
          :map org-mode-map
          ("C-c n i" . org-roam-node-insert)
          ("C-c n o" . org-id-get-create)
@@ -412,13 +429,13 @@ e.g. Sunday, September 17, 2000."
          ("C-c n l" . org-roam-buffer-toggle)
          ("C-M-i" . completion-at-point)))
 ;; Below code not working. To be fixed at a later date
-;; :map org-roam-dailies-map   
+;; :map org-roam-dailies-map
 ;; ("Y" . org-roam-dailies-capture-yesterday)
 ;; ("T" . org-roam-dailies-capture-tomorrow)
 ;; :bind-keymap
-;; ("C-c n d" . org-roam-dailies-map)      
+;; ("C-c n d" . org-roam-dailies-map)
 
-;; Below options are not used for now. Need to see if they are useful 
+;; Below options are not used for now. Need to see if they are useful
 
 ;; (setq org-id-link-to-org-use-id 'use-existing)
 
@@ -473,8 +490,8 @@ e.g. Sunday, September 17, 2000."
 ;; (add-hook 'python-base-mode-hook 'flymake-mode)
   ;; (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
   ;; https://stackoverflow.com/questions/1259873/how-can-i-use-emacs-flymake-mode-for-python-with-pyflakes-and-pylint-checking-co
-  ;; (add-hook 'python-mode-hook 
-  ;;     (lambda () 
+  ;; (add-hook 'python-mode-hook
+  ;;     (lambda ()
   ;;       (unless (eq buffer-file-name nil) (flymake-mode 1)) ;dont invoke flymake on temporary buffers for the interpreter
   ;;       (local-set-key [f2] 'flymake-goto-prev-error)
   ;;       (local-set-key [f3] 'flymake-goto-next-error)
@@ -483,7 +500,7 @@ e.g. Sunday, September 17, 2000."
 (use-package pet
   :config
   (add-hook 'python-base-mode-hook 'pet-mode -10)
-  
+
   (add-hook 'python-mode-hook
             (lambda ()
               (setq-local python-shell-interpreter (pet-executable-find "python")
@@ -511,7 +528,7 @@ e.g. Sunday, September 17, 2000."
 (use-package live-py-mode
   :ensure t
   )
-              
+
 ;; The configuration related to Python has ended with the above line.
 
 ;;;; flymake
@@ -528,14 +545,14 @@ e.g. Sunday, September 17, 2000."
   ))
 
 
-;; (add-to-list 'load-path "/home/prabu/.emacs.d/flymake-diagnostic-at-point-master") 
+;; (add-to-list 'load-path "/home/prabu/.emacs.d/flymake-diagnostic-at-point-master")
 ;; (use-package flymake-diagnostic-at-point
 ;;   :after flymake
 ;;   :config
 ;;   (add-hook 'flymake-mode-hook #'flymake-diagnostic-at-point-mode)
 ;;   )
 
-;;;; Company 
+;;;; Company
 ;; Provide drop-down completion.
 (use-package company
   :ensure t
@@ -595,12 +612,12 @@ e.g. Sunday, September 17, 2000."
   ;;                                                   "home/prabu/.venv/bin/python"
   ;;                                                    t])
   ;;                                  ))))
-  
+
   :bind(
         :map eglot-mode-map
              ("C-c r" . eglot-rename)
              ("C-c o" . eglot-code-action-organize-imports)
-             ("C-c h" . eldoc)             
+             ("C-c h" . eldoc)
              )
   )
 ;;;; beancount
@@ -670,14 +687,14 @@ e.g. Sunday, September 17, 2000."
 (use-package magit
   ;; :quelpa (magit :fetcher github :repo "magit/magit")
   :ensure t
-  ;; :after 
+  ;; :after
   :bind (
          ("C-x g" .	magit-status)
          ("C-x M-g"	. magit-dispatch)
          ("C-c M-g"	. magit-file-dispatch)
          )
   )
-;; 
+;;
 
 ;;;; tree-sitter-module
 ;; https://www.adventuresinwhy.com/post/eglot/
@@ -764,4 +781,3 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :hook (c++-mode . platformio-conditionally-enable)
   )
-

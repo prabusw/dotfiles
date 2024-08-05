@@ -1,7 +1,7 @@
 #
 # ~/.bashrc : executed by bash(1) for non-login shells.
 #
-# If not running interactively, don't do anything
+# # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
 alias ls='ls --color=auto'
@@ -16,12 +16,13 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-# https://stackoverflow.com/questions/40574819/how-to-remove-dir-background-in-ls-color-output
+# # https://stackoverflow.com/questions/40574819/how-to-remove-dir-background-in-ls-color-output
 eval "$(dircolors -p | \
     sed 's/ 4[0-9];/ 01;/; s/;4[0-9];/;01;/g; s/;4[0-9] /;01 /' | \
     dircolors /dev/stdin)"
 
 PS1='[\u@\h \W]\$ '
+
 
 
 # https://wiki.archlinux.org/title/fish#Setting_fish_as_interactive_shell_only
@@ -31,3 +32,4 @@ then
 	shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=''
 	exec fish $LOGIN_OPTION
 fi
+# exec fish

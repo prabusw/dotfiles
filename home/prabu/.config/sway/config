@@ -11,34 +11,34 @@ set $drun tofi-drun | xargs swaymsg exec --
 # Nord Color Scheme Configuration
 # This configuration uses the Nord color scheme for consistent aesthetics.
 # Reference: https://www.nordtheme.com/
-set $nord0 #2E3440   
-set $nord1 #3B4252   
-set $nord2 #434C5E   
-set $nord3 #4C566A   
-set $nord4 #D8DEE9   
-set $nord5 #E5E9F0   
-set $nord6 #ECEFF4   
-set $nord7 #8FBCBB   
-set $nord8 #88C0D0   
-set $nord9 #81A1C1   
-set $nord10 #5E81AC  
-set $nord11 #BF616A  
-set $nord12 #D08770  
-set $nord13 #EBCB8B  
-set $nord14 #A3BE8C  
-set $nord15 #B48EAD  
+set $nord0 #2E3440
+set $nord1 #3B4252
+set $nord2 #434C5E
+set $nord3 #4C566A
+set $nord4 #D8DEE9
+set $nord5 #E5E9F0
+set $nord6 #ECEFF4
+set $nord7 #8FBCBB
+set $nord8 #88C0D0
+set $nord9 #81A1C1
+set $nord10 #5E81AC
+set $nord11 #BF616A
+set $nord12 #D08770
+set $nord13 #EBCB8B
+set $nord14 #A3BE8C
+set $nord15 #B48EAD
 
 
 # Color Variables (Adjusted for Nord Scheme)
-set $bar-bg $nord0   
-set $text $nord4     
+set $bar-bg $nord0
+set $text $nord4
 set $active-bg $nord2
 set $wb-focused $nord8
 set $border-focused $nord10
 set $wb-active $nord9
-set $wb-inactive $nord1   
-set $wb-unfocused $nord3  
-set $clear $nord6         
+set $wb-inactive $nord1
+set $wb-unfocused $nord3
+set $clear $nord6
 
 # ========================
 # Output Configuration
@@ -48,10 +48,12 @@ output * bg $nord0 solid_color
 # ========================
 # Idle Configuration
 # ========================
+
+exec touch /tmp/swaylock-sleep && inotifyd swaylock /tmp/swaylock-sleep
 exec swayidle -w \
     timeout 300 "swaylock" \
     timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-    timeout 600 "systemctl suspend" \
+    timeout 600 "powerctl mem" \
     before-sleep "swaylock"
 
 # ========================
@@ -67,8 +69,8 @@ bar {
 
     # Color settings for the status bar
     colors {
-        statusline $text    
-        background $bar-bg  
+        statusline $text
+        background $bar-bg
         focused_workspace $wb-focused $active-bg $text
         inactive_workspace $wb-inactive $bar-bg $text
         urgent_workspace $wb-focused $active-bg $nord11
@@ -89,6 +91,7 @@ client.unfocused $nord10 $nord0 $nord4 $nord8 $nord3
 # Theme settings
 # ========================
 font pango:Cantarell 11
+seat seat0 xcursor_theme Adwaita 24
 set $gnome-schema org.gnome.desktop.interface
 exec_always {
     gsettings set org.gnome.desktop.wm.preferences button-layout 'menu:close'
@@ -193,9 +196,9 @@ mode "cmusic" {
 bindsym $mod+c mode "cmusic"
 
 
-# Application launchers with keybindings 
+# Application launchers with keybindings
 bindsym $mod+F2 exec toggle_wlsunset
-bindsym $mod+w exec firefox 
+bindsym $mod+w exec firefox
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
 
 # ========================
@@ -208,17 +211,21 @@ for_window [app_id="org.gnome.Calculator"] floating enable, border normal, move 
 for_window [app_id="org.twosheds.iwgtk"] floating enable, move position 900 0
 for_window [app_id="nemo"] floating enable
 for_window [app_id="xed"] floating enable, focus, resize set width 30 ppt height 40 ppt, border pixel 2
-#Alternate coding style 
+for_window [title="clip_history_fzf_foot"] floating enable,focus,resize set width 80 ppt height 50 ppt, border pixel 2
+#Alternate coding style
 for_window [title="play_cmus_in_scratch"] {
             move scratchpad
             inhibit_idle open
             }
-            
+
 # ========================
 # Miscellaneous Settings
 # ========================
 xwayland disable
 include /etc/sway/config.d/*
+# exec mako
+# exec /usr/libexec/pipewire-launcher
+# exec dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 # ========================
 # Autostart Applications
 # ========================
@@ -230,6 +237,8 @@ exec_always wlsunset -g 0.9
 # Clipboard
 # ========================
 exec wl-paste --watch cliphist store
+bindsym $mod+p exec foot -T "clip_history_fzf_foot" -L bash -c "cliphist list | fzf -d $'\t' --with-nth 2 | cliphist decode | wl-copy" -H
+# bindsym $mod+Shift+p exec cliphist list | tofi --width 80% | cliphist decode | wl-copy
 
 
 # ========================
@@ -272,3 +281,5 @@ bindsym $mod+F1 exec cat ~/.config/sway/config |grep bindsym |grep -v "^#"| sed 
 # https://github.com/Iss-in/dotfiles-v2/blob/master/.config/sway/config_latest#L95
 # https://aaronlauterer.com/blog/2018/01/i3-scratchpad-to-access-often-used-applications/
 # https://www.reddit.com/r/i3wm/comments/onzwvn/any_way_to_highlight_the_active_workspace_so_you/
+# https://github.com/sentriz/cliphist
+# https://luxagraf.net/src/guide-to-switching-i3-to-sway

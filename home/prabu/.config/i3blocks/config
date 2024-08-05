@@ -22,7 +22,7 @@ SCRIPT_DIR=/home/prabu/.local/bin/i3blocks
 
 [calendar]
 command=$SCRIPT_DIR/calendar
-interval=once
+interval=5
 DATEFMT=+%H:%M
 signal=3
 # # Fancy text with multiple colors and shapes

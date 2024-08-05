@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 get_volume(){
     volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)

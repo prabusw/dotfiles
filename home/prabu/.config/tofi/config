@@ -9,7 +9,7 @@
 ### Fonts
 #
 	# Font to use, either a path to a font file or a name.
-    font = "/usr/share/fonts/TTF/Hack-Bold.ttf"
+    font = "/usr/share/fonts/hack/Hack-Bold.ttf"
 	# Point size of text
 	# font-size = 24
     font-size = 15
