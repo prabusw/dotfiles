@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Based on https://github.com/rileyrg/linux-init/blob/master/directories/bin/sway/sway-volume-notify
+# https://github.com/swaywm/sway/wiki#how-can-i-setup-keyboard-volume-keys
+# Changed symbols from 🔊 to others like 🔇, 🔈 and 🔊 where U+1F507, U+1F508 and U+1F50A respectively.
+get_volume(){
+    volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)
+    volumep=$(echo $(wpctl get-volume @DEFAULT_AUDIO_SINK@ | tr -dc '0-9')| sed 's/^0*//')
+    # if [[ -z $volumep ]]; then
+    #     volumep="0"
+    # elif [[ $volumep -gt "150" ]];then
+    #     volumep="150"
+    #     wpctl set-volume @DEFAULT_AUDIO_SINK@ 1
+    # fi
+}
+if [[ "$1" = "0" ]]; then
+    wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && pkill -RTMIN+1 i3blocks
+    # get_volume
+    # if [[ "$volume" == *"MUTED"* ]]; then
+    #     makoctl dismiss && sway-notify -h int:value:${volumep} "🔇    (${volumep}%) "
+    # else
+    #     makoctl dismiss && sway-notify -h int:value:${volumep} "🔊     Unmuted ${volumep}%"
+    # fi
+elif [[ "$1" =  "+" ]]; then
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05+" -l 1 && pkill -RTMIN+1 i3blocks
+    get_volume
+    makoctl dismiss && sway-notify -h int:value:${volumep} "🔊    ${volumep}% "
+    # makoctl dismiss && sway-notify -i volume-knob -h int:value:${volumep} "${volumep}% "
+elif [[ "$1" = "-" ]]; then
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05-" -l 1 && pkill -RTMIN+1 i3blocks
+    get_volume
+    makoctl dismiss && sway-notify -h int:value:${volumep} "🔈    ${volumep}%"
+    # makoctl dismiss && sway-notify -i volume-knob -h int:value:${volumep} "${volumep}%"
+else 
+    get_volume
+    makoctl dismiss && sway-notify -h int:value:${volumep} "🔈    ${volumep}%"
+    # makoctl dismiss && sway-notify -i volume-knob -h int:value:${volumep} "${volumep}%"
+fi
+
