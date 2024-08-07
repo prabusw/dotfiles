@@ -13,9 +13,10 @@ coreutils
 cronie
 cups
 cups-filters
+diffutils
 doas
 docs
-emacs-pgtk
+emacs-pgtk-nativecomp
 epy
 eudev
 evince

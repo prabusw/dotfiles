@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Function to handle file comparison and merging in interactive mode
-compare_and_merge_interactive() {
+# Function to handle file comparison and merging 
+compare_and_merge() {
     local orig_file="$1"
     local new_file="$2"
 
@@ -9,24 +9,8 @@ compare_and_merge_interactive() {
 
     # If the original file exists, compare it with the new file using Emacs ediff
     if [ -e "$orig_file" ]; then
-        /usr/local/bin/emacs_as_user.sh -nw --eval "(ediff-files \"$orig_file\" \"$new_file\")"
-        # /usr/local/bin/ediff_as_root.sh "$orig_file" "$new_file"
-    else
-        echo "Original file $orig_file does not exist. You might want to manually handle $new_file."
-    fi
-}
-
-# Function to handle file comparison and merging in batch mode
-compare_and_merge_batch() {
-    local orig_file="$1"
-    local new_file="$2"
-
-    echo "Comparing $orig_file with $new_file"
-
-    # If the original file exists, compare it with the new file using Emacs ediff
-    if [ -e "$orig_file" ]; then
-        /usr/local/bin/emacs_as_user.sh -nw --eval "(ediff-files \"$orig_file\" \"$new_file\")"
-        # /usr/local/bin/ediff_as_root.sh "$orig_file" "$new_file"
+        # /usr/local/bin/emacs_as_user.sh -nw --eval "(ediff-files \"$orig_file\" \"$new_file\")"
+        /usr/local/bin/ediff_as_root.sh "$orig_file" "$new_file"
     else
         echo "Original file $orig_file does not exist. You might want to manually handle $new_file."
     fi
@@ -63,7 +47,8 @@ case "$choice" in
             orig_file="${new_file%.apk-new}"
 
             # Call the comparison function
-            compare_and_merge_interactive "$orig_file" "$new_file"
+            # compare_and_merge_interactive "$orig_file" "$new_file"
+	    compare_and_merge "$orig_file" "$new_file"
 
             # Increment the counter
             file_count=$((file_count + 1))
@@ -85,7 +70,8 @@ case "$choice" in
             orig_file="${new_file%.apk-new}"
 
             # Call the comparison function
-            compare_and_merge_batch "$orig_file" "$new_file"
+            # compare_and_merge_batch "$orig_file" "$new_file"
+	    compare_and_merge "$orig_file" "$new_file"
         done
         ;;
     *)

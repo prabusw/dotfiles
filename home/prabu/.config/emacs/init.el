@@ -247,6 +247,45 @@ e.g. Sunday, September 17, 2000."
   ;; ("<f9>" . helm-org-roam)
   )
 
+
+;;;; ediff
+;; Enhanced settings for ediff in Emacs
+(use-package ediff
+  :config
+  ;; Split window horizontally for ediff
+  (setq ediff-split-window-function 'split-window-horizontally
+        ;; Use a single frame for ediff
+        ediff-window-setup-function 'ediff-setup-windows-plain
+        ;; Keep the cursor in the same position when scrolling in ediff
+        scroll-preserve-screen-position t
+        ;; Do not highlight all differences
+        ediff-highlight-all-diffs 'nil
+        ;; Make ediff diffing algorithm more aggressive
+        ediff-diff-options "-w"
+        ;; Auto-refine differences
+        ediff-auto-refine 'on
+        ;; Automatically merge non-conflicting changes
+        ediff-merge-split-window-function 'split-window-horizontally
+        ;; Show help messages in the echo area
+        ediff-show-clashes-only t
+        ;; Ignore whitespace differences
+        ediff-ignore-similar-regions t)
+
+  ;; Define a function to quit ediff with a single 'q' press
+  (defun my-ediff-quit-session ()
+    (interactive)
+    (ediff-quit 'no-confirm))
+
+  ;; Hook to set custom key bindings
+  (add-hook 'ediff-keymap-setup-hook
+            (lambda ()
+              (define-key ediff-mode-map (kbd "q") 'my-ediff-quit-session)))
+
+  :bind (
+         ;; Add any additional key bindings here if needed
+         )
+  )
+
 ;;;; hydra
 ;; Make bindings that stick around. https://framagit.org/steckerhalter/steckemacs.el/-/blob/master/steckemacs.el#L375
 (use-package hydra
@@ -498,6 +537,7 @@ e.g. Sunday, September 17, 2000."
   ;;       ))
 )
 (use-package pet
+  :ensure t
   :config
   (add-hook 'python-base-mode-hook 'pet-mode -10)
 
