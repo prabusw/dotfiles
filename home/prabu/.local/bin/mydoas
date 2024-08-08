@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Function to show usage
+show_usage() {
+    echo "Usage: $0 [command]"
+    echo "  -h, --help    Show this help message"
+    echo
+    echo "The command followed by mydoas will run with environment variables of the user."
+}
+
+# Check for help argument
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    show_usage
+    exit 0
+fi
+# Check if at least one argument is provided
+if [ "$#" -lt 1 ]; then
+    show_usage
+    exit 0
+fi
+# Run doas with the user's environment
+doas sh -c "
+     export XDG_RUNTIME_DIR='$XDG_RUNTIME_DIR'
+     export HOME='$HOME'
+     export USER='$USER'
+     export WAYLAND_DISPLAY='$WAYLAND_DISPLAY'
+     \"$@\""
+     # exec \"\$@\""
