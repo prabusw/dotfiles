@@ -17,13 +17,13 @@ diffutils
 doas
 docs
 emacs-pgtk-nativecomp
-epy
 eudev
 evince
 fastfetch
 findutils
 firefox
 fish
+foliate
 font-awesome
 font-cantarell
 font-dejavu
@@ -36,7 +36,7 @@ foot-themes
 gnome-calculator
 gnutls-utils
 grep
-grim
+grimshot
 gsettings-desktop-schemas
 hicolor-icon-theme
 hugo
@@ -45,8 +45,6 @@ intel-media-driver
 inxi
 iwd
 iwgtk
-jq
-libnotify
 linux-firmware-i915
 linux-firmware-rtlwifi
 linux-lts
@@ -68,7 +66,6 @@ procps-ng
 rclone
 rsync
 seatd
-slurp
 swappy@testing
 sway
 swaybg
