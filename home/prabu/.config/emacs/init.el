@@ -82,6 +82,7 @@
 ;; (set-face-attribute 'default nil :height 130)
 ;; (set-face-attribute 'default nil :font "Monaco-16" )
 ;; (set-face-attribute 'default nil :font "Hack-13:embolden=true" )
+;; (set-face-attribute 'default nil :font "Roboto Mono-13" )
 (set-face-attribute 'default nil :font "Hack-13" )
 
 
@@ -122,22 +123,36 @@
 (setq initial-scratch-message "")
 ;; (setq initial-buffer-choice "/home/prabu/newfile.txt")
 (setq initial-major-mode 'fundamental-mode)
-;;;; theme
 
-;; https://github.com/rougier/elegant-emacs  ;;Webiste to make emacs more elegant
-;; https://github.com/jmdeldin/ir-black-theme.el/blob/master/ir-black-theme.el   ;;yet another theme
-;; (setq custom-theme-directory "/home/prabu/.emacs.d/themes")
-;; (load-theme 'material t)
-;; Refer to nord-theme under packages for current theme
-;; (load-theme 'nord t)
+;;;; better-defaults
 ;; Found about better-defaults from
-;; https://linuxhint.com/configuring_emacs_python/
 ;; https://git.sr.ht/~technomancy/better-defaults
-
+(use-package better-defaults
+  :load-path "better-defaults"
+  :init
+  (require 'better-defaults)
+  )
 ;; (add-to-list 'load-path "better-defaults")
-(add-to-list 'load-path "/home/prabu/.emacs.d/better-defaults")
-(require 'better-defaults)
+;; (add-to-list 'load-path "/home/prabu/.emacs.d/better-defaults")
+;; (require 'better-defaults)
 
+;;;; theme
+;; (use-package nord-theme
+;;   :ensure t
+;;   :config
+;;   (load-theme 'nord t)
+;;   )
+(use-package lambda-themes
+  ;; :straight (:type git :host github :repo "lambda-emacs/lambda-themes")
+  :load-path "lambda-themes"
+  :custom
+  (lambda-themes-set-italic-comments t)
+  (lambda-themes-set-italic-keywords t)
+  (lambda-themes-set-variable-pitch t)
+  :config
+  ;; load preferred theme
+  (load-theme 'lambda-dark-faded t)
+  )
 ;;;; custom functions
 
 (defun now ()
@@ -193,12 +208,7 @@ e.g. Sunday, September 17, 2000."
 ;;   ("v" flycheck-verify-setup))
 
 ;;; packages
-;;;; nord-theme
-(use-package nord-theme
-  :ensure t
-  :config
-  (load-theme 'nord t)
-  )
+
 ;;;; helpful
 ;; https://github.com/jeffkreeftmeijer/.emacs.d/blob/main/emacs-configuration.org
 (use-package helpful
@@ -821,3 +831,16 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :hook (c++-mode . platformio-conditionally-enable)
   )
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" default)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

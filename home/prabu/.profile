@@ -9,12 +9,12 @@
 #umask 022
 
 # # if running bash
-# if [ -n "$BASH_VERSION" ]; then
-#     # include .bashrc if it exists
-#     if [ -f "$HOME/.bashrc" ]; then
-# 	. "$HOME/.bashrc"
-#     fi
-# fi
+#if [ -n "$BASH_VERSION" ]; then
+#    # include .bashrc if it exists
+#    if [ -f "$HOME/.bashrc" ]; then
+#	. "$HOME/.bashrc"
+#    fi
+#fi
 
 
 # set PATH so it includes user's private bin if it exists
@@ -36,7 +36,7 @@ fi
 # https://wiki.alpinelinux.org/wiki/Wayland
 
 if [ -z "$XDG_RUNTIME_DIR" ]; then
-	XDG_RUNTIME_DIR="/tmp/$(id -u)-runtime-dir"
+	XDG_RUNTIME_DIR="/tmp/user/$(id -u)"
 
 	mkdir -pm 0700 "$XDG_RUNTIME_DIR"
 	export XDG_RUNTIME_DIR
