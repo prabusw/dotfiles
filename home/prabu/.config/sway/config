@@ -176,25 +176,6 @@ mode "resize" {
 }
 bindsym $mod+r mode "resize"
 
-# Custom Music Mode
-mode "cmusic" {
-    bindsym 0 exec current_song.sh
-    bindsym 9 exec current_queue.sh
-    bindsym Left exec playerctl previous && exec current_song.sh
-    bindsym Right exec playerctl next && exec current_song.sh
-    bindsym p exec playerctl play-pause
-    bindsym space exec playerctl play-pause
-    bindsym q exec playerctl stop
-    bindsym s exec playerctl shuffle toggle
-    bindsym l exec playerctl loop Track
-    bindsym Shift+l exec playerctl loop Playlist
-    bindsym c scratchpad show
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+c mode "default"
-}
-bindsym $mod+c mode "cmusic"
-
 
 # Application launchers with keybindings
 bindsym $mod+F2 exec toggle_wlsunset

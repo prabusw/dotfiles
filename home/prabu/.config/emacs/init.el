@@ -405,6 +405,7 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :requires oc
   :requires org-id
+  :requires org-tempo
   :custom
   ;; (org-directory (file-truename "/data/docs/prabu/Dropbox/org"))
   (org-cite-global-bibliography '("~/org/Resources/my_library.bib"))

@@ -20,7 +20,6 @@ emacs-pgtk-nativecomp
 eudev
 evince
 fastfetch
-findutils
 firefox
 fish
 foliate
@@ -34,7 +33,6 @@ font-terminus
 foot
 foot-themes
 gnome-calculator
-gnutls-utils
 grep
 grimshot
 gsettings-desktop-schemas
@@ -42,7 +40,6 @@ hicolor-icon-theme
 hugo
 i3blocks
 intel-media-driver
-inxi
 iwd
 iwgtk
 linux-firmware-i915
@@ -50,7 +47,7 @@ linux-firmware-rtlwifi
 linux-lts
 mako
 mbuffer
-mpv
+mpv-mpris
 nano
 nemo
 nfs-utils
@@ -58,7 +55,6 @@ nnn
 openresolv
 openssh
 pango-tools
-pciutils
 pipewire-pulse
 playerctl
 powerctl@testing
@@ -73,7 +69,6 @@ swayidle
 swayimg
 swaylock
 tofi
-usbutils
 util-linux
 wlogout
 wlsunset
