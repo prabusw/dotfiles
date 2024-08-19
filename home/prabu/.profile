@@ -6,15 +6,7 @@
 
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
-#umask 022
-
-# # if running bash
-#if [ -n "$BASH_VERSION" ]; then
-#    # include .bashrc if it exists
-#    if [ -f "$HOME/.bashrc" ]; then
-#	. "$HOME/.bashrc"
-#    fi
-#fi
+umask 022
 
 
 # set PATH so it includes user's private bin if it exists
@@ -28,11 +20,6 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 
-# https://wiki.archlinux.org/title/sway#Automatically_on_TTY_login
-# if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
-#     exec sway
-# fi
-
 # https://wiki.alpinelinux.org/wiki/Wayland
 
 if [ -z "$XDG_RUNTIME_DIR" ]; then
@@ -42,6 +29,7 @@ if [ -z "$XDG_RUNTIME_DIR" ]; then
 	export XDG_RUNTIME_DIR
 fi
 
+export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')
 export XDG_SESSION_TYPE=wayland
 export XDG_CURRENT_DESKTOP=sway
 # export XDG_SESSION_DESKTOP=sway
@@ -57,15 +45,16 @@ export WLR_LIBINPUT_NO_DEVICES=1
 export ADW_DISABLE_PORTAL=1
 export GTK_THEME=Nordic
 
-# If running from tty1 start sway
-# A much simpler script to start sway without checking for wayland display
-# if [ "$(tty)" = "/dev/tty1" ]; then
-#     exec dbus-run-session sway -d 2> ~/sway_error.log
-# fi
 
 # https://wiki.archlinux.org/title/sway#Automatically_on_TTY_login
-# if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
-if [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-    # exec sway
-    exec dbus-run-session sway -d 2> ~/sway_error.log
+if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
+    exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
+fi
+
+# # if running bash
+if [ -n "$BASH_VERSION" ]; then
+   # include .bashrc if it exists
+   if [ -f "$HOME/.bashrc" ]; then
+	. "$HOME/.bashrc"
+   fi
 fi
