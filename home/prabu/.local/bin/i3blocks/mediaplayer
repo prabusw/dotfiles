@@ -25,11 +25,11 @@ fi
 
 function handle_button {
     case "$BLOCK_BUTTON" in
-        1) ( current_song.sh ) > /dev/null ;;
+        1) ( current_song.sh && pkill -RTMIN+2 i3blocks) > /dev/null ;;
         2) ( playerctl play-pause && pkill -RTMIN+2 i3blocks) > /dev/null ;;
         3) ( swaymsg scratchpad show ) > /dev/null ;;
         4) ( playerctl next && sway-notify "Song skipped" && current_song.sh ) > /dev/null ;;
-        5) ( playerctl previous && sway-notify "previous Song" && current_song.sh ) > /dev/null ;;        
+        5) ( playerctl previous && sway-notify "previous Song" && current_song.sh ) > /dev/null ;;
     esac
 }
 
