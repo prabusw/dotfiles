@@ -251,6 +251,8 @@ e.g. Sunday, September 17, 2000."
   ;; ("C-c a" . org-agenda)
   ("C-c g" . magit-status)
   ("C-c d" . ispell-change-dictionary)
+  ("C-c n f" . org-roam-node-find)
+  ("C-c n r" . org-roam-node-random)
   ;; ("C-z" . undo)
   ;; ("C-c s" . web-search)
   ;; ("C-c w" . wdired-mode)
@@ -387,13 +389,15 @@ e.g. Sunday, September 17, 2000."
          ;; ([f9] . helm-buffers-list)
          ;; ([S-f10] . helm-recentf)
          )
+  :custom
+  (helm-split-window-default-side 'right)
   )
 ;; Helm can resize its buffer automatically to fit the number of candidates
 ;; (setq ;;helm-autoresize-mode t
 ;;       helm-autoresize-max-height                80   ; it is %.
 ;;       helm-autoresize-min-height                20   ; it is %.
 ;;       )
-(setq helm-split-window-default-side 'right)
+
 ;;;; org Mode
 ;; https://orgmode.org/worg/org-tutorials/orgtutorial_dto.html
 ;; https://www.reddit.com/r/emacs/comments/dv02lk/how_to_force_emacs_to_prefer_manually_installed/
@@ -467,10 +471,12 @@ e.g. Sunday, September 17, 2000."
   (org-roam-db-autosync-mode)
   (setq org-id-extra-files (org-roam--list-files org-roam-directory))
   (advice-add 'org-roam-node-read :around #'case-insensitive-org-roam-node-read)
+  (message "org-roam loaded")
   ;; (require 'org-roam-dailies)
   :bind (
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n r" . org-roam-node-random)
+         ;; below two global commands moved to bind-key package
+         ;; ("C-c n f" . org-roam-node-find)
+         ;; ("C-c n r" . org-roam-node-random)
          :map org-mode-map
          ("C-c n i" . org-roam-node-insert)
          ("C-c n o" . org-id-get-create)
@@ -478,6 +484,7 @@ e.g. Sunday, September 17, 2000."
          ("C-c n a" . org-roam-alias-add)
          ("C-c n l" . org-roam-buffer-toggle)
          ("C-M-i" . completion-at-point)))
+
 ;; Below code not working. To be fixed at a later date
 ;; :map org-roam-dailies-map
 ;; ("Y" . org-roam-dailies-capture-yesterday)
@@ -512,6 +519,18 @@ e.g. Sunday, September 17, 2000."
 
 ;; Exporting Org-Mode Documents With Many Org-Id Links Is Slow https://notes.alexkehayias.com/exporting-org-mode-documents-with-many-org-id-links-is-slow/
 
+;;;; org-transclusion
+(use-package org-transclusion
+  :ensure t   ;;Auto-install the package from Melpa
+  ;; :config
+  ;; (setq org-tranclusion-modes '(org-mode))
+  :hook (org-mode . org-transclusion-mode)
+  ;; (map
+  ;;  :map global-map "<f12>" #'org-transclusion-add
+  ;;  :leader
+  ;;  :prefix "n"
+  ;;  :desc "Org Transclusion Mode" "t" #'org-transclusion-mode)
+  )
 ;;;; markdown-Mode
 ;; (use-package markdown-mode
 ;;   )
