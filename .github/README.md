@@ -8,6 +8,7 @@ The dotfiles in this repository are used in a pc which dual boots
 between Arch and Alpine Linux. So anything related to systemd will not
 work on Alpine.
 
+![ScreenShot](2024-08-25_21-02-19.png )
 ## Sway configuration Details
 
 Sway configuration uses the following tools
@@ -23,12 +24,12 @@ Sway configuration uses the following tools
 * Nord - Theme
 
 ### Other Tools used
-* btrfs filesystem 
+* btrfs filesystem
 * refind - boot manager
 * btrbk - Backup tool for managing snapshots
 * snapper - snapshot creator
 
-## Tracking swaywm dotfiles using a bare git repository 
+## Tracking swaywm dotfiles using a bare git repository
 
 The only tool used here is git. Normal user account is used for adding
 files as long as the user has Read permission. Only for deleting files
@@ -54,4 +55,3 @@ prabu@homepc2 ~> sysconfig push origin master
 Sources:
 * https://news.ycombinator.com/item?id=11071754
 * https://www.atlassian.com/git/tutorials/dotfiles
-
