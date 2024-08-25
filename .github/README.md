@@ -15,19 +15,22 @@ Sway configuration uses the following tools
 * foot - terminal
 * mako - notification daemon
 * greetd - login manager(optional)
-* nwg-hello -greeter for the greetd(optional)
+* regreet -greeter for the greetd(optional)
 * swaylock - locking tool
 * i3blocks - feed generator for swaybar
 * tofi - dynamic menu
 * swappy - screenshot editing tool
 * wlogout - logout menu
 * Nord - Theme
+* seatd in alpine and elogind in arch
 
 ### Other Tools used
 * btrfs filesystem
 * refind - boot manager
 * btrbk - Backup tool for managing snapshots
-* snapper - snapshot creator
+* snapper - snapshot creator(only in arch)
+* emacs
+* fish shell
 
 ## Tracking swaywm dotfiles using a bare git repository
 
@@ -35,7 +38,6 @@ The only tool used here is git. Normal user account is used for adding
 files as long as the user has Read permission. Only for deleting files
 added from system folders and when the default user does not have Read
 permission, sudo needs to be used with full command.
-
 
 The below steps will suffice to keep track of dotfiles for single
 desktop. For detailed explanation refer to the sources
