@@ -8,7 +8,7 @@ The dotfiles in this repository are used in a pc which dual boots
 between Arch and Alpine Linux. So anything related to systemd will not
 work on Alpine.
 
-![ScreenShot](home/prabu/Screenshots/2024-08-25_21-02-19.png )
+![ScreenShot](/home/prabu/Screenshots/2024-08-25_21-02-19.png )
 ## Sway configuration Details
 
 Sway configuration uses the following tools
