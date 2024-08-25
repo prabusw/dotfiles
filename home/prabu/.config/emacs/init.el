@@ -771,6 +771,66 @@ e.g. Sunday, September 17, 2000."
 ;; https://github.com/casouri/tree-sitter-module
 
 
+;;;; nov - epub reader
+(use-package nov
+  :ensure t
+  :mode ("\\.epub\\'" . nov-mode)
+  :custom
+  (nov-text-width 80)  ;; Adjust text width for readability
+  (nov-variable-pitch t)  ;; Use variable pitch font for a more book-like appearance
+  ;; (nov-custom-css-file (expand-file-name "nov-custom.css" user-emacs-directory))
+  :config
+  ;; Any additional configurations can go here
+  ;; set Bookerly as the variable-pitch font only inside the mode
+  (defun my-nov-font-setup ()
+    (face-remap-add-relative 'variable-pitch nil
+                             :family "Bookerly"
+                             :height 1.1))
+  (add-hook 'nov-mode-hook 'my-nov-font-setup)
+
+  (defun my-nov-window-configuration-change-hook ()
+    (my-nov-post-html-render-hook)
+    (remove-hook 'window-configuration-change-hook
+                 'my-nov-window-configuration-change-hook
+                 t))
+  (require 'justify-kp)
+  (setq nov-text-width t)
+  (defun my-nov-post-html-render-hook ()
+    (if (get-buffer-window)
+        (let ((max-width (pj-line-width))
+              buffer-read-only)
+          (save-excursion
+            (goto-char (point-min))
+            (while (not (eobp))
+              (when (not (looking-at "^[[:space:]]*$"))
+                (goto-char (line-end-position))
+                (when (> (shr-pixel-column) max-width)
+                  (goto-char (line-beginning-position))
+                  (pj-justify)))
+              (forward-line 1))))
+      (add-hook 'window-configuration-change-hook
+                'my-nov-window-configuration-change-hook
+                nil t)))
+
+  (add-hook 'nov-post-html-render-hook 'my-nov-post-html-render-hook)
+
+  ;; ;; Force reload of the custom CSS
+  ;; (defun my-nov-reload-custom-css ()
+  ;;   (interactive)
+  ;;   (setq nov-css-url nil)
+  ;;   (nov-render-document))
+
+  ;; (add-hook 'nov-mode-hook 'my-nov-reload-custom-css)
+  )
+
+
+;;;; justify-kp
+(use-package justify-kp
+  :load-path "~/.config/emacs/"
+  :config
+  ;; Your configuration here
+  ;; (setq justify-kp-option t))  ;; Example configuration
+)
 ;;;; eww
 ;; https://emacs.stackexchange.com/questions/7328/how-to-make-eww-default-browser-in-emacs
 ;; https://howardism.org/Technical/Emacs/browsing-in-emacs.html
