@@ -63,6 +63,14 @@
   :group 'lambda-themes
   :type 'symbol)
 
+;; (defcustom lambda-themes-set-theme 'light
+;;   "Choose which theme variant to use. Options include 'light', 'dark', 'light-faded', 'dark-faded', and 'nord'."
+;;   :group 'lambda-themes
+;;   :type '(choice (const :tag "Light" light)
+;;                  (const :tag "Dark" dark)
+;;                  (const :tag "Light Faded" light-faded)
+;;                  (const :tag "Dark Faded" dark-faded)
+;;                  (const :tag "Nord" nord)))
 ;; Cursors
 (defcustom lambda-themes-set-evil-cursors t
   "If t then use lambda evil cursor colors."
@@ -162,39 +170,169 @@ It should stick out from any other faces currently displayed."
       )))
 
 ;;;; Theme Colors
-
 (defun lambda-themes-create (variant theme-name)
   "Define colors with VARIANT and THEME-NAME."
-  (let ((class '((class color) (min-colors 89))) ;;     ~~Dark~~                                                            ~~Light~~                                                 ~~Nord~~
-        ;; basic
-        (lambda-fg          (cond ((eq variant 'dark)  "#EBE9E7") ((eq variant 'dark-faded) "#eceff1") ((eq variant 'light) "#0C0D0D") ((eq variant 'light-faded) "#282b35") ((eq variant 'nord) "#D8DEE9")))
-        (lambda-bg          (cond ((eq variant 'dark)  "#141414") ((eq variant 'dark-faded) "#282b35") ((eq variant 'light) "#FFFEFD") ((eq variant 'light-faded) "#fcfaf6") ((eq variant 'nord) "#2E3440")))
-        ;; highlighting
-        (lambda-ultralight  (cond ((eq variant 'dark)  "#2c2c34") ((eq variant 'dark-faded) "#525868") ((eq variant 'light) "#EBE9E7") ((eq variant 'light-faded) "#cfd6e2") ((eq variant 'nord) "#4C566A")))
-        (lambda-highlight   (cond ((eq variant 'dark)  "#212228") ((eq variant 'dark-faded) "#444B5c") ((eq variant 'light) "#F5F2F0") ((eq variant 'light-faded) "#dbe1eb") ((eq variant 'nord) "#3B4252")))
-        (lambda-lowlight    (cond ((eq variant 'dark)  "#1A1919") ((eq variant 'dark-faded) "#3c4353") ((eq variant 'light) "#F8F6F4") ((eq variant 'light-faded) "#e3e7ef") ((eq variant 'nord) "#434C5E")))
-        ;; attention
-        (lambda-urgent      (cond ((eq variant 'dark)  "#CF6752") ((eq variant 'dark-faded) "#f46715") ((eq variant 'light) "#B30000") ((eq variant 'light-faded) "#f53137") ((eq variant 'nord) "#BF616A")))
-        (lambda-crucial     (cond ((eq variant 'dark)  "#F4BF4F") ((eq variant 'dark-faded) "#88c0d0") ((eq variant 'light) "#5D00DA") ((eq variant 'light-faded) "#303db4") ((eq variant 'nord) "#EBCB8B")))
-        (lambda-focus       (cond ((eq variant 'dark)  "#7A9EFF") ((eq variant 'dark-faded) "#bc85ff") ((eq variant 'light) "#0044CC") ((eq variant 'light-faded) "#940B96") ((eq variant 'nord) "#5E81AC")))
-        (lambda-strong      (cond ((eq variant 'dark)  "#F5F2F0") ((eq variant 'dark-faded) "#ffffff") ((eq variant 'light) "#000000") ((eq variant 'light-faded) "#000000") ((eq variant 'nord) "#ECEFF4")))
-        (lambda-meek        (cond ((eq variant 'dark)  "#A3A3A3") ((eq variant 'dark-faded) "#959eb1") ((eq variant 'light) "#706F6F") ((eq variant 'light-faded) "#727d97") ((eq variant 'nord) "#D8DEE9")))
-        (lambda-mild        (cond ((eq variant 'dark)  "#474648") ((eq variant 'dark-faded) "#8791A7") ((eq variant 'light) "#C1C1C1") ((eq variant 'light-faded) "#C8CDD8") ((eq variant 'nord) "#434C5E")))
-        (lambda-faint       (cond ((eq variant 'dark)  "#37373E") ((eq variant 'dark-faded) "#333a47") ((eq variant 'light) "#E3E1E0") ((eq variant 'light-faded) "#eceff1") ((eq variant 'nord) "#4C566A")))
-        ;; accent
-        (lambda-black       (cond ((eq variant 'dark)  "#000000") ((eq variant 'dark-faded) "#000000") ((eq variant 'light) "#000000") ((eq variant 'light-faded) "#000000") ((eq variant 'nord) "#3B4252")))
-        (lambda-white       (cond ((eq variant 'dark)  "#FFFFFF") ((eq variant 'dark-faded) "#FFFFFF") ((eq variant 'light) "#FFFFFF") ((eq variant 'light-faded) "#FFFFFF") ((eq variant 'nord) "#ECEFF4")))
-        (lambda-red         (cond ((eq variant 'dark)  "#EC6A5E") ((eq variant 'dark-faded) "#bf616a") ((eq variant 'light) "#EC6A5E") ((eq variant 'light-faded) "#960d36") ((eq variant 'nord) "#BF616A")))
-        (lambda-green       (cond ((eq variant 'dark)  "#62C554") ((eq variant 'dark-faded) "#8eb89d") ((eq variant 'light) "#005A02") ((eq variant 'light-faded) "#00796b") ((eq variant 'nord) "#A3BE8C")))
-        (lambda-blue        (cond ((eq variant 'dark)  "#81a1c1") ((eq variant 'dark-faded) "#81a1c1") ((eq variant 'light) "#4C4CFF") ((eq variant 'light-faded) "#30608c") ((eq variant 'nord) "#5E81AC")))
-        (lambda-yellow      (cond ((eq variant 'dark)  "#F2DA61") ((eq variant 'dark-faded) "#e9b85d") ((eq variant 'light) "#e0a500") ((eq variant 'light-faded) "#e0a500") ((eq variant 'nord) "#EBCB8B")))
-        (lambda-orange      (cond ((eq variant 'dark)  "#d08770") ((eq variant 'dark-faded) "#d08770") ((eq variant 'light) "#ED8811") ((eq variant 'light-faded) "#966e53") ((eq variant 'nord) "#D08770")))
-        (lambda-aqua        (cond ((eq variant 'dark)  "#85CCC6") ((eq variant 'dark-faded) "#85CCC6") ((eq variant 'light) "#278C87") ((eq variant 'light-faded) "#278C87") ((eq variant 'nord) "#88C0D0")))
-        (lambda-cyan        (cond ((eq variant 'dark)  "#00FFFF") ((eq variant 'dark-faded) "#66CCCC") ((eq variant 'light) "#007F7F") ((eq variant 'light-faded) "#66CCCC") ((eq variant 'nord) "#8FBCBB")))
-        (lambda-purple      (cond ((eq variant 'dark)  "#9D67E6") ((eq variant 'dark-faded) "#9D67E6") ((eq variant 'light) "#833AE6") ((eq variant 'light-faded) "#833AE6") ((eq variant 'nord) "#B48EAD"))))
+  (let* ((class '((class color) (min-colors 89)))
+         ;; Define color palette for each variant
+         (color-palettes '((dark
+                            (fg          . "#EBE9E7")
+                            (bg          . "#141414")
+                            (ultralight  . "#2c2c34")
+                            (highlight   . "#212228")
+                            (lowlight    . "#1A1919")
+                            (urgent      . "#CF6752")
+                            (crucial     . "#F4BF4F")
+                            (focus       . "#7A9EFF")
+                            (strong      . "#F5F2F0")
+                            (meek        . "#A3A3A3")
+                            (mild        . "#474648")
+                            (faint       . "#37373E")
+                            (black       . "#000000")
+                            (white       . "#FFFFFF")
+                            (red         . "#EC6A5E")
+                            (green       . "#62C554")
+                            (blue        . "#81a1c1")
+                            (yellow      . "#F2DA61")
+                            (orange      . "#d08770")
+                            (aqua        . "#85CCC6")
+                            (cyan        . "#00FFFF")
+                            (purple      . "#9D67E6"))
+                           (dark-faded
+                            (fg          . "#eceff1")
+                            (bg          . "#282b35")
+                            (ultralight  . "#525868")
+                            (highlight   . "#444B5c")
+                            (lowlight    . "#3c4353")
+                            (urgent      . "#f46715")
+                            (crucial     . "#88c0d0")
+                            (focus       . "#bc85ff")
+                            (strong      . "#ffffff")
+                            (meek        . "#959eb1")
+                            (mild        . "#8791A7")
+                            (faint       . "#333a47")
+                            (black       . "#000000")
+                            (white       . "#FFFFFF")
+                            (red         . "#bf616a")
+                            (green       . "#8eb89d")
+                            (blue        . "#81a1c1")
+                            (yellow      . "#e9b85d")
+                            (orange      . "#d08770")
+                            (aqua        . "#85CCC6")
+                            (cyan        . "#66CCCC")
+                            (purple      . "#9D67E6"))
+                           (light
+                            (fg          . "#0C0D0D")
+                            (bg          . "#FFFEFD")
+                            (ultralight  . "#EBE9E7")
+                            (highlight   . "#F5F2F0")
+                            (lowlight    . "#F8F6F4")
+                            (urgent      . "#B30000")
+                            (crucial     . "#5D00DA")
+                            (focus       . "#0044CC")
+                            (strong      . "#000000")
+                            (meek        . "#706F6F")
+                            (mild        . "#C1C1C1")
+                            (faint       . "#E3E1E0")
+                            (black       . "#000000")
+                            (white       . "#FFFFFF")
+                            (red         . "#EC6A5E")
+                            (green       . "#005A02")
+                            (blue        . "#4C4CFF")
+                            (yellow      . "#e0a500")
+                            (orange      . "#ED8811")
+                            (aqua        . "#278C87")
+                            (cyan        . "#007F7F")
+                            (purple      . "#833AE6"))
+                           (light-faded
+                            (fg          . "#282b35")
+                            (bg          . "#fcfaf6")
+                            (ultralight  . "#cfd6e2")
+                            (highlight   . "#dbe1eb")
+                            (lowlight    . "#e3e7ef")
+                            (urgent      . "#f53137")
+                            (crucial     . "#303db4")
+                            (focus       . "#940B96")
+                            (strong      . "#000000")
+                            (meek        . "#727d97")
+                            (mild        . "#C8CDD8")
+                            (faint       . "#eceff1")
+                            (black       . "#000000")
+                            (white       . "#FFFFFF")
+                            (red         . "#960d36")
+                            (green       . "#00796b")
+                            (blue        . "#30608c")
+                            (yellow      . "#e0a500")
+                            (orange      . "#966e53")
+                            (aqua        . "#278C87")
+                            (cyan        . "#66CCCC")
+                            (purple      . "#833AE6"))
+                           (nord
+                            (fg          . "#D8DEE9")
+                            (bg          . "#2E3440")
+                            (ultralight  . "#4C566A")
+                            (highlight   . "#3B4252")
+                            (lowlight    . "#434C5E")
+                            (urgent      . "#BF616A")
+                            (crucial     . "#EBCB8B")
+                            (focus       . "#5E81AC")
+                            (strong      . "#ECEFF4")
+                            (meek        . "#D8DEE9")
+                            (mild        . "#434C5E")
+                            (faint       . "#4C566A")
+                            (black       . "#3B4252")
+                            (white       . "#ECEFF4")
+                            (red         . "#BF616A")
+                            (green       . "#A3BE8C")
+                            (blue        . "#5E81AC")
+                            (yellow      . "#EBCB8B")
+                            (orange      . "#D08770")
+                            (aqua        . "#88C0D0")
+                            (cyan        . "#8FBCBB")
+                            (purple      . "#B48EAD"))))
 
+         ;; Select the appropriate color palette based on the variant
+         (palette (cdr (assoc variant color-palettes))))
+
+    ;; Define custom colors based on the selected palette
+    (cl-loop for (color . hex) in palette
+             do (set (intern (format "lambda-%s" color)) hex))
+
+    ;; Apply additional customization if necessary
     (cl-loop for (cvar . val) in lambda-themes-custom-colors
-             do (set cvar val))
+             do (set cvar val))))
+
+;; (defun lambda-themes-create (variant theme-name)
+;;   "Define colors with VARIANT and THEME-NAME."
+;;   (let ((class '((class color) (min-colors 89))) ;;     ~~Dark~~                                                            ~~Light~~                                                 ~~Nord~~
+;;         ;; basic
+;;         (lambda-fg          (cond ((eq variant 'dark)  "#EBE9E7") ((eq variant 'dark-faded) "#eceff1") ((eq variant 'light) "#0C0D0D") ((eq variant 'light-faded) "#282b35") ((eq variant 'nord) "#D8DEE9")))
+;;         (lambda-bg          (cond ((eq variant 'dark)  "#141414") ((eq variant 'dark-faded) "#282b35") ((eq variant 'light) "#FFFEFD") ((eq variant 'light-faded) "#fcfaf6") ((eq variant 'nord) "#2E3440")))
+;;         ;; highlighting
+;;         (lambda-ultralight  (cond ((eq variant 'dark)  "#2c2c34") ((eq variant 'dark-faded) "#525868") ((eq variant 'light) "#EBE9E7") ((eq variant 'light-faded) "#cfd6e2") ((eq variant 'nord) "#4C566A")))
+;;         (lambda-highlight   (cond ((eq variant 'dark)  "#212228") ((eq variant 'dark-faded) "#444B5c") ((eq variant 'light) "#F5F2F0") ((eq variant 'light-faded) "#dbe1eb") ((eq variant 'nord) "#3B4252")))
+;;         (lambda-lowlight    (cond ((eq variant 'dark)  "#1A1919") ((eq variant 'dark-faded) "#3c4353") ((eq variant 'light) "#F8F6F4") ((eq variant 'light-faded) "#e3e7ef") ((eq variant 'nord) "#434C5E")))
+;;         ;; attention
+;;         (lambda-urgent      (cond ((eq variant 'dark)  "#CF6752") ((eq variant 'dark-faded) "#f46715") ((eq variant 'light) "#B30000") ((eq variant 'light-faded) "#f53137") ((eq variant 'nord) "#BF616A")))
+;;         (lambda-crucial     (cond ((eq variant 'dark)  "#F4BF4F") ((eq variant 'dark-faded) "#88c0d0") ((eq variant 'light) "#5D00DA") ((eq variant 'light-faded) "#303db4") ((eq variant 'nord) "#EBCB8B")))
+;;         (lambda-focus       (cond ((eq variant 'dark)  "#7A9EFF") ((eq variant 'dark-faded) "#bc85ff") ((eq variant 'light) "#0044CC") ((eq variant 'light-faded) "#940B96") ((eq variant 'nord) "#5E81AC")))
+;;         (lambda-strong      (cond ((eq variant 'dark)  "#F5F2F0") ((eq variant 'dark-faded) "#ffffff") ((eq variant 'light) "#000000") ((eq variant 'light-faded) "#000000") ((eq variant 'nord) "#ECEFF4")))
+;;         (lambda-meek        (cond ((eq variant 'dark)  "#A3A3A3") ((eq variant 'dark-faded) "#959eb1") ((eq variant 'light) "#706F6F") ((eq variant 'light-faded) "#727d97") ((eq variant 'nord) "#D8DEE9")))
+;;         (lambda-mild        (cond ((eq variant 'dark)  "#474648") ((eq variant 'dark-faded) "#8791A7") ((eq variant 'light) "#C1C1C1") ((eq variant 'light-faded) "#C8CDD8") ((eq variant 'nord) "#434C5E")))
+;;         (lambda-faint       (cond ((eq variant 'dark)  "#37373E") ((eq variant 'dark-faded) "#333a47") ((eq variant 'light) "#E3E1E0") ((eq variant 'light-faded) "#eceff1") ((eq variant 'nord) "#4C566A")))
+;;         ;; accent
+;;         (lambda-black       (cond ((eq variant 'dark)  "#000000") ((eq variant 'dark-faded) "#000000") ((eq variant 'light) "#000000") ((eq variant 'light-faded) "#000000") ((eq variant 'nord) "#3B4252")))
+;;         (lambda-white       (cond ((eq variant 'dark)  "#FFFFFF") ((eq variant 'dark-faded) "#FFFFFF") ((eq variant 'light) "#FFFFFF") ((eq variant 'light-faded) "#FFFFFF") ((eq variant 'nord) "#ECEFF4")))
+;;         (lambda-red         (cond ((eq variant 'dark)  "#EC6A5E") ((eq variant 'dark-faded) "#bf616a") ((eq variant 'light) "#EC6A5E") ((eq variant 'light-faded) "#960d36") ((eq variant 'nord) "#BF616A")))
+;;         (lambda-green       (cond ((eq variant 'dark)  "#62C554") ((eq variant 'dark-faded) "#8eb89d") ((eq variant 'light) "#005A02") ((eq variant 'light-faded) "#00796b") ((eq variant 'nord) "#A3BE8C")))
+;;         (lambda-blue        (cond ((eq variant 'dark)  "#81a1c1") ((eq variant 'dark-faded) "#81a1c1") ((eq variant 'light) "#4C4CFF") ((eq variant 'light-faded) "#30608c") ((eq variant 'nord) "#5E81AC")))
+;;         (lambda-yellow      (cond ((eq variant 'dark)  "#F2DA61") ((eq variant 'dark-faded) "#e9b85d") ((eq variant 'light) "#e0a500") ((eq variant 'light-faded) "#e0a500") ((eq variant 'nord) "#EBCB8B")))
+;;         (lambda-orange      (cond ((eq variant 'dark)  "#d08770") ((eq variant 'dark-faded) "#d08770") ((eq variant 'light) "#ED8811") ((eq variant 'light-faded) "#966e53") ((eq variant 'nord) "#D08770")))
+;;         (lambda-aqua        (cond ((eq variant 'dark)  "#85CCC6") ((eq variant 'dark-faded) "#85CCC6") ((eq variant 'light) "#278C87") ((eq variant 'light-faded) "#278C87") ((eq variant 'nord) "#88C0D0")))
+;;         (lambda-cyan        (cond ((eq variant 'dark)  "#00FFFF") ((eq variant 'dark-faded) "#66CCCC") ((eq variant 'light) "#007F7F") ((eq variant 'light-faded) "#66CCCC") ((eq variant 'nord) "#8FBCBB")))
+;;         (lambda-purple      (cond ((eq variant 'dark)  "#9D67E6") ((eq variant 'dark-faded) "#9D67E6") ((eq variant 'light) "#833AE6") ((eq variant 'light-faded) "#833AE6") ((eq variant 'nord) "#B48EAD"))))
+
+;;     (cl-loop for (cvar . val) in lambda-themes-custom-colors
+;;              do (set cvar val))
 
 ;;;; Define Theme
     (custom-theme-set-faces

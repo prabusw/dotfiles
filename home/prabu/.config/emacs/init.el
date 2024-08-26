@@ -151,7 +151,7 @@
   (lambda-themes-set-variable-pitch t)
   :config
   ;; load preferred theme
-  (load-theme 'lambda-dark-faded t)
+  (load-theme 'lambda-nord t)
   )
 ;;;; custom functions
 
