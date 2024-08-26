@@ -9,11 +9,6 @@
          user-init-directory)
         (t "~/.emacs.d/")))
 
-(defvar beancount-mode-dir (file-name-as-directory (expand-file-name "beancount-mode" user-emacs-directory))
-  "Directory containing beancount package.")
-(defvar flymake-bean-check-dir (file-name-as-directory (expand-file-name "beancount-mode" user-emacs-directory))
-  "Directory containing beancount package with flymake-bean-check.el.")
-
 (defun load-user-file (file)
   (interactive "f")
   "Load a file in current user's configuration directory"
@@ -691,8 +686,9 @@ e.g. Sunday, September 17, 2000."
              )
   )
 ;;;; beancount
+;; https://github.com/beancount/beancount-mode
 (use-package beancount
-  :load-path beancount-mode-dir
+  :load-path "beancount-mode"
   :commands beancount-mode
   :hook
   (beancount-mode . outline-minor-mode)
@@ -708,31 +704,10 @@ e.g. Sunday, September 17, 2000."
               ("C-c TAB" . beancount-outline-cycle)
               ))
 (use-package flymake-bean-check
-  :load-path flymake-bean-check-dir
+  :load-path "beancount-mode"
   :hook
   (beancount-mode . flymake-bean-check-enable)
   )
-
-;; ;; https://github.com/beancount/beancount-mode
-;; ;; (setq beancount-mode-old-style-keybindings t)
-;; (add-to-list 'load-path "/home/prabu/.emacs.d/beancount-mode/")
-;; (require 'beancount)
-;; (add-to-list 'auto-mode-alist '("\\.beancount\\'" . beancount-mode))
-;; (add-hook 'beancount-mode-hook
-;;           (lambda () (setq-local electric-indent-chars nil)))
-;; (setq beancount-outline-regexp "\\(\\*+\\)")
-;; (add-hook 'beancount-mode-hook #'outline-minor-mode)
-;; (define-key beancount-mode-map (kbd "C-c C-n") #'outline-next-visible-heading)
-;; (define-key beancount-mode-map (kbd "C-c C-p") #'outline-previous-visible-heading)
-;; (define-key beancount-mode-map (kbd "C-c C-u") #'outline-up-heading)
-;; (define-key beancount-mode-map (kbd "C-c C-b") #'outline-backward-same-level)
-;; (define-key beancount-mode-map (kbd "C-c C-f") #'outline-forward-same-level)
-;; (define-key beancount-mode-map (kbd "C-c C-a") #'outline-show-all)
-;; ;; (define-key beancount-mode-map (kbd "C-c C-t") #'outline-hide-body)
-;; ;; (define-key beancount-mode-map (kbd "C-c C-q") #'outline-hide-sublevels)
-;; (define-key beancount-mode-map (kbd "C-c TAB") #'beancount-outline-cycle)
-;; (require 'flymake-bean-check)
-;; (add-hook 'beancount-mode-hook #'flymake-bean-check-enable)
 
 ;;;; helm-org-rifle
 
@@ -777,10 +752,9 @@ e.g. Sunday, September 17, 2000."
   :mode ("\\.epub\\'" . nov-mode)
   :custom
   (nov-text-width 80)  ;; Adjust text width for readability
+
   (nov-variable-pitch t)  ;; Use variable pitch font for a more book-like appearance
-  ;; (nov-custom-css-file (expand-file-name "nov-custom.css" user-emacs-directory))
   :config
-  ;; Any additional configurations can go here
   ;; set Bookerly as the variable-pitch font only inside the mode
   (defun my-nov-font-setup ()
     (face-remap-add-relative 'variable-pitch nil
@@ -788,13 +762,15 @@ e.g. Sunday, September 17, 2000."
                              :height 1.1))
   (add-hook 'nov-mode-hook 'my-nov-font-setup)
 
+;; Rendering with Justify-kp pacjage
+  (require 'justify-kp)
+  (setq nov-text-width t)
+
   (defun my-nov-window-configuration-change-hook ()
     (my-nov-post-html-render-hook)
     (remove-hook 'window-configuration-change-hook
                  'my-nov-window-configuration-change-hook
                  t))
-  (require 'justify-kp)
-  (setq nov-text-width t)
   (defun my-nov-post-html-render-hook ()
     (if (get-buffer-window)
         (let ((max-width (pj-line-width))
@@ -811,16 +787,7 @@ e.g. Sunday, September 17, 2000."
       (add-hook 'window-configuration-change-hook
                 'my-nov-window-configuration-change-hook
                 nil t)))
-
   (add-hook 'nov-post-html-render-hook 'my-nov-post-html-render-hook)
-
-  ;; ;; Force reload of the custom CSS
-  ;; (defun my-nov-reload-custom-css ()
-  ;;   (interactive)
-  ;;   (setq nov-css-url nil)
-  ;;   (nov-render-document))
-
-  ;; (add-hook 'nov-mode-hook 'my-nov-reload-custom-css)
   )
 
 

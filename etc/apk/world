@@ -7,6 +7,7 @@ btrfs-compsize
 btrfs-progs
 chromium
 chrony
+clang18
 cliphist-fzf@testing
 cmus
 coreutils
