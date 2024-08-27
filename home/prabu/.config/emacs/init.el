@@ -38,7 +38,6 @@
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install 'use-package)
-
   (use-package use-package-ensure
     :config  (setq use-package-always-ensure t)))
 
@@ -752,7 +751,6 @@ e.g. Sunday, September 17, 2000."
   :mode ("\\.epub\\'" . nov-mode)
   :custom
   (nov-text-width 80)  ;; Adjust text width for readability
-
   (nov-variable-pitch t)  ;; Use variable pitch font for a more book-like appearance
   :config
   ;; set Bookerly as the variable-pitch font only inside the mode
@@ -868,16 +866,23 @@ e.g. Sunday, September 17, 2000."
 ;;        (define-key irony-mode-map [remap completion-at-point] 'irony-completion-at-point-async)
 ;;        (define-key irony-mode-map [remap complete-symbol] 'irony-completion-at-point-async)))
 ;;   )
-
+;;;; Arduino
 (use-package arduino-mode
   :ensure t
   :mode ("\\.ino$" . arduino-mode)
   )
-
+;;;; platformio
 (use-package platformio-mode
   :ensure t
   :hook (c++-mode . platformio-conditionally-enable)
   )
+
+;;;; rainbow-delimiters
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+;;;; custom
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
