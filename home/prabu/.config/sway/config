@@ -112,6 +112,7 @@ bindsym $mod+d exec $menu
 bindsym $mod+Shift+d exec $drun
 floating_modifier $mod normal
 bindsym $mod+shift+q exec wlogout
+bindsym $mod+b bar mode toggle
 
 # Moving Around
 bindsym $mod+Left focus left
