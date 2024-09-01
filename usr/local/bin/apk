@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Define the log file
+LOGFILE="/var/log/apk.log"
+
+# Capture the command and its arguments
+COMMAND="$1"
+shift
+ARGS="$@"
+
+# Check if the command is 'add' or 'del'
+if [ "$COMMAND" = "add" ] || [ "$COMMAND" = "del" ] || [ "$COMMAND" = "upgrade" ]; then
+    # Log the command that was invoked
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] doas apk $COMMAND $ARGS" >> "$LOGFILE"
+
+    # Run the apk command, prepend each line with a timestamp, and log to the file
+    {
+        /sbin/apk "$COMMAND" $ARGS | awk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }'
+    } | tee -a "$LOGFILE"
+else
+    # For other apk commands, just run them without logging
+    /sbin/apk "$COMMAND" $ARGS
+fi
