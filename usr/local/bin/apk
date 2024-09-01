@@ -3,21 +3,25 @@
 # Define the log file
 LOGFILE="/var/log/apk.log"
 
-# Capture the command and its arguments
-COMMAND="$1"
-shift
-ARGS="$@"
+# Check if there are arguments
+if [ "$#" -eq 0 ]; then
+    echo "No arguments provided. Exiting."
+    exit 1
+fi
 
-# Check if the command is 'add' or 'del'
-if [ "$COMMAND" = "add" ] || [ "$COMMAND" = "del" ] || [ "$COMMAND" = "upgrade" ]; then
-    # Log the command that was invoked
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] doas apk $COMMAND $ARGS" >> "$LOGFILE"
+# Capture the entire command line
+COMMAND_LINE="$@"
+
+# Check if the command line contains 'add', 'del', or 'upgrade'
+if echo "$COMMAND_LINE" | grep -E '\b(add|del|upgrade)\b' > /dev/null; then
+    # Log the command and its arguments
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] doas apk $COMMAND_LINE" >> "$LOGFILE"
 
     # Run the apk command, prepend each line with a timestamp, and log to the file
     {
-        /sbin/apk "$COMMAND" $ARGS | awk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }'
+        /sbin/apk $COMMAND_LINE | awk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }'
     } | tee -a "$LOGFILE"
 else
     # For other apk commands, just run them without logging
-    /sbin/apk "$COMMAND" $ARGS
+    /sbin/apk $COMMAND_LINE
 fi
