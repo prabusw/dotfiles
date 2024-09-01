@@ -16,6 +16,7 @@ cups
 cups-filters
 diffutils
 doas
+easytag
 emacs-pgtk-nativecomp
 eudev
 evince
