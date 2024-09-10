@@ -1,6 +1,7 @@
 adwaita-icon-theme
 alpine-base
 alpine-sdk
+apk-snap@testing
 bash
 btrbk
 btrfs-compsize

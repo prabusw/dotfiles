@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Define the log file
+LOGFILE="/var/log/apk.log"
+
+# Capture the entire command line
+COMMAND_LINE="$@"
+
+# Check if the command line contains 'add', 'del', or 'upgrade'
+if echo "$COMMAND_LINE" | grep -E '\b(add|del|upgrade)\b' > /dev/null; then
+    # Log the command and its arguments
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] doas apk $COMMAND_LINE" >> "$LOGFILE"
+
+    # Run the apk command and log the output with timestamps
+    OUTPUT=$( /sbin/apk $COMMAND_LINE 2>&1 )
+    echo "$OUTPUT" | awk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }' | tee -a "$LOGFILE"
+
+    # Check if apk command was successful
+    EXIT_STATUS=$?
+    if [ "$EXIT_STATUS" -ne 0 ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error: apk command failed with status $EXIT_STATUS" >> "$LOGFILE"
+    fi
+else
+    # For other apk commands, just run them without logging
+    /sbin/apk $COMMAND_LINE
+fi
