@@ -205,9 +205,8 @@ for_window [title="play_cmus_in_scratch"] {
 # ========================
 xwayland disable
 include /etc/sway/config.d/*
-# exec mako
-# exec /usr/libexec/pipewire-launcher
-# exec dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+# Moved mako, pipewire and dbus-update-activation-environment to /etc/sway/config.d/user.conf
+
 # ========================
 # Autostart Applications
 # ========================
