@@ -48,6 +48,7 @@ linux-firmware-i915
 linux-firmware-rtlwifi
 linux-lts
 mako
+mandoc
 mbuffer
 mosquitto-clients
 mpv-mpris
@@ -72,6 +73,7 @@ swayidle
 swayimg
 swaylock
 tofi
+ufw
 util-linux
 wlogout
 wlsunset

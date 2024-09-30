@@ -1,4 +1,4 @@
 #/media/sda/apks
-http://dl-cdn.alpinelinux.org/alpine/latest-stable/main
-http://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+http://dl-cdn.alpinelinux.org/alpine/v3.20/main
+http://dl-cdn.alpinelinux.org/alpine/v3.20/community
 @testing https://dl-cdn.alpinelinux.org/alpine/edge/testing
