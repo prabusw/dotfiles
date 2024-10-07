@@ -195,7 +195,7 @@ for_window [app_id="nemo"] floating enable
 for_window [app_id="xed"] floating enable, focus, resize set width 30 ppt height 40 ppt, border pixel 2
 for_window [title="clip_history_fzf_foot"] floating enable,focus,resize set width 80 ppt height 50 ppt, border pixel 2
 #Alternate coding style
-for_window [title="play_cmus_in_scratch"] {
+for_window [title=^play_cmus_in_scratch$] {
             move scratchpad
             inhibit_idle open
             }
