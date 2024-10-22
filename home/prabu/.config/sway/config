@@ -7,6 +7,20 @@ set $mod Mod4
 set $term foot
 set $menu tofi-run | xargs swaymsg exec --
 set $drun tofi-drun | xargs swaymsg exec --
+set $XF86AudioPlay XF86AudioPlay
+set $XF86AudioNext XF86AudioNext
+set $XF86AudioPrev XF86AudioPrev
+set $XF86AudioLowerVolume XF86AudioLowerVolume
+set $XF86AudioRaiseVolume XF86AudioRaiseVolume
+set $XF86AudioMute XF86AudioMute
+# For keyboards without Multimedia keys
+# set $XF86AudioPlay $mod+F12
+# set $XF86AudioNext $mod+Shift+F12
+# set $XF86AudioPrev $mod+Alt+F12
+# set $XF86AudioLowerVolume F11
+# set $XF86AudioRaiseVolume $mod+F11
+# set $XF86AudioMute F12
+
 
 # Nord Color Scheme Configuration
 # This configuration uses the Nord color scheme for consistent aesthetics.
@@ -225,12 +239,14 @@ bindsym $mod+p exec foot -T clip_history_fzf_foot -L bash -c "cliphist list | fz
 # ========================
 # Media Control
 # ========================
-bindsym --locked F11 exec sway-volume-notify "-"
-bindsym --locked $mod+F11 exec sway-volume-notify "+"
-bindsym --locked F12 exec sway-volume-notify "0"
-bindsym $mod+Alt+F12 exec foot -T play_cmus_in_scratch play_cmus
-bindsym $mod+F12 exec playerctl play-pause && pkill -RTMIN+2 i3blocks
-bindsym $mod+Shift+F12 exec /usr/local/bin/player_skip.sh
+bindsym --locked $XF86AudioLowerVolume exec sway-volume-notify "-"
+bindsym --locked $XF86AudioRaiseVolume exec sway-volume-notify "+"
+bindsym --locked $XF86AudioMute exec sway-volume-notify "0"
+bindsym --locked $XF86AudioPlay exec playerctl play-pause && pkill -RTMIN+2 i3blocks
+bindsym $XF86AudioNext exec playerctl next
+bindsym $XF86AudioPrev exec playerctl previous
+bindsym Alt+$XF86AudioPlay exec foot -T play_cmus_in_scratch play_cmus
+
 # ========================
 # Screenshots
 # ========================
