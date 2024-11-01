@@ -1,4 +1,5 @@
-#!/usr/bin/bash
+#!/usr/bin/env sh
+
 # Initialize variables
 f_paused=/tmp/player_paused
 f_playing=/tmp/player_playing
@@ -26,7 +27,6 @@ else
         rm -f $f_paused
     elif [ "$player_status" == "Stopped" ]; then
         [[ ! -f $f_playing ]] && touch $f_playing
-        rm -f $f_paused    
+        rm -f $f_paused
     fi
 fi
-

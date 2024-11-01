@@ -1,4 +1,5 @@
-#!/usr/bin/bash
+#!/usr/bin/env sh
+
 # Initialize variables
 prev_mute_status=""
 
@@ -18,4 +19,3 @@ fi
 
 # Display status
 echo -e "$mute"
-        

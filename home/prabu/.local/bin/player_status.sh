@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env sh
+
 # Initialize variables
 f_paused=/tmp/player_paused
 f_playing=/tmp/player_playing
@@ -14,4 +15,3 @@ else
     echo ""
 fi
 # done
-

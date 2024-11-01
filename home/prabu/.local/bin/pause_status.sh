@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env sh
+
 # Initialize variables
 FILE=/tmp/player_paused
 # while true; do
@@ -10,4 +11,3 @@ else
     echo ""
 fi
 # done
-

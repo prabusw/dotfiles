@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 # player_status=$(playerctl status 2>/dev/null)
 
 SHOWNAME_PATH=~/.cache/i3block-mpd-showname
@@ -36,7 +36,7 @@ function handle_button {
         2) ( exec-mpc toggle && pkill -RTMIN+3 i3blocks) > /dev/null ;;
         3) ( exec-mpc stop && pkill -RTMIN+3 i3blocks) > /dev/null ;;
         4) ( exec-mpc next && sway-notify "Song skipped" && current_song.sh ) > /dev/null ;;
-        5) ( exec-mpc pre && sway-notify "previous Song" && current_song.sh ) > /dev/null ;;        
+        5) ( exec-mpc pre && sway-notify "previous Song" && current_song.sh ) > /dev/null ;;
     esac
 }
 

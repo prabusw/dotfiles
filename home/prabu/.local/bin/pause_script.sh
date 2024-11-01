@@ -1,4 +1,5 @@
-#!/usr/bin/bash
+#!/usr/bin/env sh
+
 # Initialize variables
 FILE=/tmp/player_paused
  # Check player status
