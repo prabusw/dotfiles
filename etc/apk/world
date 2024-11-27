@@ -21,6 +21,7 @@ emacs-pgtk-nativecomp
 eudev
 evince
 fastfetch
+findutils
 firefox
 fish
 foliate
@@ -33,6 +34,7 @@ font-nerd-fonts-symbols
 font-terminus
 foot
 foot-themes
+gawk
 gnome-calculator
 grep
 grimshot

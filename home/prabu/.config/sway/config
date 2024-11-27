@@ -57,7 +57,8 @@ set $clear $nord6
 # ========================
 # Output Configuration
 # ========================
-output * bg $nord0 solid_color
+# output * bg $nord0 solid_color
+output HDMI-A-1 mode 1920x1080@100Hz bg $nord0 solid_color scale 1.25
 
 # ========================
 # Idle Configuration
@@ -232,7 +233,7 @@ exec_always wlsunset -g 0.9
 # Clipboard
 # ========================
 exec wl-paste --watch cliphist store
-bindsym $mod+p exec foot -T clip_history_fzf_foot -L bash -c "cliphist list | fzf -d $'\t' --with-nth 2 | cliphist decode | wl-copy" -H
+bindsym $mod+p exec foot -T clip_history_fzf_foot -L sh -c "cliphist list | fzf -d $'\t' --with-nth 2 | cliphist decode | wl-copy" -H
 # bindsym $mod+Shift+p exec cliphist list | tofi --width 80% | cliphist decode | wl-copy
 
 

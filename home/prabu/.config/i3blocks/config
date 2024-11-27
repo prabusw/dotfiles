@@ -33,7 +33,8 @@ signal=3
 # This block is present to ensure that time appears in the center of the bar
 [spaceblock]
 full_text=" "
-min_width=580
+min_width=680
+# min_width=850
 align=center
 
 [mediaplayer]
@@ -75,4 +76,3 @@ min_width=20
 
 # sources:
 # https://codeberg.org/trill/dotfiles/src/branch/master/.local/bin/i3blocks/volume-pipewire
-
