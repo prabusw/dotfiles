@@ -59,6 +59,7 @@ set $clear $nord6
 # ========================
 # output * bg $nord0 solid_color
 output HDMI-A-1 mode 1920x1080@100Hz bg $nord0 solid_color scale 1.25
+# output HDMI-A-1 mode 1920x1080@100Hz bg $nord0 solid_color scale 1
 
 # ========================
 # Idle Configuration
@@ -95,11 +96,12 @@ bar {
 # ========================
 # Window Decorations
 # ========================
-default_border pixel 1
+default_border pixel 2
 smart_borders on
-client.focused $nord10 $nord2 $nord6 $wb-focused $nord10
-client.focused_inactive $nord10 $nord0 $nord4 $nord8 $nord2
-client.unfocused $nord10 $nord0 $nord4 $nord8 $nord3
+# class                     border   bground  text     indicator    child_border
+client.focused              $nord10  $nord2   $nord6   $wb-focused  $nord10
+client.focused_inactive     $nord10  $nord0   $nord4   $nord8       $nord2
+client.unfocused            $nord10  $nord0   $nord4   $nord8       $nord3
 
 
 # ========================

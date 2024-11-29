@@ -44,6 +44,7 @@ hugo
 i3blocks
 intel-media-driver
 intel-ucode
+irssi
 iwd
 iwgtk
 linux-firmware-i915
@@ -68,6 +69,7 @@ procps-ng
 rclone
 rsync
 seatd
+sed
 swappy@testing
 sway
 swaybg
