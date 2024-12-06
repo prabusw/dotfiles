@@ -30,7 +30,8 @@ Sway configuration uses the following tools
 * btrbk - Backup tool for managing snapshots
 * snapper - snapshot creator
 * emacs
-* fish shell
+* fish shell(ash is Alpine default)
+
 
 ## Tracking swaywm dotfiles using a bare git repository
 
@@ -43,16 +44,17 @@ The below steps will suffice to keep track of dotfiles for single
 desktop. For detailed explanation refer to the sources
 
 ```
-prabu@homepc2 ~> git init --bare $HOME/.systemfiles
-prabu@homepc2 ~> alias sysconfig='git --git-dir=$HOME/.systemfiles --work-tree=/'
-prabu@homepc2 ~> echo "alias sysconfig='git --git-dir=/home/prabu/.systemfiles --work-tree=/'" >> ~/.config/fish/config.fish
-prabu@homepc2 ~> source ~/.config/fish/config.fish
-prabu@homepc2 ~> sysconfig add /etc/btrbk/btrbk.conf
-prabu@homepc2 ~> sysconfig add Readme.md
-prabu@homepc2 ~> sudo git --git-dir=/home/prabu/.systemfiles --work-tree=/ rm /usr/local/bin/current_song.sh~
-prabu@homepc2 ~> sysconfig status
-prabu@homepc2 ~> sysconfig commit -m "added Readme.md"
-prabu@homepc2 ~> sysconfig push origin master
+$ git init --bare $HOME/.systemfiles
+$ alias sysconfig='git --git-dir=$HOME/.systemfiles --work-tree=/'
+$ echo "alias sysconfig='git --git-dir=/home/prabu/.systemfiles --work-tree=/'" >> ~/.config/fish/config.fish
+$ echo "alias sysconfig='git --git-dir=/home/prabu/.systemfiles --work-tree=/'" >> ~/.config/ash/ashrc
+$ source ~/.config/fish/config.fish
+$ sysconfig add /etc/btrbk/btrbk.conf
+$ sysconfig add /.github/README.md
+$ sudo git --git-dir=/home/prabu/.systemfiles --work-tree=/ rm /usr/local/bin/current_song.sh
+$ sysconfig status
+$ sysconfig commit -m "added Readme.md"
+$ sysconfig push origin master
 ```
 Sources:
 * https://news.ycombinator.com/item?id=11071754

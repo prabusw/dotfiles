@@ -1,0 +1,2 @@
+alias su="doas -s"
+alias sysconfig='git --git-dir=/home/prabu/.systemfiles --work-tree=/'
