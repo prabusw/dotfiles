@@ -5,8 +5,8 @@ below can be found in this repository. Most of configuration is based
 on online resources. Sources are cited in the individual files.
 
 The dotfiles in this repository are used in a pc which dual boots
-between Arch and Alpine Linux. So anything related to systemd will not
-work on Alpine.
+between Arch Linux and Alpine Linux. So any configuration related to
+systemd is only for Arch Linux.
 
 ![ScreenShot](/home/prabu/Screenshots/2024-08-25_21-02-19.png )
 ## Sway configuration Details
@@ -14,8 +14,8 @@ work on Alpine.
 Sway configuration uses the following tools
 * foot - terminal
 * mako - notification daemon
-* greetd - login manager(optional)
-* regreet -greeter for the greetd(optional)
+* greetd - login manager(optional - used in Arch only)
+* regreet -greeter for the greetd(optional - used in Arch only)
 * swaylock - locking tool
 * i3blocks - feed generator for swaybar
 * tofi - dynamic menu
@@ -28,7 +28,7 @@ Sway configuration uses the following tools
 * btrfs filesystem
 * refind - boot manager
 * btrbk - Backup tool for managing snapshots
-* snapper - snapshot creator(only in arch)
+* snapper - snapshot creator
 * emacs
 * fish shell
 
