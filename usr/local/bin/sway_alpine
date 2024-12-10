@@ -2,7 +2,7 @@
 # https://wiki.alpinelinux.org/wiki/Wayland
 
 if [ -z "$XDG_RUNTIME_DIR" ]; then
-	XDG_RUNTIME_DIR="/tmp/user/$(id -u)"
+	XDG_RUNTIME_DIR="/tmp/$(id -u)"
 
 	mkdir -pm 0700 "$XDG_RUNTIME_DIR"
 	export XDG_RUNTIME_DIR
