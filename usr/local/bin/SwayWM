@@ -1,2 +1,1 @@
-#!/bin/sh
-sway-run.sh
+/usr/local/bin/sway_alpine

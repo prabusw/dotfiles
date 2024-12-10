@@ -1,0 +1,27 @@
+#!/bin/sh
+# https://wiki.alpinelinux.org/wiki/Wayland
+
+if [ -z "$XDG_RUNTIME_DIR" ]; then
+	XDG_RUNTIME_DIR="/tmp/user/$(id -u)"
+
+	mkdir -pm 0700 "$XDG_RUNTIME_DIR"
+	export XDG_RUNTIME_DIR
+fi
+
+export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=sway
+# export XDG_SESSION_DESKTOP=sway
+export MOZ_ENABLE_WAYLAND=1
+export WLR_NO_HARDWARE_CURSORS=1
+export WLR_RENDERER=gles2
+export WLR_BACKENDS=drm,libinput
+export LIBVA_DRIVER_NAME=iHD
+export MESA_LOADER_DRIVER_OVERRIDE=iris
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+export LIBSEAT_BACKEND=seatd
+export WLR_LIBINPUT_NO_DEVICES=1
+export ADW_DISABLE_PORTAL=1
+export GTK_THEME=Nordic
+# exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
+dbus-run-session -- sway $@

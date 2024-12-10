@@ -1,0 +1,9 @@
+# Configuration for /etc/init.d/greetd
+
+# Path to config file to use.
+#cfgfile="/etc/greetd/config.toml"
+cfgfile="/etc/greetd/greetd.conf"
+
+# Uncomment to use process supervisor.
+# supervisor=supervise-daemon
+rc_need=seatd
