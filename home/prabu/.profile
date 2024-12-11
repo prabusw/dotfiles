@@ -19,37 +19,38 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-
+# export XDG_RUNTIME_DIR=$(mkrundir)
 # https://wiki.alpinelinux.org/wiki/Wayland
+# Replaced by pam-rundir package
+# if [ -z "$XDG_RUNTIME_DIR" ]; then
+# 	XDG_RUNTIME_DIR="/tmp/user/$(id -u)"
 
-if [ -z "$XDG_RUNTIME_DIR" ]; then
-	XDG_RUNTIME_DIR="/tmp/user/$(id -u)"
+# 	mkdir -pm 0700 "$XDG_RUNTIME_DIR"
+# 	export XDG_RUNTIME_DIR
+# fi
 
-	mkdir -pm 0700 "$XDG_RUNTIME_DIR"
-	export XDG_RUNTIME_DIR
-fi
-
-export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')
-export XDG_SESSION_TYPE=wayland
-export XDG_CURRENT_DESKTOP=sway
-# export XDG_SESSION_DESKTOP=sway
-export MOZ_ENABLE_WAYLAND=1
-export WLR_NO_HARDWARE_CURSORS=1
-export WLR_RENDERER=gles2
-export WLR_BACKENDS=drm,libinput
-export LIBVA_DRIVER_NAME=iHD
-export MESA_LOADER_DRIVER_OVERRIDE=iris
-export __GLX_VENDOR_LIBRARY_NAME=mesa
-export LIBSEAT_BACKEND=seatd
-export WLR_LIBINPUT_NO_DEVICES=1
-export ADW_DISABLE_PORTAL=1
-export GTK_THEME=Nordic
+# The following moved /usr/local/bin/SwayWM
+# export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')
+# export XDG_SESSION_TYPE=wayland
+# export XDG_CURRENT_DESKTOP=sway
+# # export XDG_SESSION_DESKTOP=sway
+# export MOZ_ENABLE_WAYLAND=1
+# export WLR_NO_HARDWARE_CURSORS=1
+# export WLR_RENDERER=gles2
+# export WLR_BACKENDS=drm,libinput
+# export LIBVA_DRIVER_NAME=iHD
+# export MESA_LOADER_DRIVER_OVERRIDE=iris
+# export __GLX_VENDOR_LIBRARY_NAME=mesa
+# export LIBSEAT_BACKEND=seatd
+# export WLR_LIBINPUT_NO_DEVICES=1
+# export ADW_DISABLE_PORTAL=1
+# export GTK_THEME=Nordic
 
 
-# https://wiki.archlinux.org/title/sway#Automatically_on_TTY_login
-if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
-    exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
-fi
+# # https://wiki.archlinux.org/title/sway#Automatically_on_TTY_login
+# if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
+#     exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
+# fi
 
 # # if running bash
 if [ -n "$BASH_VERSION" ]; then

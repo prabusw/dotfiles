@@ -62,6 +62,7 @@ nfs-utils
 nnn
 openresolv
 openssh
+pam-rundir
 pango-tools
 pipewire-pulse
 playerctl
