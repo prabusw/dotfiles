@@ -14,8 +14,8 @@ systemd is only for Arch Linux.
 Sway configuration uses the following tools
 * foot - terminal
 * mako - notification daemon
-* greetd - login manager(optional - used in Arch only)
-* regreet -greeter for the greetd(optional - used in Arch only)
+* greetd - login manager
+* gtkgreet in Alpine and regreet in Arch - greeter
 * swaylock - locking tool
 * i3blocks - feed generator for swaybar
 * tofi - dynamic menu
