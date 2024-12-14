@@ -17,6 +17,7 @@ cups-filters
 diffutils
 doas
 easytag
+elogind
 emacs-pgtk-nativecomp
 eudev
 evince
@@ -36,10 +37,10 @@ foot
 foot-themes
 gawk
 gnome-calculator
+greetd-regreet@testing
 grep
 grimshot
 gsettings-desktop-schemas
-gtkgreet
 hicolor-icon-theme
 hugo
 i3blocks
@@ -62,15 +63,14 @@ nfs-utils
 nnn
 openresolv
 openssh
-pam-rundir
 pango-tools
 pipewire-pulse
 playerctl
+polkit-elogind
 powerctl@testing
 procps-ng
 rclone
 rsync
-seatd
 sed
 swappy@testing
 sway

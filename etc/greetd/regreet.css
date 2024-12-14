@@ -1,0 +1,48 @@
+/* .window { */
+/*     background-color: transparent;  */
+/*     background-image: url("file:///usr/share/wallpapers/default-1920x1080.jpg"); */
+/*     /\* background-image: url("file:///usr/share/backgrounds/nordic/nord_lake.png"); *\/ */
+/*     background-size: cover; */
+/*     background-position: center; */
+/*     /\* color: rgba(53, 185, 171, 1); *\/ */
+
+/* Style the entire login window */
+.login-window {
+  background-color: #2e3440;  /* Nord0 - Polar Night (background) */
+  color: #d8dee9;               /* Nord1 - Frost (text) */
+  font-family: sans-serif;    /* Change this for font family */
+}
+
+/* Style the username entry field */
+.username-entry {
+  background-color: #3b4252; /* Nord1 - Frost (entry field background) */
+  color: #d8dee9;               /* Nord1 - Frost (entry field text) */
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+/* Style the password entry field */
+.password-entry {
+  background-color: #3b4252; /* Nord1 - Frost (entry field background) */
+  color: #d8dee9;               /* Nord1 - Frost (entry field text) */
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Style the login button */
+.login-button {
+  background-color: #4CAF50;  /* Change this for button background color (original) */
+  color: #fff;                 /* Change this for button text color (original) */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Add hover effect to the login button (optional) */
+.login-button:hover {
+  background-color: #3e8e41;  /* Consider using a Nord theme color for hover */
+}

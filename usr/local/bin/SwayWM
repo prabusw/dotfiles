@@ -1,6 +1,5 @@
 #!/bin/sh
 
-export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')
 # https://man.sr.ht/~kennylevinsen/greetd/#how-to-set-xdg_session_typewayland
 # Session
 export XDG_SESSION_TYPE=wayland
@@ -17,12 +16,5 @@ export __GLX_VENDOR_LIBRARY_NAME=mesa
 export WLR_LIBINPUT_NO_DEVICES=1
 export ADW_DISABLE_PORTAL=1
 export GTK_THEME=Nordic
-# For seatd using pam-rundir
-export LIBSEAT_BACKEND=seatd
-#export XDG_RUNTIME_DIR=$(mkdir -pm 0700 "/tmp/user/$(id -u)"|echo "/tmp/user/$(id -u)")
 
-# https://wiki.archlinux.org/title/sway#Automatically_on_TTY_login
-if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
-    # exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
-    exec dbus-run-session sway "$@"
-fi
+exec dbus-run-session sway "$@"
