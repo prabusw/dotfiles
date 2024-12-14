@@ -15,22 +15,22 @@ Sway configuration uses the following tools
 * foot - terminal
 * mako - notification daemon
 * greetd - login manager
-* gtkgreet in Alpine and regreet in Arch - greeter
+* regreet - greeter for greetd
 * swaylock - locking tool
 * i3blocks - feed generator for swaybar
 * tofi - dynamic menu
 * swappy - screenshot editing tool
 * wlogout - logout menu
-* Nord - Theme
-* seatd in alpine and elogind in arch
+* nord - theme
+* elogind - seat manager
 
 ### Other Tools used
 * btrfs filesystem
 * refind - boot manager
 * btrbk - Backup tool for managing snapshots
-* snapper - snapshot creator
-* emacs
-* fish shell(ash is Alpine default)
+* snapper - automatic snapshot creator
+* emacs - editor
+* fish - shell (ash is Alpine default)
 
 
 ## Tracking swaywm dotfiles using a bare git repository
@@ -51,6 +51,7 @@ $ echo "alias sysconfig='git --git-dir=/home/prabu/.systemfiles --work-tree=/'" 
 $ source ~/.config/fish/config.fish
 $ sysconfig add /etc/btrbk/btrbk.conf
 $ sysconfig add /.github/README.md
+$ cd / && git --git-dir=/home/prabu/.systemfiles --work-tree=/ ls-files
 $ sudo git --git-dir=/home/prabu/.systemfiles --work-tree=/ rm /usr/local/bin/current_song.sh
 $ sysconfig status
 $ sysconfig commit -m "added Readme.md"
