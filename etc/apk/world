@@ -67,7 +67,6 @@ pango-tools
 pipewire-pulse
 playerctl
 polkit-elogind
-powerctl@testing
 procps-ng
 rclone
 rsync
