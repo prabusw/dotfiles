@@ -197,7 +197,7 @@ bindsym $mod+r mode "resize"
 
 
 # Application launchers with keybindings
-bindsym $mod+F2 exec toggle_wlsunset
+# bindsym $mod+F2 exec toggle_wlsunset
 bindsym $mod+w exec firefox
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
 
@@ -230,7 +230,7 @@ include /etc/sway/config.d/*
 # ========================
 # exec "foot --server"
 # exec inactive-windows-transparency.py -o 0.4
-exec_always wlsunset -g 0.9
+# exec_always wlsunset -g 0.9
 
 # ========================
 # Clipboard

@@ -14,6 +14,7 @@ coreutils
 cronie
 cups
 cups-filters
+ddcutil
 diffutils
 doas
 easytag
