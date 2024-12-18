@@ -1,7 +1,6 @@
 #!/bin/sh
 while true; do
-    # export XDG_RUNTIME_DIR=/run/user/$(id -u)
-    # export WAYLAND_DISPLAY=$(ls $XDG_RUNTIME_DIR | grep wayland-.)
+    echo "screen_blank job started at $(date)" >> /tmp/screen_blank.log
     sleep 1200  # 20 minutes
     swaymsg "output * dpms off"
     sleep 20

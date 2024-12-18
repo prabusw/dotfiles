@@ -56,7 +56,19 @@ text-alignment=center
 # format= <span font="Symbols Nerd Font 13" line_height="0.01" rise="5pt" color="#b48ead" font-weight="700">%s</span>\n%b
 format= <span font="Symbols Nerd Font 13" rise="5pt" color="#b48ead" font-weight="700">%s</span>\n%b
 
+[app-name=RSI]
+#sample command for the below section
+#sway-notify -a RSI 'Save Eyes' 'Save Eyes'
+default-timeout=20000
+background-color=#000000
+text-color=#000000
+border-color=#000000
+border-radius=0
+width=1600
+height=1200
+format=<span font="Cantarell 1020" line_height="0.01" rise="5pt" color="#000000">%s</span>\n%b
+anchor=center
+
 [urgency=critical]
 border-color=#bf616a
 default-timeout=0
-
