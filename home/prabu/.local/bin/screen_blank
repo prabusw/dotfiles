@@ -2,6 +2,8 @@
 while true; do
     echo "screen_blank job started at $(date)" >> /tmp/screen_blank.log
     sleep 1200  # 20 minutes
+    sway-notify "Time to Rest your Eyes"
+    sleep 2
     swaymsg "output * dpms off"
     sleep 20
     swaymsg "output * dpms on"

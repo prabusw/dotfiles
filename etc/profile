@@ -1,0 +1,42 @@
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+export PAGER=less
+umask 022
+
+# use nicer PS1 for bash and busybox ash
+if [ -n "$BASH_VERSION" -o "$BB_ASH_VERSION" ]; then
+	PS1='\h:\w\$ '
+# use nicer PS1 for zsh
+elif [ -n "$ZSH_VERSION" ]; then
+	PS1='%m:%~%# '
+# set up fallback default PS1
+else
+	: "${HOSTNAME:=$(hostname)}"
+	PS1='${HOSTNAME%%.*}:$PWD'
+	[ "$(id -u)" -eq 0 ] && PS1="${PS1}# " || PS1="${PS1}\$ "
+fi
+# https://andidittrich.com/2019/10/busybox-fancy-cli-color-prompt-ps1.html
+# If not running interactively, don't do anything
+
+[ -z "$PS1" ] && return
+# set a fancy prompt (non-color, overwrite the one in /etc/profile)
+if [ $(id -u) -eq 0 ]; then
+  # root user
+  export PS1='\n\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
+else
+  # non root
+  export PS1='\n\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
+fi
+
+# https://askubuntu.com/questions/230759/etc-profile-vs-profile
+# ORDER=${ORDER}+"~/etc/profile"
+
+for script in /etc/profile.d/*.sh ; do
+	if [ -r "$script" ] ; then
+		. "$script"
+	fi
+done
+unset script
+
+# shortcuts
+alias la='ls $LS_OPTIONS -all -h'
