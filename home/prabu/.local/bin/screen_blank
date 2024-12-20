@@ -1,10 +1,34 @@
-#!/bin/sh
+#!/usr/bin/env sh
+
+# Define the PID file
+PID_FILE="/tmp/screen_blank.pid"
+
+# Check if the PID file exists and if the process is still running
+if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+    echo "screen_blank job stopped at $(date)" >> /tmp/screen_blank.log
+    kill "$(cat "$PID_FILE")"
+    rm -f "$PID_FILE"
+    command -v sway-notify >/dev/null 2>&1 && sway-notify "screen_blank suspended"
+    exit 0
+fi
+
+# Start a new screen_blank process
+echo "screen_blank job started at $(date)" >> /tmp/screen_blank.log
+command -v sway-notify >/dev/null 2>&1 && sway-notify "screen_blank Enabled"
+
+# Save the current script's PID to the PID file
+echo $$ > "$PID_FILE"
+
+# Run the loop
 while true; do
-    echo "screen_blank job started at $(date)" >> /tmp/screen_blank.log
     sleep 1200  # 20 minutes
-    sway-notify "Time to Rest your Eyes"
+    command -v sway-notify >/dev/null 2>&1 && sway-notify -a "RSI" "Time to Rest your Eyes"
     sleep 2
     swaymsg "output * dpms off"
     sleep 20
     swaymsg "output * dpms on"
+    echo "screen_blank occurred at $(date)" >> /tmp/screen_blank.log
 done
+
+# Cleanup the PID file on exit
+trap 'rm -f "$PID_FILE"' EXIT

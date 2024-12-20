@@ -64,9 +64,9 @@ background-color=#000000
 text-color=#000000
 border-color=#000000
 border-radius=0
-width=1600
-height=1200
-format=<span font="Cantarell 1020" line_height="0.01" rise="5pt" color="#000000">%s</span>\n%b
+width=1200
+height=600
+format=<span font="Cantarell 24" line_height="12.0" rise="50pt" color="#b48ead">%s</span>\n%b
 anchor=center
 
 [urgency=critical]

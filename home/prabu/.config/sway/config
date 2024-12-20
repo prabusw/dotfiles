@@ -200,6 +200,7 @@ bindsym $mod+r mode "resize"
 # bindsym $mod+F2 exec toggle_wlsunset
 bindsym $mod+w exec firefox
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
+bindsym $mod+Shift+s exec screen_blank
 
 # ========================
 # Application Specific Rules
@@ -223,7 +224,7 @@ for_window [title=^play_cmus_in_scratch$] {
 # ========================
 xwayland disable
 include /etc/sway/config.d/*
-# Moved mako, pipewire and dbus-update-activation-environment to /etc/sway/config.d/user.conf
+
 
 # ========================
 # Autostart Applications
@@ -231,6 +232,8 @@ include /etc/sway/config.d/*
 # exec "foot --server"
 # exec inactive-windows-transparency.py -o 0.4
 # exec_always wlsunset -g 0.9
+# Moved mako, wlsunset, pipewire and dbus-update-activation-environment to /etc/sway/config.d/user.conf
+exec screen_blank
 
 # ========================
 # Clipboard
