@@ -15,13 +15,17 @@ Sway configuration uses the following tools
 * foot - terminal
 * mako - notification daemon
 * greetd - login manager
-* regreet - greeter for greetd
 * swaylock - locking tool
 * i3blocks - feed generator for swaybar
 * tofi - dynamic menu
 * swappy - screenshot editing tool
 * wlogout - logout menu
 * nord - theme
+For Alpine
+* gtkgreet - greeter for greetd
+* seatd - seat manager
+For Arch
+* regreet - greeter for greetd
 * elogind - seat manager
 
 ### Other Tools used
@@ -30,7 +34,7 @@ Sway configuration uses the following tools
 * btrbk - Backup tool for managing snapshots
 * snapper - automatic snapshot creator
 * emacs - editor
-* fish - shell (ash is Alpine default)
+* fish - shell
 
 
 ## Tracking swaywm dotfiles using a bare git repository

@@ -66,7 +66,7 @@ border-color=#000000
 border-radius=0
 width=1200
 height=600
-format=<span font="Cantarell 24" line_height="12.0" rise="50pt" color="#b48ead">%s</span>\n%b
+format=<span font="Symbols Nerd Font 24" line_height="12.0" rise="50pt" color="#b48ead">%s</span>\n%b
 anchor=center
 
 [urgency=critical]

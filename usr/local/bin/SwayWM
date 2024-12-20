@@ -16,5 +16,9 @@ export __GLX_VENDOR_LIBRARY_NAME=mesa
 export WLR_LIBINPUT_NO_DEVICES=1
 export ADW_DISABLE_PORTAL=1
 export GTK_THEME=Nordic
+# If using seatd instead of elogind
+export LIBSEAT_BACKEND=seatd
 
+# enable one of the two options below
+# exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
 exec dbus-run-session sway "$@"

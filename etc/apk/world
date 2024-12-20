@@ -18,7 +18,6 @@ ddcutil
 diffutils
 doas
 easytag
-elogind
 emacs-pgtk-nativecomp
 eudev
 evince
@@ -38,10 +37,10 @@ foot
 foot-themes
 gawk
 gnome-calculator
-greetd-regreet@testing
 grep
 grimshot
 gsettings-desktop-schemas
+gtkgreet
 hicolor-icon-theme
 hugo
 i3blocks
@@ -56,6 +55,7 @@ linux-lts
 mako
 mandoc
 mbuffer
+mkrundir@testing
 mosquitto-clients
 mpv-mpris
 nano
@@ -67,10 +67,11 @@ openssh
 pango-tools
 pipewire-pulse
 playerctl
-polkit-elogind
+powerctl@testing
 procps-ng
 rclone
 rsync
+seatd
 sed
 swappy@testing
 sway

@@ -6,3 +6,4 @@ cfgfile="/etc/greetd/greetd.conf"
 
 # Uncomment to use process supervisor.
 # supervisor=supervise-daemon
+rc_need=seatd

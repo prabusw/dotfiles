@@ -19,15 +19,16 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-# export XDG_RUNTIME_DIR=$(mkrundir)
+
 # https://wiki.alpinelinux.org/wiki/Wayland
-# Replaced by pam-rundir package
 # if [ -z "$XDG_RUNTIME_DIR" ]; then
 # 	XDG_RUNTIME_DIR="/tmp/user/$(id -u)"
 
 # 	mkdir -pm 0700 "$XDG_RUNTIME_DIR"
 # 	export XDG_RUNTIME_DIR
 # fi
+# above script replaced by mkrundir
+export XDG_RUNTIME_DIR=$(mkrundir)
 
 # The following moved /usr/local/bin/SwayWM
 # export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')
