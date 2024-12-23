@@ -28,7 +28,7 @@ fi
 # 	export XDG_RUNTIME_DIR
 # fi
 # above script replaced by mkrundir
-export XDG_RUNTIME_DIR=$(mkrundir)
+# export XDG_RUNTIME_DIR=$(mkrundir)
 
 # The following moved /usr/local/bin/SwayWM
 # export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')

@@ -5,6 +5,7 @@ apk-snap@testing
 btrbk
 btrfs-compsize
 btrfs-progs
+cage
 chromium
 chrony
 clang17
@@ -55,7 +56,6 @@ linux-lts
 mako
 mandoc
 mbuffer
-mkrundir@testing
 mosquitto-clients
 mpv-mpris
 nano
@@ -64,11 +64,16 @@ nfs-utils
 nnn
 openresolv
 openssh
+pam-rundir
 pango-tools
 pipewire-pulse
 playerctl
 powerctl@testing
 procps-ng
+qemu
+qemu-img
+qemu-system-x86_64
+qemu-ui-gtk
 rclone
 rsync
 seatd
