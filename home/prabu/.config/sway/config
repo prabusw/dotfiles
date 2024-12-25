@@ -81,7 +81,7 @@ bar {
     font pango:Symbols Nerd Font Bold 13
     status_edge_padding 10
     status_padding 5
-    status_command i3blocks
+    status_command SCRIPT_DIR=$HOME/.local/bin/i3blocks i3blocks
 
     # Color settings for the status bar
     colors {
@@ -123,8 +123,8 @@ exec_always {
 # Key Bindings
 # ========================
 # Basics
-# bindsym $mod+Shift+Return exec $term fish
-bindsym $mod+Shift+Return exec $term
+bindsym $mod+Shift+Return exec $term fish
+# bindsym $mod+Shift+Return exec $term
 bindsym $mod+Shift+c kill
 bindsym $mod+d exec $menu
 bindsym $mod+Shift+d exec $drun

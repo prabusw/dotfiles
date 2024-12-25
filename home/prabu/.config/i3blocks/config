@@ -13,15 +13,14 @@ align=center
 # color=#f8f8f2
 separator_block_width=15
 markup=pango
-SCRIPT_DIR=/home/prabu/.local/bin/i3blocks
-
+# $SCRIPT_DIR set in status_command
+command=$SCRIPT_DIR/$BLOCK_NAME
 
 # [active]
 # command=swaymsg -t subscribe -m '["window"]' | jq -r '.container.name'
 # interval=once
 
 [calendar]
-command=$SCRIPT_DIR/calendar
 interval=5
 DATEFMT=+%H:%M
 signal=3
@@ -38,20 +37,16 @@ min_width=680
 align=center
 
 [mediaplayer]
-command=$SCRIPT_DIR/mediaplayer
 interval=once
 signal=2
 min_width=20
 
 # [mpd]
-# command=$SCRIPT_DIR/mpd
 # interval=once
 # min_width=20
 # signal=3
 
-
 [volume-pipewire]
-command=$SCRIPT_DIR/volume-pipewire
 interval=once
 signal=1
 min_width=20
