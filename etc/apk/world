@@ -15,6 +15,7 @@ coreutils
 cronie
 cups
 cups-filters
+curl
 ddcutil
 diffutils
 doas
