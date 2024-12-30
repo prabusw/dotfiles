@@ -20,13 +20,17 @@ Sway configuration uses the following tools
 * tofi - dynamic menu
 * swappy - screenshot editing tool
 * wlogout - logout menu
-* nord - theme
 For Alpine
 * gtkgreet - greeter for greetd
 * seatd - seat manager
 For Arch
 * regreet - greeter for greetd
 * elogind - seat manager
+
+To achieve nord theme colors the following are used:
+* nordic - gtk theme
+* nordzy - icon theme
+* For firefox, custom userChrome.css based on KeyFox by AlfarexGuy2019
 
 ### Other Tools used
 * btrfs filesystem
