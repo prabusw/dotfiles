@@ -19,6 +19,7 @@ curl
 ddcutil
 diffutils
 doas
+doasedit@testing
 easytag
 emacs-pgtk-nativecomp
 eudev
