@@ -1,6 +1,7 @@
 adwaita-icon-theme
 alpine-base
 alpine-sdk
+anki@testing
 apk-snap@testing
 btrbk
 btrfs-compsize
@@ -72,6 +73,7 @@ pipewire-pulse
 playerctl
 powerctl@testing
 procps-ng
+py3-stringcase@testing
 qemu
 qemu-img
 qemu-system-x86_64
