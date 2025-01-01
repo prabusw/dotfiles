@@ -197,7 +197,7 @@ bindsym $mod+r mode "resize"
 
 
 # Application launchers with keybindings
-# bindsym $mod+F2 exec toggle_wlsunset
+bindsym $mod+F2 exec toggle_wlsunset
 bindsym $mod+w exec firefox
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
 bindsym $mod+Shift+s exec screen_blank
@@ -218,6 +218,10 @@ for_window [title=^play_cmus_in_scratch$] {
             move scratchpad
             inhibit_idle open
             }
+for_window [app_id="com.github.johnfactotum.Foliate"] {
+           move to workspace 5
+           inhibit_idle focus
+           }
 
 # ========================
 # Miscellaneous Settings
