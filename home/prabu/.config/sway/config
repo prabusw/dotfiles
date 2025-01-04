@@ -170,8 +170,8 @@ bindsym $mod+Shift+0 move container to workspace number 10
 # Layout Management
 bindsym $mod+h splith
 bindsym $mod+v splitv
-bindsym $mod+s layout stacking
-bindsym $mod+t layout tabbed
+# bindsym $mod+s layout stacking
+# bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
 bindsym $mod+f fullscreen
 bindsym $mod+Shift+space floating toggle

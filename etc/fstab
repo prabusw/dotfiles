@@ -1,30 +1,27 @@
-# Static information about the filesystems.
-# See fstab(5) for details.
+# UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@avanillanew 0 1
+UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@alpine 0 1
+/dev/cdrom	/media/cdrom	iso9660	noauto,ro 0 0
+/dev/usbdisk	/media/usb	vfat	noauto	0 0
+tmpfs	/tmp	tmpfs	nosuid,nodev	0	0
+UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/home	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@home 0 1
 
-# <file system> <dir> <type> <options> <dump> <pass>
-# /dev/nvme0n1p3
-# UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/         	btrfs     	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvolid=2918,subvol=/@arch	0 0
-UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/         	btrfs     	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@	0 0
+UUID=55C3-8AB4	/boot/efi	vfat	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,errors=remount-ro 0 2
+/dev/cdrom	/media/cdrom	iso9660	noauto,ro 0 0
+/dev/usbdisk	/media/usb	vfat	noauto	0 0
+tmpfs	/tmp	tmpfs	nosuid,nodev	0	0
 
-# /dev/nvme0n1p1
-UUID=55C3-8AB4      	/boot/efi 	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 0
+UUID=dab64e31-fb89-4364-b90f-b79400f73304 	swap		swap	defaults 0 0
 
-# /dev/nvme0n1p3
-# UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/home     	btrfs     	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvolid=332,subvol=/@home	0 0
-UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/home     	btrfs     	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@home	0 0
+UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/var/cache/apk	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@alpinepkg 0 1
 
-# /dev/nvme0n1p2
-UUID=dab64e31-fb89-4364-b90f-b79400f73304	none      	swap      	defaults  	0 0
+# btrfs filesystem root(different from OS root) mounted to /mnt/btrfs enables handling of snapshots easier
+UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /mnt/btrfs           btrfs    compress=zlib:3   0    0
 
-# /mnt/btrfs added to enable btrbk
-UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /mnt/btrfs           btrfs    compress=zlib:3    0       0
+# /mnt/backup added to enable beanbk (no second hdd. so disabled this)
+# UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /mnt/backup        btrfs    compress=zlib:3,subvol=@backup    0    0
 
-# /mnt/backup added to enable beanbk
-UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /mnt/backup           btrfs    compress=zlib:3,subvol=@backup    0       0
-
-# mounting snapshots from snapper on .snapshot folder compress=zstd:7 did not work.
-#UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /.snapshots  btrfs compress=zstd:7,subvol=@snaps_root 0 0
-UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /.snapshots  btrfs compress=zstd,subvol=@snaps_root 0 0
+# @snaps_root mounted on /.snapshot folder enables managing snapshots from snapper easier
+UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /.snapshots  btrfs compress=zlib:3,subvol=@snaps_root 0 0
 
 # mounting all 4 subvolumes on /data folder
 UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b  /data/docs    btrfs  compress=zlib:3,subvol=@docs      0       0
@@ -32,22 +29,12 @@ UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b  /data/audio   btrfs  compress=zlib:3,
 UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b  /data/video   btrfs  compress=zlib:3,subvol=@video     0       0
 UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b  /data/photos  btrfs  compress=zlib:3,subvol=@photos    0       0
 
-# /var/log folder as a seperate subvolume. /var must all times be part of @, but /var/log need not be.
-UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /var/log           btrfs   nodatacow,subvol=@log 0    0
-
-# /var/cache/pacman/pkg folder contains cache of all pacman packages, hence a seperate subvolume.
-UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b /var/cache/pacman/pkg     btrfs   compress=zlib:3,subvol=@pkg 0    0
-
 # NFS on openwrt - https://wiki.archlinux.org/title/NFS#Mount_using_/etc/fstab_with_systemd
-#192.168.1.1:/mnt/sda1 /tmp/1 nfs defaults,nofail,x-systemd.device-timeout=20  0 0
-# 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs defaults,nofail,x-systemd.device-timeout=20  0 0
-# 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14,x-systemd.idle-timeout=1min 0 0
-# 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs  _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14, 0 0
-192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14, 0 0
-# 192.168.1.1:/mnt/sda1/espsite /data/docs/prabu/espsite nfs _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14, 0 0
+192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs rw,_netdev 0 0
+# 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs defaults 0 0
 # Mount the external seagate using automount option with btrfs compression
 # https://askubuntu.com/questions/220015/how-to-use-btrfs-with-compression-on-external-usb-hard-drive
 UUID=40250d10-abaa-4f0a-8da6-38251b813fb0 /mnt/ext_part1 btrfs noauto,compress=zlib:3,subvol=/ 0 0
 # Mount the pi zero nfs
-# 192.168.1.197:/lib/motion   /mnt/motion   nfs4   defaults,_netdev   0   0
-192.168.1.197:/lib/motion   /mnt/motion   nfs4   _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14 0 0
+# 192.168.1.197:/lib/motion   /mnt/motion   nfs4   defaults   0   0
+# 192.168.1.197:/lib/motion   /mnt/motion   nfs4   _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14 0 0
