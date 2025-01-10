@@ -1,14 +1,13 @@
-# UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@avanillanew 0 1
 UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@alpine 0 1
+
 /dev/cdrom	/media/cdrom	iso9660	noauto,ro 0 0
 /dev/usbdisk	/media/usb	vfat	noauto	0 0
+
 tmpfs	/tmp	tmpfs	nosuid,nodev	0	0
+
 UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/home	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@home 0 1
 
 UUID=55C3-8AB4	/boot/efi	vfat	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,errors=remount-ro 0 2
-/dev/cdrom	/media/cdrom	iso9660	noauto,ro 0 0
-/dev/usbdisk	/media/usb	vfat	noauto	0 0
-tmpfs	/tmp	tmpfs	nosuid,nodev	0	0
 
 UUID=dab64e31-fb89-4364-b90f-b79400f73304 	swap		swap	defaults 0 0
 
