@@ -29,11 +29,14 @@ UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b  /data/video   btrfs  compress=zlib:3,
 UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b  /data/photos  btrfs  compress=zlib:3,subvol=@photos    0       0
 
 # NFS on openwrt - https://wiki.archlinux.org/title/NFS#Mount_using_/etc/fstab_with_systemd
-192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs rw,_netdev 0 0
-# 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs defaults 0 0
+# 192.168.1.1:/mnt/sda1/beancount /data/docs/prabu/beancount nfs4 rw,_netdev 0 0
+# 192.168.1.1:/beancount /data/docs/prabu/beancount nfs4 rw,_netdev 0 0
+# Removed above nfs mounting to autofs
+
 # Mount the external seagate using automount option with btrfs compression
 # https://askubuntu.com/questions/220015/how-to-use-btrfs-with-compression-on-external-usb-hard-drive
 UUID=40250d10-abaa-4f0a-8da6-38251b813fb0 /mnt/ext_part1 btrfs noauto,compress=zlib:3,subvol=/ 0 0
+
 # Mount the pi zero nfs
 # 192.168.1.197:/lib/motion   /mnt/motion   nfs4   defaults   0   0
 # 192.168.1.197:/lib/motion   /mnt/motion   nfs4   _netdev,noauto,x-systemd.automount,x-systemd.mount-timeout=10,timeo=14 0 0

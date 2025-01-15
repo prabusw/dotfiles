@@ -3,6 +3,7 @@ alpine-base
 alpine-sdk
 anki@testing
 apk-snap@testing
+autofs
 btrbk
 btrfs-compsize
 btrfs-progs
@@ -70,6 +71,7 @@ nnn
 openjdk21
 openresolv
 openssh
+ovmf
 pam-rundir
 pango-tools
 pipewire-pulse
