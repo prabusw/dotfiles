@@ -655,6 +655,9 @@ e.g. Sunday, September 17, 2000."
          (python-ts-mode . eglot-ensure)
          )
   :config
+  ;; Configure eglot to use pylsp from your virtual environment
+  (setq eglot-server-programs
+        '((python-ts-mode . ("/data/docs/prabu/pylsp/bin/pylsp"))))
   ;; https://www.reddit.com/r/emacs/comments/16fvmow/disable_eglotinlayhintsmode_in_every_buffer/
   ;; (setq eglot-ignored-server-capabilities '(:inlayHintProvider))
 ;; https://www.reddit.com/r/emacs/comments/106oq11/eglot_flymake_eldoc/
@@ -667,16 +670,6 @@ e.g. Sunday, September 17, 2000."
                             (remove #'flymake-eldoc-function eldoc-documentation-functions)))
                 ;; Show all eldoc feedback.
                 (setq eldoc-documentation-strategy #'eldoc-documentation-compose))))
-;; To enable pyvenv in eglot
-;; https://github.com/wyuenho/emacs-pet/issues/29#issuecomment-1812952799
-  ;; (setq-default eglot-workspace-configuration
-  ;;                 '(:pylsp (:plugins
-  ;;                           (:pylsp_mypy (;;:enabled t
-  ;;                                         :overrides ["--python-executable"
-  ;;                                                   "home/prabu/.venv/bin/python"
-  ;;                                                    t])
-  ;;                                  ))))
-
   :bind(
         :map eglot-mode-map
              ("C-c r" . eglot-rename)
@@ -743,7 +736,6 @@ e.g. Sunday, September 17, 2000."
 ;;;; tree-sitter-module
 ;; https://www.adventuresinwhy.com/post/eglot/
 ;; https://github.com/casouri/tree-sitter-module
-
 
 ;;;; nov - epub reader
 (use-package nov
