@@ -20,9 +20,11 @@ Sway configuration uses the following tools
 * tofi - dynamic menu
 * swappy - screenshot editing tool
 * wlogout - logout menu
+
 For Alpine
 * gtkgreet - greeter for greetd
 * seatd - seat manager
+
 For Arch
 * regreet - greeter for greetd
 * elogind - seat manager
