@@ -1,0 +1,1 @@
+beancount -fstype=nfs4,rw 192.168.1.1:/beancount
