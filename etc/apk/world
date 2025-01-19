@@ -79,6 +79,7 @@ playerctl
 powerctl@testing
 procps-ng
 py3-stringcase@testing
+python3-dev
 qemu
 qemu-img
 qemu-system-x86_64
