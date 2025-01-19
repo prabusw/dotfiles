@@ -543,11 +543,19 @@ e.g. Sunday, September 17, 2000."
   :config
   ;; Remove guess indent python message
   (setq python-indent-guess-indent-offset-verbose nil)
-  ;; https://robbmann.io/emacsd/#language-specific-major-modes
-  ;; (setq python-check-command "ruff")
-  ;; https://www.reddit.com/r/emacs/comments/10yzhmn/flymake_just_works_with_ruff/
+  ;; Remap python-mode to python-ts-mode
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
-  :mode  ("\\.py\\'" . python-ts-mode)
+  ;; Set custom mode name for python-ts-mode
+  (add-hook 'python-ts-mode-hook
+            (lambda ()
+              (setq mode-name "Python-TS")))
+  ;; Ensure proper indentation in `python-ts-mode`
+  (add-hook 'python-ts-mode-hook
+            (lambda ()
+              (setq python-indent-offset 4)  ;; Use 4 spaces for indentation (PEP 8)
+              (setq tab-width 4)            ;; Set tab width to 4
+              (electric-indent-local-mode 1)))) ;; Enable automatic indentation
+
   ;; https://www.adventuresinwhy.com/post/eglot/
   ;;check flymake-ruff below
 ;; (add-hook 'python-base-mode-hook 'flymake-mode)
@@ -559,17 +567,15 @@ e.g. Sunday, September 17, 2000."
   ;;       (local-set-key [f2] 'flymake-goto-prev-error)
   ;;       (local-set-key [f3] 'flymake-goto-next-error)
   ;;       ))
-)
+
 (use-package pet
   :ensure t
   :config
   (add-hook 'python-base-mode-hook 'pet-mode -10)
-
   (add-hook 'python-mode-hook
             (lambda ()
               (setq-local python-shell-interpreter (pet-executable-find "python")
                           python-shell-virtualenv-root (pet-virtualenv-root))
-
               (pet-eglot-setup)
               (eglot-ensure)
               ))
@@ -583,7 +589,6 @@ e.g. Sunday, September 17, 2000."
 
 (use-package hide-mode-line
   :ensure t
-  :defer t
   :hook (inferior-python-mode . hide-mode-line-mode)
   )
 
@@ -607,7 +612,6 @@ e.g. Sunday, September 17, 2000."
              ("M-p" . flymake-goto-prev-error)
              ("<f2>" . flymake-show-buffer-diagnostics)
   ))
-
 
 ;; (add-to-list 'load-path "/home/prabu/.emacs.d/flymake-diagnostic-at-point-master")
 ;; (use-package flymake-diagnostic-at-point
@@ -651,7 +655,7 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :defer t
   :hook (
-         (python-mode . eglot-ensure)
+         ;; (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
          )
   :config
@@ -678,12 +682,12 @@ e.g. Sunday, September 17, 2000."
              )
   )
 ;;;; beancount
-;; https://github.com/beancount/beancount-mode
 (use-package beancount
-  :load-path "beancount-mode"
+  :ensure t
   :commands beancount-mode
   :hook
-  (beancount-mode . outline-minor-mode)
+  ;; (beancount-mode . outline-minor-mode)
+  (beancount-mode . flymake-bean-check-enable)
   :config
   (setq-local electric-indent-chars nil)
   :bind (:map beancount-mode-map
@@ -695,11 +699,6 @@ e.g. Sunday, September 17, 2000."
               ("C-c C-a" . outline-show-all)
               ("C-c TAB" . beancount-outline-cycle)
               ))
-(use-package flymake-bean-check
-  :load-path "beancount-mode"
-  :hook
-  (beancount-mode . flymake-bean-check-enable)
-  )
 
 ;;;; helm-org-rifle
 
