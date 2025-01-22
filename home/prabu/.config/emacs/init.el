@@ -535,38 +535,21 @@ e.g. Sunday, September 17, 2000."
 ;; https://robbmann.io/emacsd/#language-specific-major-modes
 ;; python-mode is the builtin major-mode for the Python language.
 ;; https://www.adventuresinwhy.com/post/eglot/
-
+;; https://stackoverflow.com/questions/1259873/how-can-i-use-emacs-flymake-mode-for-python-with-pyflakes-and-pylint-checking-co
 ;;;;; Python
 ;; Using inbuilt python.el. Other alternates are python-mode, elpy etc..
 
 (use-package python
   :config
-  ;; Remove guess indent python message
-  (setq python-indent-guess-indent-offset-verbose nil)
-  ;; Remap python-mode to python-ts-mode
-  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
-  ;; Set custom mode name for python-ts-mode
+  (setq python-indent-guess-indent-offset-verbose nil)   ;; Remove guess indent python message
+  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))   ;; Remap python-mode to python-ts-mode
   (add-hook 'python-ts-mode-hook
             (lambda ()
-              (setq mode-name "Python-TS")))
-  ;; Ensure proper indentation in `python-ts-mode`
-  (add-hook 'python-ts-mode-hook
-            (lambda ()
+              (setq mode-name "Python-TS")   ;; Set custom mode name for python-ts-mode
+              ;; Ensure proper indentation in `python-ts-mode`
               (setq python-indent-offset 4)  ;; Use 4 spaces for indentation (PEP 8)
               (setq tab-width 4)            ;; Set tab width to 4
               (electric-indent-local-mode 1)))) ;; Enable automatic indentation
-
-  ;; https://www.adventuresinwhy.com/post/eglot/
-  ;;check flymake-ruff below
-;; (add-hook 'python-base-mode-hook 'flymake-mode)
-  ;; (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
-  ;; https://stackoverflow.com/questions/1259873/how-can-i-use-emacs-flymake-mode-for-python-with-pyflakes-and-pylint-checking-co
-  ;; (add-hook 'python-mode-hook
-  ;;     (lambda ()
-  ;;       (unless (eq buffer-file-name nil) (flymake-mode 1)) ;dont invoke flymake on temporary buffers for the interpreter
-  ;;       (local-set-key [f2] 'flymake-goto-prev-error)
-  ;;       (local-set-key [f3] 'flymake-goto-next-error)
-  ;;       ))
 
 (use-package pet
   :ensure t
@@ -621,50 +604,36 @@ e.g. Sunday, September 17, 2000."
 ;;   )
 
 ;;;; Company
-;; Provide drop-down completion.
-(use-package company
+(use-package company ;; Provide drop-down completion.
   :ensure t
   :defer t
   :custom
-  ;; Search other buffers with the same modes for completion instead of
-  ;; searching all other buffers.
-  (company-dabbrev-other-buffers t)
-  (company-dabbrev-code-other-buffers t)
-  ;; M-<num> to select an option according to its number.
-  (company-show-numbers t)
-  ;; Only 2 letters required for completion to activate.
-  (company-minimum-prefix-length 3)
-  ;; Do not downcase completions by default.
-  (company-dabbrev-downcase nil)
-  ;; Even if I write something with the wrong case,
-  ;; provide the correct casing.
-  (company-dabbrev-ignore-case t)
-  ;; company completion wait
-  (company-idle-delay 0.2)
-  ;; No company-mode in shell & eshell
-  (company-global-modes '(not eshell-mode shell-mode))
-  ;; Use company with text and programming modes.
-    :hook ((text-mode . company-mode)
-           (prog-mode . company-mode)))
+  (company-dabbrev-other-buffers t)   ;; searching all other buffers.
+  (company-dabbrev-code-other-buffers t)   ;; Search other buffers with the same modes for completion instead of
+  (company-show-numbers t)   ;; M-<num> to select an option according to its number.
+  (company-minimum-prefix-length 3)   ;; Only 2 letters required for completion to activate.
+  (company-dabbrev-downcase nil)   ;; Do not downcase completions by default.
+  (company-dabbrev-ignore-case t) ;;  provide the correct casing.
+  (company-idle-delay 0.2)   ;; company completion wait
+  (company-global-modes '(not eshell-mode shell-mode))  ;; No company-mode in shell & eshell
+  :hook ((text-mode . company-mode)
+         (prog-mode . company-mode))) ;; Use company with text and programming modes.
 
 ;;;; Eglot
 ;; See: https://github.com/joaotavora/eglot.
 ;; https://www.adventuresinwhy.com/post/eglot/
 ;; sudo pacman -S python-lsp-server
+;; https://www.reddit.com/r/emacs/comments/106oq11/eglot_flymake_eldoc/
+  ;; https://www.reddit.com/r/emacs/comments/16fvmow/disable_eglotinlayhintsmode_in_every_buffer/
 (use-package eglot
   :ensure t
   :defer t
-  :hook (
-         ;; (python-mode . eglot-ensure)
-         (python-ts-mode . eglot-ensure)
-         )
+  :hook
+  (python-mode . eglot-ensure)
+  (python-ts-mode . eglot-ensure)
   :config
-  ;; Configure eglot to use pylsp from your virtual environment
   (setq eglot-server-programs
-        '((python-ts-mode . ("/data/docs/prabu/pylsp/bin/pylsp"))))
-  ;; https://www.reddit.com/r/emacs/comments/16fvmow/disable_eglotinlayhintsmode_in_every_buffer/
-  ;; (setq eglot-ignored-server-capabilities '(:inlayHintProvider))
-;; https://www.reddit.com/r/emacs/comments/106oq11/eglot_flymake_eldoc/
+        '((python-ts-mode . ("/data/docs/prabu/pylsp/bin/pylsp"))))   ;; Configure eglot to use pylsp from your virtual environment
   (with-eval-after-load 'eglot
     (add-hook 'eglot-managed-mode-hook
               (lambda ()
@@ -686,7 +655,7 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :commands beancount-mode
   :hook
-  ;; (beancount-mode . outline-minor-mode)
+  (beancount-mode . outline-minor-mode)
   (beancount-mode . flymake-bean-check-enable)
   :config
   (setq-local electric-indent-chars nil)
@@ -697,7 +666,7 @@ e.g. Sunday, September 17, 2000."
               ("C-c C-b" . outline-backward-same-level)
               ("C-c C-f" . outline-forward-same-level)
               ("C-c C-a" . outline-show-all)
-              ("C-c TAB" . beancount-outline-cycle)
+              ("TAB" . beancount-outline-cycle)
               ))
 
 ;;;; helm-org-rifle
