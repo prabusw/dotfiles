@@ -156,7 +156,6 @@
   (insert (format-time-string "%R"))
 )
 
-
 (defun today ()
   "Insert string for today's date nicely formatted in American style,
 e.g. Sunday, September 17, 2000."
@@ -164,7 +163,6 @@ e.g. Sunday, September 17, 2000."
   ;; (insert (format-time-string "%A, %B %e, %Y"))
   (insert (format-time-string "%F"))
   )
-
 
 ;; https://emacs.stackexchange.com/questions/77295/org-roam-case-insensitive-search
 (defun case-insensitive-org-roam-node-read (orig-fn &rest args)
@@ -176,30 +174,6 @@ e.g. Sunday, September 17, 2000."
      (with-current-buffer (find-file org-file)
 			   (message (format "[build] Exporting %s" org-file))
 			   (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
-
-;; (defhydra hydra-flycheck (:color blue)
-;;   ;; https://www.reddit.com/r/emacs/comments/931la6/tip_how_to_adopt_flycheck_as_your_new_best_friend/
-;;   "
-;;   ^
-;;   ^Flycheck^          ^Errors^            ^Checker^
-;;   ^────────^──────────^──────^────────────^───────^─────
-;;   _q_ quit            _<_ previous        _?_ describe
-;;   _M_ manual          _>_ next            _d_ disable
-;;   _v_ verify setup    _f_ check           _m_ mode
-;;   ^^                  _l_ list            _s_ select
-;;   ^^                  ^^                  ^^
-;;   "
-;;   ("q" nil)
-;;   ("<" flycheck-previous-error :color pink)
-;;   (">" flycheck-next-error :color pink)
-;;   ("?" flycheck-describe-checker)
-;;   ("M" flycheck-manual)
-;;   ("d" flycheck-disable-checker)
-;;   ("f" flycheck-buffer)
-;;   ("l" flycheck-list-errors)
-;;   ("m" flycheck-mode)
-;;   ("s" flycheck-select-checker)
-;;   ("v" flycheck-verify-setup))
 
 ;;; packages
 
@@ -214,46 +188,6 @@ e.g. Sunday, September 17, 2000."
    ("C-h v" . helpful-variable)  ; Replace describe-variable
    ("C-h k" . helpful-key)       ; Replace describe-key
    ("C-h x" . helpful-command))) ; Replace describe-command
-;;;; bind-key
-;; https://framagit.org/steckerhalter/steckemacs.el/-/blob/master/steckemacs.el#L148
-(use-package bind-key
-  :ensure t
-  ;; A simple way to manage personal keybindings, provided by `use-package'
-  :init
-  ;; If non-nil, extract docstrings from lambdas, closures and keymaps if possible.
-  (setq bind-key-describe-special-forms t)
-  (defun my-keyboard-translations (&optional frame)
-    (with-selected-frame (or frame (selected-frame))
-      (define-key input-decode-map (kbd "C-h") (kbd "<backspace>"))
-      (define-key input-decode-map (kbd "M-h") (kbd "<M-backspace>"))))
-  (add-to-list 'after-make-frame-functions 'my-keyboard-translations)
-  :bind
-  ;; ("<f10>" . save-buffer)
-  ;; ("<f6>" . my-kill-buffer)
-  ;; ("<f7>" . my-toggle-window-split)
-  ;; ("C-8" . my-split-window)
-  ;; ("<f2>" . split-window-vertically)
-  ;; ("S-<f2>" . make-frame-command)
-  ;; ("<f3>" . split-window-horizontally)
-  ;; ("<f4>" . delete-window)
-  ;; ("S-<f4>" . delete-frame)
-  ;; ("<f5>" . delete-other-windows)
-  ;; ("S-<f5>" . delete-other-frames)
-  ;; ("C-c c" . my-capture)
-  ;; ("C-c m" . menu-bar-mode)
-  ;; ("C-c n" . my-org-agenda)
-  ;; ("C-c a" . org-agenda)
-  ("C-c g" . magit-status)
-  ("C-c d" . ispell-change-dictionary)
-  ;; ("C-c n f" . org-roam-node-find)
-  ;; ("C-c n r" . org-roam-node-random)
-  ;; ("C-z" . undo)
-  ;; ("C-c s" . web-search)
-  ;; ("C-c w" . wdired-mode)
-  ;; ("<f9>" . helm-org-roam)
-  )
-
-
 ;;;; ediff
 ;; Enhanced settings for ediff in Emacs
 (use-package ediff
@@ -291,53 +225,6 @@ e.g. Sunday, September 17, 2000."
          ;; Add any additional key bindings here if needed
          )
   )
-
-;;;; hydra
-;; Make bindings that stick around. https://framagit.org/steckerhalter/steckemacs.el/-/blob/master/steckemacs.el#L375
-(use-package hydra
-  ;; :quelpa
-  :ensure t
-  :defer 2
-  ;; :bind ("C-c f" . hydra-flycheck/body)
-  )
-  ;; :bind
-;;   ("S-SPC" . hydra-navigate/body) ;;here hydra-! is the name of hydra function
-;;   ;; ("<menu>" . !/body) ;;more than hydra can be defined or same hydra can have multiple shortcuts.
-;;   :config
-;;   (defun kbds (keys)
-;;     "Simulate keyboard input.
-;; KEYS should be provided as with `kbd'."
-;;     (execute-kbd-macro (kbd keys)))
-;;   (defmacro hydra-resume (fn &rest args)
-;;     "Execute FN and resume the current hydra."
-;;     `(progn (if (commandp ',fn)
-;;                 (call-interactively ',fn)
-;;               (,fn ,@args))
-;;             (funcall hydra-curr-body-fn)))
-;;   (defmacro hydra-arg (fn &rest plist)
-;;     "Execute FN or with arg the function given in the PLIST.
-;; PLIST are pairs of the numerical argument and function, for example to call `find-file' with C-u, use: 4 find-file"
-;;     ;; Example:
-;;     ;; ("SPC f" (hydra-arg ff-helm-places 4 hydra-ff) :exit t)
-;;     ;; (defhydra hydra-ff (:color blue :pre (setq hydra-is-helpful t) :post (!/body))
-;;     ;;   "Firefox"
-;;     ;;   ("f" ff-helm-places "History")
-;;     ;;   ("b" ff-helm-bookmarks "Bookmarks")
-;;     ;;   ("u" ff-paste-current-url "Yank current url")
-;;     ;;   ("q" nil "quit"))
-;;     `(let* ((prefix (prefix-numeric-value current-prefix-arg))
-;;             (fnp (plist-get ',plist prefix)))
-;;        (call-interactively (or fnp ',fn))))
-;;   (defun !/state (&optional exit)
-;;     ;; TODO: add state to mode-line
-;;     (setq hydra-is-helpful exit)
-;;     (if exit
-;;         (progn
-;;           (setq which-key-show-docstrings 'docstring-only)
-;;           (custom-theme-recalc-face 'cursor))
-;;       ;; (set-face-background 'cursor "#ff5f87")
-;;       (set-face-background 'cursor "#40e0d0") ;;changed the hydra color
-;;       (setq which-key-show-docstrings nil))))
 
 ;;;; outshine
 ;; Outshine brings Org Mode to the world outside of Org;; https://github.com/alphapapa/outshine
@@ -385,6 +272,7 @@ e.g. Sunday, September 17, 2000."
          )
   :custom
   (helm-split-window-default-side 'right)
+  (helm-autoresize-mode t)
   )
 ;; Helm can resize its buffer automatically to fit the number of candidates
 ;; (setq ;;helm-autoresize-mode t
@@ -392,7 +280,7 @@ e.g. Sunday, September 17, 2000."
 ;;       helm-autoresize-min-height                20   ; it is %.
 ;;       )
 
-;;;; org Mode
+;;;; org mode
 ;; https://orgmode.org/worg/org-tutorials/orgtutorial_dto.html
 ;; https://www.reddit.com/r/emacs/comments/dv02lk/how_to_force_emacs_to_prefer_manually_installed/
 
@@ -426,18 +314,15 @@ e.g. Sunday, September 17, 2000."
 	      'append)
 
 ;;;; org-roam
-;;;;; comments
 ;; Install and configure org-roam as per following sources
 ;; https://www.orgroam.com/manual.html and for dailies
 ;; https://www.orgroam.com/manual.html#org_002droam_002ddailies
 ;; https://lucidmanager.org/productivity/taking-notes-with-emacs-org-mode-and-org-roam/
 ;; https://systemcrafters.net/build-a-second-brain-in-emacs/keep-a-journal/
 ;; https://org-roam.discourse.group/t/how-to-put-all-the-org-roam-dailies-in-one-file-with-a-date-tree-structure/1561/2
-;;;;; code
+
 (use-package org-roam
   :ensure t
-  :init
-  ;; (org-roam-completion-everywhere t)
   :custom
   (org-roam-v2-ack t) ;; Acknowledge V2 upgrade
   (org-roam-completion-everywhere t)
