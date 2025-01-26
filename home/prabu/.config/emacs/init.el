@@ -431,7 +431,7 @@ e.g. Sunday, September 17, 2000."
       )
 ;; Undefine keys "C-c [" and "C-c ]" which expands the agenda list files
 (add-hook 'org-mode-hook
-	      '(lambda ()
+	      (lambda ()
 	         (org-defkey org-mode-map "\C-c[" 'undefined)
 	         (org-defkey org-mode-map "\C-c]" 'undefined))
 	      'append)
@@ -655,8 +655,12 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :commands beancount-mode
   :hook
-  (beancount-mode . outline-minor-mode)
-  (beancount-mode . flymake-bean-check-enable)
+  (beancount-mode . (lambda ()
+                      (outline-minor-mode)
+                      (flymake-mode) ; Enable flymake-mode here
+                      (flymake-bean-check-enable))) ; Then enable bean-check specifically
+  ;; (beancount-mode . outline-minor-mode)
+  ;; (beancount-mode . flymake-bean-check-enable)
   :config
   (setq-local electric-indent-chars nil)
   :bind (:map beancount-mode-map
@@ -666,7 +670,7 @@ e.g. Sunday, September 17, 2000."
               ("C-c C-b" . outline-backward-same-level)
               ("C-c C-f" . outline-forward-same-level)
               ("C-c C-a" . outline-show-all)
-              ("TAB" . beancount-outline-cycle)
+              ([backtab] . beancount-outline-cycle)
               ))
 
 ;;;; helm-org-rifle
