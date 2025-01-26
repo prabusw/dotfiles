@@ -245,8 +245,8 @@ e.g. Sunday, September 17, 2000."
   ;; ("C-c a" . org-agenda)
   ("C-c g" . magit-status)
   ("C-c d" . ispell-change-dictionary)
-  ("C-c n f" . org-roam-node-find)
-  ("C-c n r" . org-roam-node-random)
+  ;; ("C-c n f" . org-roam-node-find)
+  ;; ("C-c n r" . org-roam-node-random)
   ;; ("C-z" . undo)
   ;; ("C-c s" . web-search)
   ;; ("C-c w" . wdired-mode)
@@ -398,37 +398,26 @@ e.g. Sunday, September 17, 2000."
 
 (use-package org
   ;; :quelpa
-  :pin gnu
-  :mode (("\\.org$" . org-mode))
+  ;; :pin gnu
   :ensure t
-  :requires oc
-  :requires org-id
-  :requires org-tempo
+  :config
   :custom
   ;; (org-directory (file-truename "/data/docs/prabu/Dropbox/org"))
   (org-cite-global-bibliography '("~/org/Resources/my_library.bib"))
   (org-cite-csl-styles-dir '("~/Zotero/styles"))
+  (org-agenda-files '("/data/docs/prabu/Dropbox/org"))
+  (org-log-done t)
+  (org-todo-keywords '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
+  (org-tag-alist '((:startgroup . nil)
+                   ("@kpm" . ?k) ("@home" . ?h)
+                   ("@errands" . ?e)
+                   (:endgroup . nil)
+                   ("@computer" . ?c) ("@phone" . ?p) ("@reading" . ?r)))
   :bind (
          ("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          )
   )
-
-(setq org-log-done t)
-(setq org-todo-keywords
-      '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
-
-;; https://orgmode.org/manual/Setting-Tags.html#Setting-Tags
-(setq org-tag-alist '((:startgroup . nil)
-                      ("@kpm" . ?k) ("@home" . ?h)
-                      ("@errands" . ?e)
-                      (:endgroup . nil)
-                      ("@computer" . ?c) ("@phone" . ?p) ("@reading" . ?r)))
-
-;;http://doc.norang.ca/org-mode.html#AgendaSetup
-(setq org-agenda-files (quote ("/data/docs/prabu/Dropbox/org") ;; ("~/org1") folders can be added
-                              )
-      )
 ;; Undefine keys "C-c [" and "C-c ]" which expands the agenda list files
 (add-hook 'org-mode-hook
 	      (lambda ()
@@ -447,14 +436,13 @@ e.g. Sunday, September 17, 2000."
 ;;;;; code
 (use-package org-roam
   :ensure t
-  :after org
   :init
-  (setq org-roam-v2-ack t) ;; Acknowledge V2 upgrade
   ;; (org-roam-completion-everywhere t)
-  (setq org-roam-completion-system 'helm)
   :custom
+  (org-roam-v2-ack t) ;; Acknowledge V2 upgrade
+  (org-roam-completion-everywhere t)
+  (org-roam-completion-system 'helm)
   (org-roam-directory (file-truename "/data/docs/prabu/Dropbox/org/Resources"))
-  ;; (setq org-roam-directory (file-truename "~/org/Resources"))
   (org-roam-dailies-directory "daily")
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
@@ -467,17 +455,18 @@ e.g. Sunday, September 17, 2000."
   (advice-add 'org-roam-node-read :around #'case-insensitive-org-roam-node-read)
   (message "org-roam loaded")
   ;; (require 'org-roam-dailies)
-  :bind (
-         ;; below two global commands moved to bind-key package
-         ;; ("C-c n f" . org-roam-node-find)
-         ;; ("C-c n r" . org-roam-node-random)
-         :map org-mode-map
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n o" . org-id-get-create)
-         ("C-c n t" . org-roam-tag-add)
-         ("C-c n a" . org-roam-alias-add)
-         ("C-c n l" . org-roam-buffer-toggle)
-         ("C-M-i" . completion-at-point)))
+  :bind
+  (("C-c n f" . org-roam-node-find)
+   ("C-c n r" . org-roam-node-random)
+   :map org-mode-map
+   ;; org-mode-specific keybindings
+   ("C-c n i" . org-roam-node-insert)
+   ("C-c n o" . org-id-get-create)
+   ("C-c n t" . org-roam-tag-add)
+   ("C-c n a" . org-roam-alias-add)
+   ("C-c n l" . org-roam-buffer-toggle)
+   ("C-M-i" . completion-at-point))
+  )
 
 ;; Below code not working. To be fixed at a later date
 ;; :map org-roam-dailies-map
