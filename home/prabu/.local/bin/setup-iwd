@@ -1,0 +1,151 @@
+#!/bin/sh
+
+# Usage: ./setup-wireless-iwd <interface> <SSID> [passphrase] [dhcp|static <ip> <gateway>]
+# Requires root privileges
+
+# Check root
+if [ "$(id -u)" -ne 0 ]; then
+    echo "ERROR: Must be run as root" >&2
+    exit 1
+fi
+
+# Check/install dependencies
+install_deps() {
+    echo "Checking dependencies..."
+    apk update
+
+    if ! apk -q info iwd | grep -q 'iwd'; then
+        echo "Installing iwd..."
+        apk add iwd
+    fi
+
+    if ! apk -q info openresolv | grep -q 'openresolv'; then
+        echo "Installing openresolv for DNS..."
+        apk add openresolv
+    fi
+
+    if ! command -v iwctl >/dev/null; then
+        echo "Failed to install iwd. Exiting." >&2
+        exit 1
+    fi
+}
+
+# Configure iwd for DHCP and DNS
+configure_iwd_network() {
+    echo "Configuring iwd network/DNS settings..."
+    mkdir -p /etc/iwd
+
+    cat > /etc/iwd/main.conf << EOF
+[General]
+EnableNetworkConfiguration=true
+
+[Network]
+NameResolvingService=resolvconf
+EOF
+
+    echo "Configured /etc/iwd/main.conf:"
+    cat /etc/iwd/main.conf
+}
+
+# Handle wpa_supplicant conflicts
+check_conflicts() {
+    if rc-service -e wpa_supplicant; then
+        echo "WARNING: wpa_supplicant is enabled and may cause conflicts!" >&2
+        echo "Stopping wpa_supplicant temporarily..."
+        rc-service wpa_supplicant stop
+
+        if rc-update show | grep -q wpa_supplicant; then
+            echo "---------------------------------------------------------" >&2
+            echo " WARNING: wpa_supplicant is in runlevel!" >&2
+            echo " To prevent permanent conflicts, disable with:" >&2
+            echo " rc-update del wpa_supplicant" >&2
+            echo "---------------------------------------------------------" >&2
+        fi
+    fi
+}
+
+# Main script
+install_deps
+check_conflicts
+configure_iwd_network
+
+# Parse arguments
+INTERFACE="$1"
+SSID="$2"
+PASSPHRASE="$3"
+MODE="$4"
+IP="$5"
+GATEWAY="$6"
+
+# Validate input
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <interface> <SSID> [passphrase] [dhcp|static <ip> <gateway>]" >&2
+    exit 1
+fi
+
+# Ensure iwd is enabled
+rc-update add iwd default >/dev/null
+rc-service iwd restart
+
+# Configure network profile
+IWDDIR="/var/lib/iwd"
+mkdir -p "$IWDDIR"
+
+if [ -n "$PASSPHRASE" ]; then
+    CONF_FILE="$IWDDIR/${SSID}.psk"
+    echo "[Security]" > "$CONF_FILE"
+    echo "Passphrase=$PASSPHRASE" >> "$CONF_FILE"
+    chmod 600 "$CONF_FILE"
+else
+    touch "$IWDDIR/${SSID}.open"
+fi
+
+# Interface management
+ip link set dev "$INTERFACE" down
+ip link set dev "$INTERFACE" up
+
+# Connect to network
+echo "Scanning and connecting..."
+iwctl station "$INTERFACE" scan
+sleep 2
+iwctl station "$INTERFACE" connect "$SSID"
+
+# Wait for connection
+echo -n "Waiting for connection "
+for _ in $(seq 1 10); do
+    if iwctl station "$INTERFACE" show | grep -q "connected"; then
+        echo " Connected!"
+        break
+    fi
+    echo -n "."
+    sleep 1
+done
+
+# IP configuration
+case "$MODE" in
+    "dhcp")
+        echo "Using iwd's built-in DHCP"
+        # iwd handles DHCP automatically via openresolv
+        ;;
+    "static")
+        if [ -z "$IP" ] || [ -z "$GATEWAY" ]; then
+            echo "ERROR: Static IP requires <ip> and <gateway>" >&2
+            exit 1
+        fi
+        echo "Configuring static IP: $IP"
+        ip addr flush dev "$INTERFACE"
+        ip addr add "$IP" dev "$INTERFACE"
+        ip route add default via "$GATEWAY"
+        ;;
+    *)
+        echo "No IP configuration specified"
+        ;;
+esac
+
+# Verify connection
+echo "Network status:"
+ip addr show dev "$INTERFACE"
+echo "Resolv.conf:"
+cat /etc/resolv.conf
+
+echo "Wireless configuration complete for $SSID"
