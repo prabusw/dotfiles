@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Usage: ./setup-wireless-iwd <interface> <SSID> [passphrase] [dhcp|static <ip> <gateway>]
-# Requires root privileges
+# Usage: Run as root - Interactively configures wireless networks using iwd
+# Non-interactive: ./setup-wireless-iwd-interactive <interface> <SSID> [passphrase] [dhcp|static <ip> <gateway>]
 
 # Check root
 if [ "$(id -u)" -ne 0 ]; then
@@ -9,7 +9,38 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-# Check/install dependencies
+# Show usage instructions
+show_usage() {
+    echo "Usage:"
+    echo "  Interactive mode:"
+    echo "    $0"
+    echo "  Non-interactive mode:"
+    echo "    $0 <interface> <SSID> [passphrase] [dhcp|static <ip> <gateway>]"
+    echo ""
+    echo "Examples:"
+    echo "  Interactive:"
+    echo "    $0"
+    echo "  Non-interactive (DHCP):"
+    echo "    $0 wlan0 MyNetwork MyPassphrase dhcp"
+    echo "  Non-interactive (static IP):"
+    echo "    $0 wlan0 MyNetwork MyPassphrase static 192.168.1.10 192.168.1.1"
+    exit 1
+}
+
+# Ask for user confirmation
+confirm_action() {
+    while true; do
+        printf "%s (y/N): " "$1"
+        read -r CHOICE
+        case "$CHOICE" in
+            [yY]) return 0 ;;
+            [nN]|"") return 1 ;;
+            *) echo "Invalid choice. Please enter y or n." ;;
+        esac
+    done
+}
+
+# Install dependencies
 install_deps() {
     echo "Checking dependencies..."
     apk update
@@ -35,6 +66,15 @@ configure_iwd_network() {
     echo "Configuring iwd network/DNS settings..."
     mkdir -p /etc/iwd
 
+    if [ -f /etc/iwd/main.conf ]; then
+        echo "Current /etc/iwd/main.conf:"
+        cat /etc/iwd/main.conf
+        if ! confirm_action "Overwrite existing /etc/iwd/main.conf?"; then
+            echo "Skipping iwd configuration."
+            return
+        fi
+    fi
+
     cat > /etc/iwd/main.conf << EOF
 [General]
 EnableNetworkConfiguration=true
@@ -51,101 +91,155 @@ EOF
 check_conflicts() {
     if rc-service -e wpa_supplicant; then
         echo "WARNING: wpa_supplicant is enabled and may cause conflicts!" >&2
-        echo "Stopping wpa_supplicant temporarily..."
-        rc-service wpa_supplicant stop
-
-        if rc-update show | grep -q wpa_supplicant; then
-            echo "---------------------------------------------------------" >&2
-            echo " WARNING: wpa_supplicant is in runlevel!" >&2
-            echo " To prevent permanent conflicts, disable with:" >&2
-            echo " rc-update del wpa_supplicant" >&2
-            echo "---------------------------------------------------------" >&2
+        if confirm_action "Stop wpa_supplicant temporarily?"; then
+            rc-service wpa_supplicant stop
+            if rc-update show | grep -q wpa_supplicant; then
+                echo "---------------------------------------------------------" >&2
+                echo " WARNING: wpa_supplicant is in runlevel!" >&2
+                echo " To prevent permanent conflicts, disable with:" >&2
+                echo " rc-update del wpa_supplicant" >&2
+                echo "---------------------------------------------------------" >&2
+            fi
+        else
+            echo "Skipping wpa_supplicant stop. Conflicts may occur."
         fi
     fi
 }
 
+# Scan and select network
+select_network() {
+    INTERFACE="$1"
+    echo "Scanning networks..."
+    iwctl station "$INTERFACE" scan
+    sleep 2
+
+    # Get networks list
+    NETWORKS=$(iwctl station "$INTERFACE" get-networks | awk '/>/ {print $2, $3}')
+    if [ -z "$NETWORKS" ]; then
+        echo "No networks found. Exiting."
+        exit 1
+    fi
+
+    # Display list
+    echo "Available networks:"
+    i=1
+    echo "$NETWORKS" | while read -r SSID SECURITY; do
+        echo "$i) $SSID $( [ "$SECURITY" = "psk" ] && echo "(secured)" )"
+        i=$((i+1))
+    done
+
+    # Get user choice
+    while true; do
+        printf "Select network (1-%d): " "$(echo "$NETWORKS" | wc -l)"
+        read -r CHOICE
+        SSID=$(echo "$NETWORKS" | sed -n "${CHOICE}p" | awk '{print $1}')
+        SECURITY=$(echo "$NETWORKS" | sed -n "${CHOICE}p" | awk '{print $2}')
+        [ -n "$SSID" ] && break
+        echo "Invalid choice. Try again."
+    done
+
+    # Get passphrase if secured
+    if [ "$SECURITY" = "psk" ]; then
+        printf "Enter password for %s: " "$SSID"
+        stty -echo  # Hide input
+        read -r PASSPHRASE
+        stty echo
+        echo
+    fi
+}
+
+# Configure IP
+configure_ip() {
+    echo "IP configuration:"
+    echo "1) DHCP (automatic) [default]"
+    echo "2) Static IP"
+    printf "Choose (1/2, press Enter for DHCP): "
+    read -r IP_CHOICE
+    case "$IP_CHOICE" in
+        1|"")
+            echo "Using DHCP..."
+            return
+            ;;
+        2)
+            printf "Enter IP/CIDR (e.g., 192.168.1.10/24): "
+            read -r STATIC_IP
+            printf "Enter gateway (e.g., 192.168.1.1): "
+            read -r GATEWAY
+            ip addr add "$STATIC_IP" dev "$INTERFACE"
+            ip route add default via "$GATEWAY"
+            echo "nameserver 8.8.8.8" > /etc/resolv.conf  # Temp DNS
+            return
+            ;;
+        *)
+            echo "Invalid choice. Using DHCP by default."
+            return
+            ;;
+    esac
+}
+
 # Main script
+if [ $# -ge 2 ]; then
+    # Non-interactive mode
+    INTERFACE="$1"
+    SSID="$2"
+    PASSPHRASE="$3"
+    MODE="$4"
+    IP="$5"
+    GATEWAY="$6"
+else
+    # Run in Interactive mode
+    echo "Running in interactive mode..."
+fi
+
 install_deps
 check_conflicts
 configure_iwd_network
 
-# Parse arguments
-INTERFACE="$1"
-SSID="$2"
-PASSPHRASE="$3"
-MODE="$4"
-IP="$5"
-GATEWAY="$6"
-
-# Validate input
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 <interface> <SSID> [passphrase] [dhcp|static <ip> <gateway>]" >&2
-    exit 1
+# Get interface (if not provided)
+if [ -z "$INTERFACE" ]; then
+    INTERFACE=$(iwctl device list | awk '/wlan/ {print $1; exit}')
+    [ -z "$INTERFACE" ] && { echo "No wireless interface found"; exit 1; }
 fi
 
-# Ensure iwd is enabled
-rc-update add iwd default >/dev/null
-rc-service iwd restart
+# Interactive setup (if no SSID provided)
+if [ -z "$SSID" ]; then
+    select_network "$INTERFACE"
+fi
+
+# Configure IP (if not provided)
+if [ -z "$MODE" ]; then
+    configure_ip
+else
+    case "$MODE" in
+        "dhcp")
+            echo "Using DHCP..."
+            ;;
+        "static")
+            if [ -z "$IP" ] || [ -z "$GATEWAY" ]; then
+                echo "ERROR: Static IP requires <ip> and <gateway>" >&2
+                exit 1
+            fi
+            echo "Configuring static IP: $IP"
+            ip addr flush dev "$INTERFACE"
+            ip addr add "$IP" dev "$INTERFACE"
+            ip route add default via "$GATEWAY"
+            ;;
+        *)
+            echo "No IP configuration specified. Using DHCP by default."
+            ;;
+    esac
+fi
 
 # Configure network profile
 IWDDIR="/var/lib/iwd"
 mkdir -p "$IWDDIR"
-
 if [ -n "$PASSPHRASE" ]; then
-    CONF_FILE="$IWDDIR/${SSID}.psk"
-    echo "[Security]" > "$CONF_FILE"
-    echo "Passphrase=$PASSPHRASE" >> "$CONF_FILE"
-    chmod 600 "$CONF_FILE"
+    echo -n "[Security]\nPassphrase=$PASSPHRASE" > "$IWDDIR/${SSID}.psk"
+    chmod 600 "$IWDDIR/${SSID}.psk"
 else
     touch "$IWDDIR/${SSID}.open"
 fi
 
-# Interface management
-ip link set dev "$INTERFACE" down
-ip link set dev "$INTERFACE" up
-
 # Connect to network
-echo "Scanning and connecting..."
-iwctl station "$INTERFACE" scan
-sleep 2
 iwctl station "$INTERFACE" connect "$SSID"
-
-# Wait for connection
-echo -n "Waiting for connection "
-for _ in $(seq 1 10); do
-    if iwctl station "$INTERFACE" show | grep -q "connected"; then
-        echo " Connected!"
-        break
-    fi
-    echo -n "."
-    sleep 1
-done
-
-# IP configuration
-case "$MODE" in
-    "dhcp")
-        echo "Using iwd's built-in DHCP"
-        # iwd handles DHCP automatically via openresolv
-        ;;
-    "static")
-        if [ -z "$IP" ] || [ -z "$GATEWAY" ]; then
-            echo "ERROR: Static IP requires <ip> and <gateway>" >&2
-            exit 1
-        fi
-        echo "Configuring static IP: $IP"
-        ip addr flush dev "$INTERFACE"
-        ip addr add "$IP" dev "$INTERFACE"
-        ip route add default via "$GATEWAY"
-        ;;
-    *)
-        echo "No IP configuration specified"
-        ;;
-esac
-
-# Verify connection
-echo "Network status:"
-ip addr show dev "$INTERFACE"
-echo "Resolv.conf:"
-cat /etc/resolv.conf
-
-echo "Wireless configuration complete for $SSID"
+echo "Connected to $SSID. Verify with: ip addr show $INTERFACE"
