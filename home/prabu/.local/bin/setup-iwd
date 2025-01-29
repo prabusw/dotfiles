@@ -87,9 +87,9 @@ EOF
     cat /etc/iwd/main.conf
 }
 
-# Handle wpa_supplicant conflicts
-check_conflicts() {
-    if rc-service -e wpa_supplicant; then
+# Function to check for conflicts with wpa_supplicant
+check_wpa_supplicant_conflict() {
+    if rc-service -e wpa_supplicant status; then
         echo "WARNING: wpa_supplicant is enabled and may cause conflicts!" >&2
         if confirm_action "Stop wpa_supplicant temporarily?"; then
             rc-service wpa_supplicant stop
@@ -102,6 +102,19 @@ check_conflicts() {
             fi
         else
             echo "Skipping wpa_supplicant stop. Conflicts may occur."
+        fi
+    fi
+}
+
+# Function to check for conflicts with iwd
+check_iwd_conflict() {
+    if rc-service -e iwd status; then
+        echo "iwd service is already running."
+        if confirm_action "Proceed with setup without restarting iwd?"; then
+            return 0  # Proceed without restarting iwd
+        else
+            echo "Aborting setup as iwd is already running."
+            exit 1
         fi
     fi
 }
@@ -191,8 +204,12 @@ else
     echo "Running in interactive mode..."
 fi
 
+# Run conflict checks first
+check_wpa_supplicant_conflict
+check_iwd_conflict
+
+# Install dependencies
 install_deps
-check_conflicts
 configure_iwd_network
 
 # Get interface (if not provided)
