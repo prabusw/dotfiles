@@ -197,7 +197,7 @@ bindsym $mod+r mode "resize"
 
 
 # Application launchers with keybindings
-bindsym $mod+F2 exec toggle_wlsunset
+bindsym $mod+F3 exec toggle_wlsunset
 bindsym $mod+w exec firefox
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
 bindsym $mod+Shift+s exec screen_blank
