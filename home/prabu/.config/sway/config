@@ -213,11 +213,8 @@ for_window [app_id="org.twosheds.iwgtk"] floating enable, move position 900 0
 for_window [app_id="nemo"] floating enable
 for_window [app_id="xed"] floating enable, focus, resize set width 30 ppt height 40 ppt, border pixel 2
 for_window [title=^clip_history_fzf_foot$] floating enable,focus,resize set width 80 ppt height 50 ppt, border pixel 2
+for_window [title=^play_cmus_in_scratch$] move scratchpad
 #Alternate coding style
-for_window [title=^play_cmus_in_scratch$] {
-            move scratchpad
-            inhibit_idle open
-            }
 for_window [app_id="com.github.johnfactotum.Foliate"] {
            move to workspace 5
            inhibit_idle focus
@@ -229,7 +226,6 @@ for_window [app_id="com.github.johnfactotum.Foliate"] {
 xwayland disable
 include /etc/sway/config.d/*
 
-
 # ========================
 # Autostart Applications
 # ========================
@@ -238,7 +234,7 @@ include /etc/sway/config.d/*
 # exec_always wlsunset -g 0.9
 # Moved mako, wlsunset, pipewire and dbus-update-activation-environment to /etc/sway/config.d/user.conf
 exec screen_blank
-
+exec wayland-pipewire-idle-inhibit
 # ========================
 # Clipboard
 # ========================
