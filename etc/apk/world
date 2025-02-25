@@ -3,6 +3,8 @@ alpine-base
 alpine-sdk
 anki@testing
 apk-snap@testing
+apk-tools3@testing
+apk-tools3-doc@testing
 autofs
 btrbk
 btrfs-compsize
@@ -98,7 +100,6 @@ swaylock
 tofi
 ufw
 util-linux
-wayland-pipewire-idle-inhibit
 wlogout
 wlsunset
 xdg-desktop-portal-wlr
