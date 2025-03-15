@@ -31,7 +31,6 @@ fi
 # export XDG_RUNTIME_DIR=$(mkrundir)
 
 # The following moved /usr/local/bin/SwayWM
-# export XDG_VTNR=$(basename "$(tty)" | sed 's/tty//')
 # export XDG_SESSION_TYPE=wayland
 # export XDG_CURRENT_DESKTOP=sway
 # # export XDG_SESSION_DESKTOP=sway
@@ -47,10 +46,10 @@ fi
 # export ADW_DISABLE_PORTAL=1
 # export GTK_THEME=Nordic
 
+# Automatically launch sway on tty1
 
-# # https://wiki.archlinux.org/title/sway#Automatically_on_TTY_login
-# if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
-#     exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
+# if [ "$(tty)" = "/dev/tty1" ]; then
+#      exec dbus-run-session sway
 # fi
 
 # # if running bash
