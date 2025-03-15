@@ -4,7 +4,6 @@ alpine-sdk
 anki@testing
 apk-snap@testing
 apk-tools3@testing
-autofs
 btrbk
 btrfs-compsize
 btrfs-progs
