@@ -20,6 +20,11 @@ set $XF86AudioMute XF86AudioMute
 # set $XF86AudioLowerVolume F11
 # set $XF86AudioRaiseVolume $mod+F11
 # set $XF86AudioMute F12
+## Keys
+# set $left h
+# set $down j
+# set $up k
+# set $right l
 
 
 # Nord Color Scheme Configuration
@@ -132,14 +137,14 @@ floating_modifier $mod normal
 bindsym $mod+shift+q exec wlogout
 bindsym $mod+b bar mode toggle
 
-# Moving Around
+# Moving Around(refer master-stack-layout)
 bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
+# bindsym $mod+Down focus down
+# bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 bindsym $mod+Shift+Left move left
-bindsym $mod+Shift+Down move down
-bindsym $mod+Shift+Up move up
+# bindsym $mod+Shift+Down move down
+# bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
 # Workspaces
@@ -239,6 +244,38 @@ include /etc/sway/config.d/*
 # exec_always wlsunset -g 0.9
 # Moved mako, wlsunset, pipewire and dbus-update-activation-environment to /etc/sway/config.d/user.conf
 exec screen_blank
+
+# ========================
+# master-stack-layout
+# ========================
+# https://github.com/phenricor/master-stack-layout-i3wm/blob/main/config
+# commit 24d4b14
+
+# Starts master-layout
+exec --no-startup-id master-layout
+
+# Variables
+# ## Scripts
+set $swap exec --no-startup-id swap
+set $cycle-focus exec --no-startup-id cycle-focus
+set $cycle-move exec --no-startup-id cycle-move
+set $resize-compass exec --no-startup-id resize-compass
+
+# Focus movement
+bindsym $mod+down $cycle-focus down
+bindsym $mod+up $cycle-focus up
+# bindsym $mod+$right $resize-compass right 5ppt
+# bindsym $mod+$left $resize-compass left 5ppt
+
+bindsym $mod+Shift+down $cycle-move down
+bindsym $mod+Shift+up $cycle-move up
+
+# Master layout behaviours
+## Swap focused window with master
+bindsym $mod+Return $swap
+## Focus on master
+bindsym $mod+Shift+p exec swaymsg focus left
+
 
 # ========================
 # Clipboard

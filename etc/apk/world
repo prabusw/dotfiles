@@ -83,6 +83,7 @@ pipewire-session-manager
 playerctl
 powerctl@testing
 procps-ng
+py3-i3ipc
 py3-stringcase@testing
 python3-dev
 qemu
