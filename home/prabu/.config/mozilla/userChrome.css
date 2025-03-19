@@ -54,9 +54,9 @@
   margin-left : var(--navbarWidth) !important;
 }
 
-#nav-bar {
-  margin-right: calc(100vw - var(--navbarWidth)) !important;
-}
+/* #nav-bar { */
+/*   margin-right: calc(100vw - var(--navbarWidth)) !important; */
+/* } */
 
 #urlbar-container {
   min-width   : 0px !important;
@@ -67,10 +67,10 @@
   height      : 37px !important;
 }
 
-:root:not([uidensity="compact"]):not([uidensity="touch"]) #nav-bar {
-  margin-top  : -44px !important;
-  height      : 44px !important;
-}
+/* :root:not([uidensity="compact"]):not([uidensity="touch"]) #nav-bar { */
+/*   margin-top  : -44px !important; */
+/*   height      : 44px !important; */
+/* } */
 
 :root[uidensity="touch"] #nav-bar {
   margin-top  : -49px !important;
