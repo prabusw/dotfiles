@@ -9,7 +9,7 @@ UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/home	btrfs	rw,relatime,compress=zlib:
 
 UUID=55C3-8AB4	/boot/efi	vfat	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,errors=remount-ro 0 2
 
-UUID=dab64e31-fb89-4364-b90f-b79400f73304 	swap		swap	defaults 0 0
+UUID=dab64e31-fb89-4364-b90f-b79400f73304 	none		swap	defaults 0 0
 
 UUID=823a3283-30a7-4fef-b50b-8a2230c71b5b	/var/cache/apk	btrfs	rw,relatime,compress=zlib:3,ssd,discard=async,space_cache=v2,subvol=/@alpinepkg 0 1
 
