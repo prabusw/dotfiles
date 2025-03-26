@@ -28,6 +28,7 @@ emacs-pgtk-nativecomp
 eudev
 evince
 fastfetch
+ffmpeg
 findutils
 firefox
 fish
@@ -46,7 +47,6 @@ gedit
 gnome-calculator
 grep
 grimshot
-gsettings-desktop-schemas
 gtkgreet
 hicolor-icon-theme
 hugo
@@ -105,3 +105,4 @@ util-linux
 vim
 wlogout
 wlsunset
+youtube-dl
