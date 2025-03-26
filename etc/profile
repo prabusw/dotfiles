@@ -1,8 +1,8 @@
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Set LD_PRELOAD to use mimalloc globally
-export LD_PRELOAD=/usr/lib/libmimalloc.so
-
+# export LD_PRELOAD=/usr/lib/libmimalloc.so
+# export LD_PRELOAD=/usr/lib/libjemalloc.so.2
 export PAGER=less
 umask 022
 
