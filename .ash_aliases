@@ -3,4 +3,5 @@ alias c=clear
 alias f=file
 alias g=grep
 alias l='ls -lh'
-alias sysconfig='git --git-dir=/home/prabu/.systemfiles --work-tree=/'
+alias sysconfig='git --git-dir=$HOME/.machine-config --work-tree=/'
+alias dotfiles='git --git-dir=$HOME/.dotfiles --work-tree=$HOME'
