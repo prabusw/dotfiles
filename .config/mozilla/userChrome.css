@@ -1,0 +1,305 @@
+/*===KeyFox by AlfarexGuy2019===*/
+
+/* MIN MAX CLOSE Remove */
+#TabsToolbar > .titlebar-buttonbox-container {
+  visibility: collapse !important;
+}
+
+/*Basic Settings*/
+:root {
+  --navbarWidth: 40vw;
+  --animationSpeed: 0.5s;
+}
+
+/* Nord Dark Theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Nord Color Palette */
+    --nord0: #2e3440;   /* Polar Night darkest */
+    --nord1: #3b4252;   /* Polar Night dark */
+    --nord2: #434c5e;   /* Polar Night medium */
+    --nord3: #4c566a;   /* Polar Night light */
+    --nord4: #d8dee9;   /* Snow Storm dark */
+    --nord5: #e5e9f0;   /* Snow Storm medium */
+    --nord6: #eceff4;   /* Snow Storm light */
+    --nord7: #8fbcbb;   /* Frost cyan */
+    --nord8: #88c0d0;   /* Frost blue */
+    --nord9: #81a1c1;   /* Frost dark blue */
+    --nord10: #5e81ac;  /* Frost darker blue */
+    
+    /* Theme Variables */
+    --main-bg-color: 46, 52, 64;        /* nord0 */
+    --secondary-bg-color: 59, 66, 82;   /* nord1 */
+    --accent-color: 129, 161, 193;      /* nord9 */
+    --hover-color: 67, 76, 94;          /* nord2 */
+    --light-text-color: 236, 239, 244;  /* nord6 */
+    --dark-text-color: 216, 222, 233;   /* nord4 */
+    --inactive-text-color: 76, 86, 106; /* nord3 */
+    
+    /* Direct color references */
+    --toolbar-color: var(--light-text-color);
+    --tab-selected-bg: var(--nord10);
+    --tab-hover-bg: rgba(var(--hover-color), 0.5);
+    --border-color: rgba(var(--hover-color), 0.3);
+  }
+}
+
+/* Adwaita Light Theme */
+@media (prefers-color-scheme: light) {
+  :root {
+    /* Adwaita Color Palette */
+    --adwaita-white: #ffffff;
+    --adwaita-light-gray: #f6f5f4;
+    --adwaita-gray: #deddda;
+    --adwaita-dark-gray: #9a9996;
+    --adwaita-darker-gray: #5e5c64;
+    --adwaita-black: #2d2d2d;
+    --adwaita-blue: #3584e4;
+    --adwaita-light-blue: #62a0ea;
+    
+    /* Theme Variables */
+    --main-bg-color: 255, 255, 255;      /* white */
+    --secondary-bg-color: 246, 245, 244; /* light gray */
+    --accent-color: 53, 132, 228;        /* blue */
+    --hover-color: 222, 221, 218;        /* gray */
+    --light-text-color: 45, 45, 45;      /* dark text for light bg */
+    --dark-text-color: 255, 255, 255;    /* white text for dark elements */
+    --inactive-text-color: 154, 153, 150; /* medium gray */
+    
+    /* Direct color references */
+    --toolbar-color: rgba(var(--light-text-color), 1);
+    --tab-selected-bg: var(--adwaita-blue);
+    --tab-hover-bg: rgba(var(--hover-color), 0.7);
+    --border-color: rgba(var(--hover-color), 0.5);
+  }
+}
+
+/* Toolbar and Navigation */
+#TabsToolbar {
+  margin-left: var(--navbarWidth) !important;
+  background: rgba(var(--main-bg-color), 1) !important;
+}
+
+#urlbar-container {
+  min-width: 0px !important;
+}
+
+:root[uidensity="compact"] #nav-bar {
+  margin-top: -37px !important;
+  height: 37px !important;
+}
+
+:root[uidensity="touch"] #nav-bar {
+  margin-top: -49px !important;
+  height: 49px !important;
+}
+
+/* Navigation Bar Styling */
+toolbar#nav-bar {
+  background: rgba(var(--main-bg-color), 1) !important;
+  box-shadow: none !important;
+  padding-bottom: 4px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+#nav-bar {
+  background: rgba(var(--main-bg-color), 1) !important;
+  box-shadow: none !important;
+  color: rgba(var(--light-text-color), 1) !important;
+}
+
+#navigator-toolbox {
+  border: none !important;
+  background: rgba(var(--main-bg-color), 1) !important;
+}
+
+/* Button Hiding */
+#back-button[disabled="true"] {
+  display: none !important;
+}
+
+#forward-button[disabled="true"] {
+  display: none !important;
+}
+
+#identity-box {
+  display: none !important;
+}
+
+#tracking-protection-icon-container {
+  display: none !important;
+}
+
+.titlebar-spacer {
+  display: none !important;
+}
+
+/* URL Bar Styling */
+#urlbar-background {
+  border: none !important;
+  background: rgba(var(--secondary-bg-color), 0.5) !important;
+  border-radius: 8px !important;
+}
+
+#urlbar:not(:hover):not([breakout][breakout-extend]) > #urlbar-background {
+  box-shadow: none !important;
+  background: rgba(var(--secondary-bg-color), 0.3) !important;
+}
+
+#urlbar:hover > #urlbar-background {
+  background: rgba(var(--secondary-bg-color), 0.7) !important;
+  box-shadow: 0 0 0 1px var(--border-color) !important;
+}
+
+#urlbar[focused] > #urlbar-background {
+  background: rgba(var(--secondary-bg-color), 1) !important;
+  box-shadow: 0 0 0 2px rgba(var(--accent-color), 0.5) !important;
+}
+
+/* URL Bar Icons */
+.urlbar-icon,
+#userContext-indicator,
+#userContext-label {
+  fill: rgba(var(--inactive-text-color), 1) !important;
+  background: transparent !important;
+  color: rgba(var(--inactive-text-color), 1) !important;
+  transition: all 0.2s ease !important;
+}
+
+#urlbar:hover .urlbar-icon,
+#urlbar:active .urlbar-icon,
+#urlbar[focused] .urlbar-icon {
+  fill: rgba(var(--light-text-color), 1) !important;
+  color: rgba(var(--light-text-color), 1) !important;
+}
+
+/* Personal Toolbar (Bookmarks) */
+#PersonalToolbar {
+  background: rgba(var(--main-bg-color), 1) !important;
+  color: rgba(var(--light-text-color), 1) !important;
+  padding-bottom: 6px !important;
+  padding-top: 1px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/*================== TABS BAR ==================*/
+
+/* Tab Bar Background */
+#titlebar #TabsToolbar {
+  background: rgba(var(--main-bg-color), 1) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Individual Tab Styling */
+.tabbrowser-tab {
+  margin-right: 3px !important;
+  border-radius: 8px 8px 0 0 !important;
+  overflow: hidden !important;
+}
+
+/* Selected Tab */
+tab[selected="true"] .tab-background {
+  background: rgba(var(--accent-color), 1) !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+tab[selected="true"] .tab-content {
+  color: rgba(var(--dark-text-color), 1) !important;
+}
+
+tab[selected="true"] .tab-label {
+  color: rgba(var(--dark-text-color), 1) !important;
+  font-weight: 500 !important;
+}
+
+/* Inactive Tabs */
+.tabbrowser-tab:not([visuallyselected="true"]),
+.tabbrowser-tab:-moz-lwtheme {
+  color: rgba(var(--light-text-color), 0.8) !important;
+}
+
+.tabbrowser-tab:not([visuallyselected="true"]) .tab-label {
+  color: rgba(var(--light-text-color), 0.8) !important;
+}
+
+/* Tab Hover Effect */
+.tabbrowser-tab > .tab-stack > .tab-background:not([selected="true"]) {
+  transition: all 0.3s ease !important;
+  background: transparent !important;
+}
+
+.tabbrowser-tab:hover > .tab-stack > .tab-background:not([selected="true"]) {
+  background: var(--tab-hover-bg) !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Tab Line (remove) */
+.tab-line {
+  height: 0px !important;
+  display: none !important;
+}
+
+/* Tab Separators (remove) */
+.tabbrowser-tab::after,
+.tabbrowser-tab::before {
+  border-left: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Tab Close Button */
+.tab-close-button {
+  transition: all 0.3s ease !important;
+  border-radius: 4px !important;
+  opacity: 0.6 !important;
+}
+
+.tabbrowser-tab:hover .tab-close-button {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+tab[selected="true"] .tab-close-button {
+  fill: rgba(var(--dark-text-color), 1) !important;
+  opacity: 0.8 !important;
+}
+
+tab[selected="true"]:hover .tab-close-button {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.tabbrowser-tab:not([selected="true"]) .tab-close-button {
+  fill: rgba(var(--light-text-color), 0.8) !important;
+}
+
+/* New Tab Button */
+#tabs-newtab-button {
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+#tabs-newtab-button:hover {
+  background: var(--tab-hover-bg) !important;
+}
+
+/* Scrollable Tab Bar */
+.tabbrowser-arrowscrollbox {
+  padding-inline: 0 !important;
+}
+
+/* Tab Overflow Indicators */
+.tabbrowser-arrowscrollbox > .arrowscrollbox-overflow-start-indicator,
+.tabbrowser-arrowscrollbox > .arrowscrollbox-overflow-end-indicator {
+  display: none !important;
+}
+
+/* Additional Theme Consistency */
+#TabsToolbar .toolbarbutton-1 {
+  color: rgba(var(--light-text-color), 1) !important;
+  fill: rgba(var(--light-text-color), 1) !important;
+}
+
+#TabsToolbar .toolbarbutton-1:hover {
+  background: var(--tab-hover-bg) !important;
+  border-radius: 6px !important;
+}

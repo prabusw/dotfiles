@@ -1,0 +1,19 @@
+#!/bin/sh
+
+INDICATOR_FILE="/tmp/btrbk_running"
+
+
+# Function to print the icon and status
+print_block() {
+        if [ -f "$INDICATOR_FILE" ]; then
+           echo ""
+           echo "btrbk"
+           echo "#FF0000"
+        else
+            echo ""
+            echo ""
+        fi
+}
+
+# Print the icon and status to i3blocks
+print_block

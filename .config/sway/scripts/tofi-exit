@@ -1,0 +1,33 @@
+#!/bin/sh
+# https://github.com/bdwalton/config/blob/main/dotfiles/_bdwscripts/tofi-exit
+set -e
+set -u
+
+selection=$(
+    printf "Suspend🌙\nLock🔒\nExit \nReboot\nPowerOff\n " |
+    # printf "Suspend\nLock\nExit\nReboot\nPowerOff\n " |
+        tofi --prompt-text="" \
+             --hide-input=true \
+             --hide-cursor=true \
+             --font "Symbols Nerd Font:size=14"\
+             --require-match=true\
+             --auto-accept-single=true
+         )
+
+case "${selection}" in
+    *"Lock"*)
+        swaylockd
+        ;;
+    *"Exit"*)
+        swaymsg exit
+        ;;
+    *"Suspend"*)
+        swaylockd && powerctl mem
+        ;;
+    *"Reboot"*)
+        doas /sbin/reboot
+        ;;
+    *"PowerOff"*)
+        doas /sbin/poweroff
+        ;;
+esac

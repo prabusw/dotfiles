@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+# Maintained in linux-config.org
+notify-send -t 3000 "${@}" || true

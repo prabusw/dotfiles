@@ -1,0 +1,5 @@
+clear
+update-cache
+add /data/audio/tamil
+set output_plugin=alsa
+set softvol=true

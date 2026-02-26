@@ -1,0 +1,8 @@
+0.0.0.0 www.ndtv.com
+0.0.0.0 www.indianexpress.com
+0.0.0.0 indianexpress.com
+0.0.0.0 gitlab.alpinelinux.org
+0.0.0.0 www.bbc.com
+0.0.0.0 bbc.com
+0.0.0.0 www.reddit.com
+0.0.0.0 reddit.com

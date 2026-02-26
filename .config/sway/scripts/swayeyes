@@ -1,0 +1,350 @@
+#!/usr/bin/env sh
+
+# An Eye Care Script for Sway
+
+SERVICE_NAME="swayeyes"
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+LOG_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/$SERVICE_NAME"
+LOG_FILE="$LOG_DIR/swayeyes.log"
+
+# Runtime files
+PID_FILE="$RUNTIME_DIR/$SERVICE_NAME.pid"
+NEXT_BLANK_FILE="$RUNTIME_DIR/$SERVICE_NAME.next"
+COUNT_FILE="$RUNTIME_DIR/$SERVICE_NAME.count"
+PRE_ALERT_FILE="$RUNTIME_DIR/$SERVICE_NAME.pre_alert"
+LAST_LOOP_TIME_FILE="$RUNTIME_DIR/$SERVICE_NAME.last_loop"
+
+# Settings
+SHORT_BREAK=20
+LONG_BREAK=60
+INTERVAL=900        # 15 minutes between breaks
+PRE_ALERT=60       # 1 minute warning
+POLL_INTERVAL=10   # Check every 10 seconds
+I3BLOCKS_SIGNAL=3  # Signal for i3blocks
+
+# Create directories
+mkdir -p "$LOG_DIR" "$RUNTIME_DIR"
+
+# Logging function
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [$SERVICE_NAME] $*" >> "$LOG_FILE"
+}
+
+# Notification function
+notify() {
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send "$*"
+    fi
+    log "NOTIFY: $*"
+}
+
+notify_break() {
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -a "RSI" "$*"
+    fi
+    log "NOTIFY: $*"
+}
+
+# Signal i3blocks to update
+signal_i3blocks() {
+    pkill -RTMIN+$I3BLOCKS_SIGNAL i3blocks 2>/dev/null
+}
+
+# Check if Sway is running and set SWAYSOCK
+setup_sway() {
+    if [ -z "$SWAYSOCK" ]; then
+        SWAYSOCK=$(find /run/user/$(id -u) -type s -name 'sway-ipc.*' 2>/dev/null | head -n 1)
+        export SWAYSOCK
+    fi
+
+    if [ -z "$SWAYSOCK" ] || ! swaymsg -t get_version >/dev/null 2>&1; then
+        log "ERROR: Cannot connect to Sway"
+        return 1
+    fi
+    return 0
+}
+
+# Cleanup function
+cleanup() {
+    rm -f "$PID_FILE" "$NEXT_BLANK_FILE" "$COUNT_FILE" "$PRE_ALERT_FILE" "$LAST_LOOP_TIME_FILE"
+    signal_i3blocks
+    log "Cleanup completed"
+}
+
+# Handle signals
+trap 'cleanup; exit 0' INT TERM HUP
+
+# Check if already running
+is_running() {
+    [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null
+}
+
+# Get status information
+get_status() {
+    if ! is_running; then
+        echo "swayeyes not running"
+        return 1
+    fi
+
+    if [ -f "$NEXT_BLANK_FILE" ]; then
+        next_time=$(cat "$NEXT_BLANK_FILE")
+        if [ -n "$next_time" ] && [ "$next_time" -gt 0 ] 2>/dev/null; then
+            echo "Next break at $(date -d "@$next_time" '+%H:%M:%S')"
+            return 0
+        fi
+    fi
+
+    echo "Running but status unclear"
+    return 0
+}
+
+# Time jump detection for suspend/resume handling
+detect_time_jump() {
+    current_epoch=$(date +%s)
+
+    # Check if last loop time file exists
+    if [ -f "$LAST_LOOP_TIME_FILE" ]; then
+        last_epoch=$(cat "$LAST_LOOP_TIME_FILE")
+
+        # Calculate time delta
+        delta=$((current_epoch - last_epoch))
+
+        # If delta is unusually large (more than 9x polling interval), likely a suspend/resume
+        if [ "$delta" -gt $((9 * POLL_INTERVAL)) ]; then
+            log "Time jump of ${delta}s detected (suspend/resume?). Resetting break schedule."
+
+            # Reset break timer - schedule next break from current time
+            schedule_break 0
+
+            # Clear pre-alert state
+            rm -f "$PRE_ALERT_FILE"
+            signal_i3blocks
+
+            # Notify user about reset
+            notify "System resumed - break timer reset"
+
+            # Store current time for next check
+            echo "$current_epoch" > "$LAST_LOOP_TIME_FILE"
+            return 0  # Time jump detected
+        fi
+    fi
+
+    # Store current time for next check
+    echo "$current_epoch" > "$LAST_LOOP_TIME_FILE"
+    return 1  # No time jump
+}
+
+# Schedule next break
+schedule_break() {
+    next_time=$(($(date +%s) + INTERVAL))
+    echo "$next_time" > "$NEXT_BLANK_FILE"
+    count=${1:-0}
+    echo "$count" > "$COUNT_FILE"
+    log "Next break scheduled for $(date -d "@$next_time" '+%H:%M:%S')"
+}
+
+# Main daemon loop
+run_daemon() {
+    if is_running; then
+        echo "Already running (PID: $(cat "$PID_FILE"))"
+        return 1
+    fi
+
+    if ! setup_sway; then
+        echo "Failed to setup Sway connection"
+        return 1
+    fi
+
+    echo $$ > "$PID_FILE"
+    log "Started (PID: $$)"
+    notify "$SERVICE_NAME started"
+
+    # Initialize
+    count=0
+    schedule_break "$count"
+    rm -f "$PRE_ALERT_FILE" "$LAST_LOOP_TIME_FILE"
+    signal_i3blocks
+
+    while true; do
+        # Detect suspend/resume events first
+        if detect_time_jump; then
+            # Time jump detected, schedule already reset, continue to next iteration
+            sleep "$POLL_INTERVAL"
+            continue
+        fi
+
+        current_time=$(date +%s)
+        next_time=$(cat "$NEXT_BLANK_FILE" 2>/dev/null || echo 0)
+        count=$(cat "$COUNT_FILE" 2>/dev/null || echo 0)
+
+        # Handle invalid next_time (defensive check)
+        if [ -z "$next_time" ] || [ "$next_time" -le 0 ]; then
+            log "Invalid next_time, rescheduling"
+            schedule_break "$count"
+            sleep "$POLL_INTERVAL"
+            continue
+        fi
+
+        # Pre-alert check
+        pre_alert_time=$((next_time - PRE_ALERT))
+        if [ "$current_time" -ge "$pre_alert_time" ] && [ "$current_time" -lt "$next_time" ]; then
+            if [ ! -f "$PRE_ALERT_FILE" ]; then
+                touch "$PRE_ALERT_FILE"
+                signal_i3blocks
+                log "Pre-alert triggered"
+            fi
+        else
+            if [ -f "$PRE_ALERT_FILE" ]; then
+                rm -f "$PRE_ALERT_FILE"
+                signal_i3blocks
+            fi
+        fi
+
+        # Break time check
+        if [ "$current_time" -ge "$next_time" ]; then
+            count=$((count + 1))
+
+            # Determine break type and send notification
+            if [ $((count % 4)) -eq 0 ]; then
+                break_duration=$LONG_BREAK
+                notify_break "Time for a long break! Look away from the screen."
+            else
+                break_duration=$SHORT_BREAK
+                notify_break "Time for a short break! Rest your eyes."
+            fi
+
+            sleep 2  # Allow notification to show
+
+            # Blank screen
+            swaymsg "output * dpms off"
+            log "Screen blanked for ${break_duration}s (break #$count)"
+
+            sleep "$break_duration"
+
+            # Unblank screen
+            swaymsg "output * dpms on"
+            log "Screen unblanked"
+
+            # Schedule next break
+            schedule_break "$count"
+            rm -f "$PRE_ALERT_FILE"
+            signal_i3blocks
+        else
+            sleep "$POLL_INTERVAL"
+        fi
+    done
+}
+
+# Stop daemon
+stop_daemon() {
+    if ! is_running; then
+        echo "Not running"
+        return 1
+    fi
+
+    pid=$(cat "$PID_FILE")
+    if kill "$pid" 2>/dev/null; then
+        # Wait for cleanup
+        i=0
+        while [ $i -lt 10 ] && is_running; do
+            sleep 1
+            i=$((i + 1))
+        done
+
+        if is_running; then
+            kill -9 "$pid" 2>/dev/null
+        fi
+
+        cleanup
+        echo "Stopped"
+        log "Stopped"
+    else
+        cleanup
+        echo "Process not found, cleaned up stale files"
+    fi
+}
+
+# Toggle service
+toggle_service() {
+    if command -v rc-service >/dev/null 2>&1; then
+        # OpenRC
+        if rc-service -U "$SERVICE_NAME" status >/dev/null 2>&1; then
+            notify "$SERVICE_NAME stopping..."
+            rc-service -U "$SERVICE_NAME" stop
+            action="stopped"
+        else
+            notify "$SERVICE_NAME starting..."
+            rc-service -U "$SERVICE_NAME" start
+            action="started"
+        fi
+    elif command -v systemctl >/dev/null 2>&1; then
+        # systemd
+        if systemctl --user is-active "$SERVICE_NAME" >/dev/null 2>&1; then
+            notify "$SERVICE_NAME stopping..."
+            systemctl --user stop "$SERVICE_NAME"
+            action="stopped"
+        else
+            notify "$SERVICE_NAME starting..."
+            systemctl --user start "$SERVICE_NAME"
+            action="started"
+        fi
+    else
+        # Standalone toggle
+        if is_running; then
+            stop_daemon
+            action="stopped"
+        else
+            run_daemon &
+            action="started"
+        fi
+    fi
+
+    sleep 2
+    notify "$SERVICE_NAME $action"
+    signal_i3blocks
+}
+
+usage(){
+	echo "Usage: $0 {start|stop|status|toggle|help|version}"
+    exit 1
+}
+help(){
+	echo "Usage: $0 {start|stop|status|toggle|help|version}"
+    echo "  start    - Start the daemon"
+    echo "  stop     - Stop the daemon"
+    echo "  status   - Show current status"
+    echo "  toggle   - Toggle via service manager or standalone"
+	echo "  help     - Show this help"
+	echo "  version  - Show version information"
+    exit 1
+}
+
+# Main command handling
+case "${1:-usage}" in
+    start)
+        run_daemon
+        ;;
+    stop)
+        stop_daemon
+        ;;
+    status)
+        get_status
+        ;;
+    toggle)
+        toggle_service
+        ;;
+	help)
+		help
+		;;
+	version)
+		echo "  swayeyes 0.3"
+		echo "  Copyright (C) 2025-2025  Prabu Anand Kalivaradhan"
+		echo "  swayeyes comes with NO WARRANTY, to the extent permitted by law."
+		echo "  For more information, see the accompanying README.md file."
+		echo "  Home page: git.sr.ht/~prabuanand/swayeyes"
+		exit 1
+		;;
+    *)
+		usage
+		;;
+esac

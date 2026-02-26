@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+
+# Action Handler for wayclock, runs in the background and doesn't print anything
+if [ "$1" = "--action" ]; then
+    sway-notify "    $(date +'%A %F')"
+    date +'%A %F %H:%M:%S' | wl-copy
+    exit 0
+fi
+
+# Function to print the icon and status and copy the content to buffer
+current_date() {
+    sway-notify "    $(date +'%A %F')"
+    date +'%A %F %H:%M:%S' | wl-copy
+}
+print_block() {
+    # This uses the $LABEL and $DATEFMT variables provided by i3blocks
+    echo "$LABEL$(date "$DATEFMT")"
+}
+# 1 Left click: Display Date and Time
+# 2 Middle click: Display calendar
+# 3 Right click: NA
+# 4 Wheel up: NA
+# 5 Wheel down: NA
+handle_button() {
+	# Exit early if no button was pressed, which is the default behavior
+	[ -z "$BLOCK_BUTTON" ] && return 0
+    case "$BLOCK_BUTTON" in
+        1) current_date ;;
+    esac
+}
+# Handle the mouse button click, and all its output is discarded
+handle_button > /dev/null 2>&1
+# Print the block to status bar
+print_block

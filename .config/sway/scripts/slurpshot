@@ -1,0 +1,69 @@
+#!/bin/sh
+# Simple screenshot script, dependencies: grim, tofi, imv, jq, slurp
+# Choose directory to save screenshots and viewer
+
+SHOTPATH="$HOME/Screenshots/"
+#VIEWER="/usr/bin/imv-wayland"
+VIEWER="/usr/bin/swayimg"
+
+WINDOWS=`swaymsg -t get_tree | jq '.. | (.nodes? // empty)[] | select(.visible and .pid) | "\(.app_id) \(.rect.x),\(.rect.y) \(.rect.width)x\(.rect.height)"'`
+FOCUSED=`swaymsg -t get_tree | jq '.. | (.nodes? // empty)[] | select(.focused and .pid) | .rect | "\(.x),\(.y) \(.width)x\(.height)"'`
+
+CHOICE=`printf "%s\n%s\n%s\n%s\n%s\n" "Fullscreen" "Selection" "Focus" "$WINDOWS" "Abort" | tofi --prompt-text="Please select screenshot area:"`
+
+if [ $? -ne 0 ] || [ "$CHOICE" = "Abort" ]; then
+    exit 0
+fi
+
+FILENAME="${SHOTPATH}/screenshot-`date +'%Y-%m-%d-%H%M%S.png'`"
+
+# Name printed when viewing screenshot, adjust if you edit FILENAME
+FILENAME_SHORT=`printf "%s" "$FILENAME" | tail -c 33`
+
+if [ "$CHOICE" = "Fullscreen" ]; then
+    grim "$FILENAME"
+elif [ "$CHOICE" = "Selection" ]; then
+    grim -g "`slurp`" "$FILENAME"
+elif [ "$CHOICE" = "Focus" ]; then
+    grim -g "`eval echo $FOCUSED`" "$FILENAME"
+else
+    GRID=`printf "%s" "$CHOICE" | awk ' {print $2,$3} '`
+    grim -g "$GRID" "$FILENAME"
+fi
+
+WAHL=`printf "%s\n%s\n%s\n%s\n%s\n" "View" "Print and Save" "Print and Discard" "Save" "Discard" | tofi --prompt-text="Screenshot taken"`
+
+if [ $? -ne 0 ]; then
+    rm "$FILENAME"
+    exit 0
+fi
+
+if [ "$WAHL" = "View" ]; then
+    "$VIEWER" "$FILENAME" &
+    WAHL2=`printf "%s\n%s\n%s\n%s\n" "Save" "Print and Save" "Print and Discard" "Discard" | tofi --prompt-text="$FILENAME_SHORT"`
+    PID_VIEWER=`pidof -s "$VIEWER"`
+
+    if [ $? -ne 0 ] || [ "$WAHL2" = "Discard" ]; then
+        rm "$FILENAME"
+        kill -9 "$PID_VIEWER"
+        exit 0
+    elif [ "$WAHL2" = "Print and Save" ]; then
+        lpr "$FILENAME" &
+        kill -9 "$PID_VIEWER"
+    elif [ "$WAHL2" = "Print and Discard" ]; then
+        lpr "$FILENAME" &
+        rm "$FILENAME" &
+        kill -9 "$PID_VIEWER"
+    else
+        kill -9 "$PID_VIEWER"
+    fi
+elif [ "$WAHL" = "Discard" ]; then
+    rm "$FILENAME"
+elif [ "$WAHL" = "Print and Save" ]; then
+    lpr "$FILENAME" &
+elif [ "$WAHL" = "Print and Discard" ]; then
+    lpr "$FILENAME" &
+    rm "$FILENAME" &
+fi
+
+exit 0

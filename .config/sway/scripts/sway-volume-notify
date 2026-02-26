@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+
+# Based on https://github.com/rileyrg/linux-init/blob/master/directories/bin/sway/sway-volume-notify
+# https://github.com/swaywm/sway/wiki#how-can-i-setup-keyboard-volume-keys
+# Changed symbols from 🔊 to others like 🔇, 🔈 and 🔊 where U+1F507, U+1F508 and U+1F50A respectively.
+NOTIFY_CMD="sway-notify"
+get_volume(){
+    volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)
+	local volume_decimal
+	volume_decimal=$(echo "$volume" | awk '/Volume/ {print $2}')
+	volumep=$(echo "$volume_decimal * 100" | bc | awk '{printf "%d", $1}')
+	if echo "$volume" | grep -q '[Mm]UTED'; then
+        volume_status="MUTED"
+    else
+        volume_status="UNMUTED"
+    fi
+}
+# Initialise variables and clear notifications first
+get_volume && makoctl dismiss 2>/dev/null
+
+case "$1" in
+    "0")
+        # Toggle mute status
+        wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && pkill -RTMIN+1 i3blocks
+        ;;
+    "+")
+        # Unmute if needed and Increase volume by 5% (0.05)
+		wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
+		wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05+" -l 1.0 && pkill -RTMIN+1 i3blocks
+        get_volume && "$NOTIFY_CMD" -h "int:value:${volumep}" "🔊 ${volumep}%"
+        ;;
+    "-")
+        # Decrease volume by 5% (0.05)
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05-" -l 1.0 && pkill -RTMIN+1 i3blocks
+		get_volume && "$NOTIFY_CMD" -h "int:value:${volumep}" "🔈 ${volumep}%"
+        ;;
+    *)
+        # Default action is to show volume
+        get_volume && "$NOTIFY_CMD" -h "int:value:${volumep}" "${volumep}%"
+        ;;
+esac

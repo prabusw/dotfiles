@@ -1,0 +1,35 @@
+#!/bin/sh
+
+#run the tool snore until the user specified time. On expiry play the sound
+# https://upload.wikimedia.org/wikipedia/commons/5/5c/Alarm_clock_-_01.ogg
+audio=/home/prabu/.local/share/sounds/alarm_clock.ogg
+currentime=$(date "+%H:%M")
+
+ring() {
+    sleep "$atimer" && mpv --volume=200 --loop "$audio"
+}
+
+if echo "$1" | grep -Eq '^[0-9]+m$'; then
+    # Timer in minutes (e.g., 10m)
+    atimer="$1"
+    ring
+elif echo "$1" | grep -Eq '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'; then
+    # Alarm time (e.g., 17:20)
+    # Convert alarm time to seconds since epoch
+    alarm_s=$(date -d "$1" +%s)
+    # Convert current time to seconds since epoch
+    ctime_s=$(date -d "$currentime" +%s)
+
+    atimer=$((alarm_s - ctime_s))
+
+    # Check if alarm is within 60 minutes and in the future
+    if [ "$atimer" -le 3600 ] && [ "$atimer" -ge 0 ]; then
+        ring
+    else
+        echo "Alarm can only be set to 60 mins from now and must be in the future."
+    fi
+elif [ "$1" = "stop" ]; then
+    pkill mpv
+else
+    echo "usage: ${0##*/} 00m|hh:mm  i.e. alarm 10m or alarm 17:20"
+fi

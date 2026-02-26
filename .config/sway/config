@@ -1,0 +1,272 @@
+# Read `man 5 sway` for a complete reference.
+
+# Ensure we have environment variables set such that other apps
+# depending on them will function correctly.
+exec dbus-update-activation-environment WAYLAND_DISPLAY
+
+# ========================
+# Variables
+# ========================
+set $mod Mod4
+set $term foot
+set $menu tofi-run | xargs -r -I {} swaymsg exec "$term -e {}"
+set $drun tofi-drun | xargs swaymsg exec --
+set $XF86AudioPlay XF86AudioPlay
+set $XF86AudioNext XF86AudioNext
+set $XF86AudioPrev XF86AudioPrev
+set $XF86AudioLowerVolume XF86AudioLowerVolume
+set $XF86AudioRaiseVolume XF86AudioRaiseVolume
+set $XF86AudioMute XF86AudioMute
+# For keyboards without Multimedia keys
+# set $XF86AudioPlay $mod+F12
+# set $XF86AudioNext $mod+Shift+F12
+# set $XF86AudioPrev $mod+Alt+F12
+# set $XF86AudioLowerVolume F11
+# set $XF86AudioRaiseVolume $mod+F11
+# set $XF86AudioMute F12
+## Keys
+set $left h
+set $down j
+set $up k
+set $right l
+set $config_dir /home/prabu/.config/sway
+set $scripts $config_dir/scripts
+
+# ========================
+# Theme settings
+# ========================
+font pango:Cantarell 11
+seat seat0 xcursor_theme Adwaita 24
+exec $scripts/toggle_theme init
+include $config_dir/current_theme.conf
+bindsym $mod+Shift+t exec $scripts/toggle_theme
+
+# ========================
+# Output Configuration
+# ========================
+output HDMI-A-1 {
+       # Set the resolution and refresh rate
+       mode 1920x1080@99.999Hz
+       subpixel rgb
+       # Set background
+       background $wallpaper_color solid_color
+       # background /usr/share/backgrounds/nordic/misty_mountains.jpg fill
+       # Use 'scale' only if you are *not* using a background image with fill
+       # scale 1.25
+}
+
+# ========================
+# Idle Configuration
+# ========================
+
+# exec touch /tmp/swaylock-sleep && inotifyd swaylockd /tmp/swaylock-sleep
+exec swayidle -w \
+    timeout 300 '$scripts/check_player.sh && swaylockd' \
+    timeout 500 'swaymsg "output * dpms off"' \
+            resume 'swaymsg "output * dpms on"' \
+    timeout 600 'powerctl mem' \
+    before-sleep 'swaylockd'
+
+# ========================
+# Status Bar Configuration
+# ========================
+# i3blocks displays status information to swaybar
+bar {
+    position top
+    font pango:Symbols Nerd Font Bold 13
+    status_edge_padding 10
+    status_padding 5
+    status_command SCRIPT_DIR=$scripts/i3blocks i3blocks
+
+    # Color settings for the status bar
+    colors {
+        statusline $bar_text
+        background $bar_bg
+        focused_workspace   $bar_focused_workspace_border $bar_focused_workspace_bg $bar_focused_workspace_text
+        active_workspace    $bar_active_workspace_border  $bar_active_workspace_bg  $bar_active_workspace_text
+        inactive_workspace  $bar_inactive_workspace_border $bar_inactive_workspace_bg $bar_inactive_workspace_text
+        urgent_workspace    $bar_urgent_workspace_border  $bar_urgent_workspace_bg  $bar_urgent_workspace_text
+        binding_mode        $bar_binding_mode_border     $bar_binding_mode_bg     $bar_binding_mode_text
+    }
+}
+
+# ========================
+# Window Decorations
+# ========================
+default_border pixel 2
+smart_borders on
+# class                     border   bground  text     indicator    child_border
+client.focused          $border_focused  $bg_focused    $text_focused    $indicator_focused   $border_focused
+client.focused_inactive $border_inactive $bg_inactive   $text_inactive   $indicator_inactive  $border_inactive
+client.unfocused        $border_unfocus  $bg_unfocus    $text_unfocus    $indicator_unfocus   $border_unfocus
+client.urgent           $border_urgent   $bg_urgent     $text_urgent     $indicator_urgent    $border_urgent
+
+
+# ========================
+# Key Bindings
+# ========================
+# Basics
+bindsym $mod+Shift+Return exec $term fish
+# bindsym $mod+Shift+Return exec $term
+bindsym $mod+Shift+c kill
+bindsym $mod+d exec $drun
+bindsym $mod+Shift+d exec $menu
+floating_modifier $mod normal
+bindsym $mod+shift+q exec $scripts/tofi-exit
+bindsym $mod+b bar mode toggle
+
+# Moving Around
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# Workspaces
+# Note: workspaces can have any name you want, not just numbers.
+# Switch to workspace
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+# Move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+
+# Layout Management
+bindsym $mod+h splith
+bindsym $mod+v splitv
+# bindsym $mod+s layout stacking
+# bindsym $mod+t layout tabbed
+bindsym $mod+m exec $scripts/monocle_sway_toggle
+bindsym $mod+e layout toggle split
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+a focus prev
+#Toggle focus script
+exec_always $scripts/track_prev_focus
+bindsym $mod+Tab [con_mark=_prev] focus
+
+# Scratchpad
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+
+# Resize Mode
+mode "resize" {
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+    bindsym $mod+r mode "default"
+}
+bindsym $mod+r mode "resize"
+bindsym $mod+Shift+r resize set width 60
+
+# Application launchers with keybindings
+bindsym $mod+F3 exec $scripts/toggle_wlsunset
+bindsym $mod+Shift+s exec $scripts/swayeyes toggle
+bindsym $mod+w exec firefox
+bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
+bindsym Print exec $scripts/slurpshot
+
+# ========================
+# Application Specific Rules
+# ========================
+# assign [app_id="emacs"] 3
+assign [app_id="firefox"] 1
+assign [app_id="chromium"] 5
+assign [app_id="librewolf"] 6
+for_window [app_id="emacs"] move to workspace 3
+for_window [app_id="org.gnome.Calculator"] floating enable, border normal, move position cursor
+for_window [app_id="org.twosheds.iwgtk"] floating enable, move position 900 0
+for_window [app_id="nemo"] floating enable
+for_window [app_id="xed"] floating enable, focus, resize set width 30 ppt height 40 ppt, border pixel 2
+for_window [title=^clip_history_fzf_foot$] floating enable,focus,resize set width 80 ppt height 50 ppt, border pixel 2
+#Alternate coding style
+for_window [app_id=^play_cmus_in_scratch$] {
+           move scratchpad
+           inhibit_idle open
+           }
+for_window [app_id="com.github.johnfactotum.Foliate"] {
+           move to workspace 5
+           inhibit_idle focus
+           }
+for_window [app_id="lagrange"] {
+           move to workspace 5
+           inhibit_idle focus
+           }
+
+# ========================
+# Miscellaneous Settings
+# ========================
+xwayland disable
+include /etc/sway/config.d/*
+
+# ========================
+# OpenRC user services runlevel
+# ========================
+exec openrc -U gui
+
+# ========================
+# Clipboard
+# ========================
+exec wl-paste --watch cliphist store
+bindsym $mod+p exec foot -T clip_history_fzf_foot -L sh -c "cliphist list | fzf -d $'\t' --with-nth 2 | cliphist decode | wl-copy" -H
+# bindsym $mod+Shift+p exec cliphist list | tofi --width 80% | cliphist decode | wl-copy
+
+# ========================
+# Media Control
+# ========================
+bindsym --locked $XF86AudioLowerVolume exec $scripts/sway-volume-notify "-"
+bindsym --locked $XF86AudioRaiseVolume exec $scripts/sway-volume-notify "+"
+bindsym --locked $XF86AudioMute exec $scripts/sway-volume-notify "0"
+bindsym --locked $XF86AudioPlay exec playerctl play-pause && pkill -RTMIN+2 i3blocks
+bindsym --locked $XF86AudioNext exec playerctl next
+bindsym --locked $XF86AudioPrev exec playerctl previous
+bindsym Alt+$XF86AudioPlay exec sway-notify -i multimedia-audio-player "cmus started" && foot -a play_cmus_in_scratch cmus
+
+
+# ========================
+# Help
+# ========================
+bindsym $mod+F1 exec cat ~/.config/sway/config |grep bindsym |grep -v "^#"| sed 's/^[[:space:]]*//'|sed 's/bindsym//'| tofi
+
+# References:
+# https://github.com/Crandel/home/blob/master/.config/sway/config
+# https://wiki.archlinux.org/title/sway#Manage_Sway-specific_daemons_with_systemd
+# https://www.reddit.com/r/swaywm/comments/wzfkxf/how_do_i_remember_all_the_shortcuts/?rdt=36334
+# https://www.reddit.com/r/swaywm/comments/bb4dam/take_screenshot_to_clipboard
+# https://www.reddit.com/r/swaywm/comments/1arbob4/comment/kqjmp7v
+# https://github.com/swaywm/sway/wiki#how-can-i-setup-keyboard-volume-keys
+# https://www.reddit.com/r/swaywm/comments/14mc3f4/calculator_for_sway/?rdt=58986
+# https://www.reddit.com/r/swaywm/comments/np9cfe/how_do_i_pause_wlsunset/
+# https://www.reddit.com/r/swaywm/comments/skpcmo/method_for_starting_applications_on_startup_on/
+# https://github.com/swaywm/sway/issues/6931
+# https://github.com/swaywm/sway/wiki/GTK-3-settings-on-Wayland
+# https://github.com/lokesh-krishna/dotfiles/blob/master/nord-v3/config/sway/config
+# https://www.reddit.com/r/swaywm/comments/qnz4mk/highlight_currently_focused_window/
+# https://github.com/Iss-in/dotfiles-v2/blob/master/.config/sway/config_latest#L95
+# https://aaronlauterer.com/blog/2018/01/i3-scratchpad-to-access-often-used-applications/
+# https://www.reddit.com/r/i3wm/comments/onzwvn/any_way_to_highlight_the_active_workspace_so_you/
+# https://github.com/sentriz/cliphist
+# https://luxagraf.net/src/guide-to-switching-i3-to-sway

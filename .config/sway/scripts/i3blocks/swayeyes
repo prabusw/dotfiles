@@ -1,0 +1,70 @@
+#!/usr/bin/env sh
+
+# Icons are FontAwesome eye-open & eye-slash
+
+# Path to swayeyes script
+SWAYEYES_SCRIPT="$HOME/.config/sway/scripts/swayeyes"
+# Notification command (use notify-send for standard notifications)
+NOTIFY_CMD="notify-send"
+# Pre-alert flag file path (MUST match swayeyes daemon script)
+PRE_ALERT_FILE="${XDG_RUNTIME_DIR:-/tmp}/swayeyes.pre_alert"
+swayeyes_status=$("$SWAYEYES_SCRIPT" status 2>/dev/null)
+
+get_swayeyes_status() {
+	case "$swayeyes_status" in
+		"Next break at"*)
+			echo "running"
+			;;
+		*)
+			echo "stopped"
+			;;
+    esac
+}
+
+# Function to print the icon and status
+print_block() {
+    local current_state
+	local ICON TEXT COLOR
+	current_state=$(get_swayeyes_status)
+	# local status_output
+	# status_output=$("$SWAYEYES_SCRIPT" status 2>/dev/null)
+	case "$current_state" in
+		"running")
+			ICON=""
+			TEXT=""
+			COLOR="#f8f8f2"
+			# COLOR="#00FF00" # Default Green
+			# Check for pre-alert first if service is running
+			if [ -f "$PRE_ALERT_FILE" ]; then
+				ICON=""
+				TEXT=""
+				COLOR="#FFA500" # Orange for warning
+			fi
+			;;
+		*)
+			ICON=""
+			TEXT="" # empty
+			COLOR="#FF0000" # Red for stopped
+			;;
+	esac
+# Print the three lines required by i3blocks
+    echo "$ICON"
+    echo "$TEXT"
+    echo "$COLOR"
+}
+
+# Function to handle button clicks
+handle_button() {
+	# Exit early if no button was pressed, which is the default behavior
+	[ -z "$BLOCK_BUTTON" ] && return 0
+    case "$BLOCK_BUTTON" in
+        1)  "$NOTIFY_CMD" "$swayeyes_status" && pkill -RTMIN+3 i3blocks ;;
+        2) "$SWAYEYES_SCRIPT" toggle && pkill -RTMIN+3 i3blocks ;;
+    esac
+}
+
+# Handle the mouse button click, and all its output is discarded
+handle_button > /dev/null 2>&1
+
+# Print the icon and status to i3blocks
+print_block

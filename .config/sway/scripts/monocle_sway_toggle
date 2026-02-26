@@ -1,0 +1,17 @@
+#!/bin/sh
+# https://www.reddit.com/r/swaywm/comments/1maj8w3/my_solution_to_the_monocle_issue/
+current=$(swaymsg -t get_workspaces | jq -r '.[] | select(.focused==true).name')
+
+monocle=M
+
+if [ "$current" != "$monocle" ]; then
+    swaymsg move container to workspace "$monocle"
+    swaymsg workspace "$monocle"
+    printf "%s\n" "$current" > /tmp/current
+else
+    # Read the previous workspace from the temporary file.
+    prev=$(cat /tmp/current)
+    swaymsg move container to workspace "$prev"
+    swaymsg workspace "$prev"
+    rm /tmp/current # Remove temp file.
+fi

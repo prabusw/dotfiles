@@ -1,0 +1,56 @@
+#!/usr/bin/env sh
+
+now_playing() {
+    local current_song
+	current_song=$(playerctl metadata --format '{{ title }} from {{ album }} by {{artist }} is playing in {{ playerName }}')
+    makoctl dismiss && sway-notify "$current_song"
+}
+print_block() {
+    # Check player status
+    local player_status
+    player_status=$(playerctl status 2>/dev/null)
+
+    case "$player_status" in
+        "Paused")
+            echo ""
+            echo ""
+            echo "#FF0000"
+            ;;
+        "Playing")
+            echo ""
+            ;;
+        "Stopped")
+            echo ""
+            ;;
+        # Handle the case when playerctl returns nothing (no players or error)
+        "")
+            echo " "
+            ;;
+        # Fallback for other states like 'Idling'
+        *)
+            echo " "
+            ;;
+    esac
+}
+
+# 1 Left click: display current song info
+# 2 Middle click: Toggle play-pause
+# 3 Right click: show scratchpad (effective only if cmus is running there)
+# 4 Wheel up: Next song
+# 5 Wheel down: Prev song
+
+handle_button() {
+	# Exit early if no button was pressed, which is the default behavior
+	[ -z "$BLOCK_BUTTON" ] && return 0
+    case "$BLOCK_BUTTON" in
+        1) now_playing && pkill -RTMIN+2 i3blocks ;;
+        2) playerctl play-pause && pkill -RTMIN+2 i3blocks ;;
+        3) swaymsg "[app_id=\"play_cmus_in_scratch\"] scratchpad show" ;;
+		4) playerctl next && now_playing ;;
+		5) playerctl previous && now_playing  ;;
+    esac
+}
+# Handle the mouse button click, and all its output is discarded
+handle_button > /dev/null 2>&1
+# Print the block to status bar
+print_block
