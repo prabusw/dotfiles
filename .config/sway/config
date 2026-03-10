@@ -44,13 +44,16 @@ bindsym $mod+Shift+t exec $scripts/toggle_theme
 # ========================
 # Output Configuration
 # ========================
-output HDMI-A-1 {
-       # Set the resolution and refresh rate
-       mode 1920x1080@99.999Hz
+# This default is applied to ANY monitor connected
+output * {
        subpixel rgb
-       # Set background
        background $wallpaper_color solid_color
        # background /usr/share/backgrounds/nordic/misty_mountains.jpg fill
+}
+output HDMI-A-1 {
+# This is used, when HDMI-A-1 is available
+       # Set the resolution and refresh rate
+       mode 1920x1080@99.999Hz
        # Use 'scale' only if you are *not* using a background image with fill
        # scale 1.25
 }
