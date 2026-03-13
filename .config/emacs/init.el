@@ -170,11 +170,11 @@ e.g. Sunday, September 17, 2000."
   (let ((completion-ignore-case t))
     (apply orig-fn args)))
 
-(defun build/export-all ()
-  (dolist (org-file (directory-files-recursively org-roam-directory "\.org$"))
-     (with-current-buffer (find-file org-file)
-			   (message (format "[build] Exporting %s" org-file))
-			   (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
+;; (defun build/export-all ()
+;;   (dolist (org-file (directory-files-recursively org-roam-directory "\.org$"))
+;;      (with-current-buffer (find-file org-file)
+;; 			   (message (format "[build] Exporting %s" org-file))
+;; 			   (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
 
 ;; Define a reusable function for general programming mode setup
 (defun my-programming-setup ()
