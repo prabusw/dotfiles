@@ -10,15 +10,16 @@ related tools listed below can be found in this repository.
 * Boot manager - [refind](https://www.rodsbooks.com/refind/)
 * Backup tool - [btrbk](https://digint.ch/btrbk/)
 * Automatic snapshot - a custom vibe coded script snapk for use with apk
-* Using openRC user services at 'gui' runlevel for the following services with :
-** Break reminder to avoid eye strain- [swayeyes](https://git.sr.ht/~prabuanand/swayeyes)
-** Audio stack - [Pipewire](https://pipewire.org/)
-** Day/night gamma adjustments for Wayland - [wlsunset](https://git.sr.ht/~kennylevinsen/wlsunset)
-* Wayland stack
-** For runtime directory (XDG_RUNTIME_DIR) [pam-rundir](https://jjacky.com/pam_rundir/)
-** Seat manager - [seatd](https://sr.ht/~kennylevinsen/seatd/)
-** Login manager - [greetd](https://sr.ht/~kennylevinsen/greetd/) with [gtkgreet](https://git.sr.ht/~kennylevinsen/gtkgreet) greeter.
 * privilege escalation - [doas](https://github.com/Duncaen/OpenDoas)
+* Using openRC user services at 'gui' runlevel for the following services with :
+  * Break reminder to avoid eye strain- [swayeyes](https://git.sr.ht/~prabuanand/swayeyes)
+  * Audio stack - [Pipewire](https://pipewire.org/)
+  * Day/night gamma adjustments for Wayland - [wlsunset](https://git.sr.ht/~kennylevinsen/wlsunset)
+* Wayland stack
+  * For runtime directory (XDG_RUNTIME_DIR) [pam-rundir](https://jjacky.com/pam_rundir/)
+  * Seat manager - [seatd](https://sr.ht/~kennylevinsen/seatd/)
+  * Login manager - [greetd](https://sr.ht/~kennylevinsen/greetd/) with [gtkgreet](https://git.sr.ht/~kennylevinsen/gtkgreet) greeter.
+  * Window manager - [Sway](https://swaywm.org/)
 
 ## Sway configuration
 
