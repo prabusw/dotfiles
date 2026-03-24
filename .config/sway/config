@@ -189,6 +189,7 @@ bindsym $mod+Shift+r resize set width 60
 bindsym $mod+F3 exec $scripts/toggle_wlsunset
 bindsym $mod+Shift+s exec $scripts/swayeyes toggle
 bindsym $mod+w exec firefox
+bindsym $mod+Shift+w exec "epiphany -i"
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
 bindsym Print exec $scripts/slurpshot
 
@@ -197,6 +198,7 @@ bindsym Print exec $scripts/slurpshot
 # ========================
 # assign [app_id="emacs"] 3
 assign [app_id="firefox"] 1
+assign [app_id="org.gnome.Epiphany"] 1
 assign [app_id="chromium"] 5
 assign [app_id="librewolf"] 6
 for_window [app_id="emacs"] move to workspace 3

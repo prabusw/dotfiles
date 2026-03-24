@@ -325,8 +325,8 @@ e.g. Sunday, September 17, 2000."
   ;; (org-directory (file-truename "/data/docs/prabu/Dropbox/org"))
   ;; (org-cite-global-bibliography '("/data/myhome/prabu/Dropbox/org/Resources/my_library.bib"))
   ;; (org-cite-csl-styles-dir '("~/Zotero/styles"))
-  (org-agenda-files '("/data/myhome/prabu/Dropbox/org/agenda"
-                      "/data/myhome/prabu/Dropbox/org/Resources/daily_journal.org"))
+  (org-agenda-files '("/data/myhome/prabu/org/agenda"
+                      "/data/myhome/prabu/org/Resources/daily_journal.org"))
   (org-log-done t)
   (org-todo-keywords '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
   (org-tag-alist '((:startgroup . nil)
@@ -368,7 +368,7 @@ e.g. Sunday, September 17, 2000."
   (interactive)
   (message "Publishing site...")
   ;; Note: Using the actual path we verified earlier
-  (shell-command "/data/myhome/prabu/Dropbox/org/my_hugo_site/scripts/publish_hugo_site.sh &"))
+  (shell-command "/data/myhome/prabu/org/my_hugo_site/scripts/publish_hugo_site.sh &"))
 
 (use-package org-roam
   :ensure t
@@ -377,7 +377,7 @@ e.g. Sunday, September 17, 2000."
   :custom
   (org-roam-v2-ack t)
   (org-roam-completion-everywhere t)
-  (org-roam-directory (file-truename "/data/myhome/prabu/Dropbox/org/Resources"))
+  (org-roam-directory (file-truename "/data/myhome/prabu/org/Resources"))
   (org-roam-dailies-directory ".")
   ;; Daily Template
   (org-roam-dailies-capture-templates
@@ -427,7 +427,17 @@ e.g. Sunday, September 17, 2000."
   :ensure t)
 ;;;; ox-hugo
 
+(defun my/ox-hugo-export-all-org-to-md ()
+  "Force export all Org-roam notes to Hugo Markdown."
+  (interactive)
+  (let ((org-export-with-broken-links t))
+    (dolist (org-file (directory-files-recursively org-roam-directory "\\.org$"))
+      (with-current-buffer (find-file-noselect org-file)
+        (message (format "[build] Exporting %s" org-file))
+        (org-hugo-export-wim-to-md :all-subtrees nil nil nil)))))
+
 (use-package ox-hugo
+  ;; uses /data/myhome/prabu/org/Resources/.dir-locals.el
   :ensure t   ;;Auto-install the package from Melpa
   :pin melpa  ;;`package-archives' should already have ("melpa" . "https://melpa.org/packages/")
   :after ox

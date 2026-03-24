@@ -3,23 +3,33 @@
 Dotfiles related to running SwayWM on Alpine Linux along with all the
 related tools listed below can be found in this repository.
 
-![ScreenShot](home/prabu/Screenshots/2024-08-25_21-02-19.png )
+![ScreenShot](Screenshots/2024-08-25_21-02-19.png )
+
+## OS level
+* Filesystem - [btrfs](https://docs.kernel.org/filesystems/btrfs.html)
+* Boot manager - [refind](https://www.rodsbooks.com/refind/)
+* Backup tool - [btrbk](https://digint.ch/btrbk/)
+* Automatic snapshot - a custom vibe coded script snapk for use with apk
+* Using openRC user services at 'gui' runlevel for the following services with :
+** Break reminder to avoid eye strain- [swayeyes](https://git.sr.ht/~prabuanand/swayeyes)
+** Audio stack - [Pipewire](https://pipewire.org/)
+** Day/night gamma adjustments for Wayland - [wlsunset](https://git.sr.ht/~kennylevinsen/wlsunset)
+* Wayland stack
+** For runtime directory (XDG_RUNTIME_DIR) [pam-rundir](https://jjacky.com/pam_rundir/)
+** Seat manager - [seatd](https://sr.ht/~kennylevinsen/seatd/)
+** Login manager - [greetd](https://sr.ht/~kennylevinsen/greetd/) with [gtkgreet](https://git.sr.ht/~kennylevinsen/gtkgreet) greeter.
+* privilege escalation - [doas](https://github.com/Duncaen/OpenDoas)
 
 ## Sway configuration
 
 SwayWM has been configured using the following tools:
-* Seat manager - [seatd](https://sr.ht/~kennylevinsen/seatd/)
 * Terminal - [foot](https://codeberg.org/dnkl/foot)
 * Notification daemon - [mako](https://github.com/emersion/mako)
-* Login manager - [greetd](https://sr.ht/~kennylevinsen/greetd/)
-* Greeter - [gtkgreet](https://git.sr.ht/~kennylevinsen/gtkgreet)
 * Locking tool - [swaylockd](https://github.com/jirutka/swaylockd)
 * Feed generator for swaybar - [i3blocks](https://vivien.github.io/i3blocks/) with custom [scripts](home/prabu/.config/sway/scripts/i3blocks)
+* Display time on swaybar - i3blocks uses [wayclock](home/prabu/.config/sway/scripts/i3blocks/wayclock), a custom vibe coded script in C
 * Launcher menu - [tofi](https://github.com/philj56/tofi)
-* screenshot tool - [slurpshot](https://github.com/de-arl/slurpshot)
 * Logout menu - [tofi-exit](home/prabu/.config/sway/scripts/tofi-exit) - a custom script based on [tofi](https://github.com/philj56/tofi)
-* File manager(s) - [nemo](https://github.com/linuxmint/nemo),[nnn](https://github.com/jarun/nnn)
-* privilege escalation - [doas](https://github.com/Duncaen/OpenDoas), [doasedit](usr/local/bin/doasedit) - a custom script using [pkexec](https://www.freedesktop.org/software/polkit/docs/latest/pkexec.1.html)
 * power management tool - [powerctl](https://sr.ht/~sircmpwn/powerctl/)
 
 To achieve consistent nord theme:
@@ -28,18 +38,14 @@ To achieve consistent nord theme:
 * Firefox - Uses custom userChrome.css based on [KeyFox](https://github.com/alfaaarex/keyfox)
 * Theme switching - [toggle_theme](home/prabu/.config/sway/scripts/toggle_theme) - a custom script is used to toggle dark/light mode
 
-## Other tools used
 
-* Filesystem - [btrfs](https://docs.kernel.org/filesystems/btrfs.html)
-* Boot manager - [refind](https://www.rodsbooks.com/refind/)
-* Backup tool - [btrbk](https://digint.ch/btrbk/)
-* Automatic snapshot - [apk-snap](https://gitlab.com/papiris/apk-snap), a tool for apk using [snapper](http://snapper.io/)
+## Other tools used
+* File manager(s) - [nemo](https://github.com/linuxmint/nemo),[nnn](https://github.com/jarun/nnn)
 * Editor - [emacs](https://www.gnu.org/software/emacs/)
 * Shell - [fish](https://fishshell.com/)
 * epub reader - [foliate](https://johnfactotum.github.io/foliate/)
 * pdf reader - [evince](https://wiki.gnome.org/Apps/Evince)
-* Break reminder to avoid eye strain- [swayeyes](https://git.sr.ht/~prabuanand/swayeyes)
-* Display time on swaybar - i3blocks uses [wayclock](home/prabu/.config/sway/scripts/i3blocks/wayclock), a custom vibe coded script in C
+* screenshot tool - [slurpshot](https://github.com/de-arl/slurpshot)
 
 ## Tracking dotfiles using a bare git repository
 
