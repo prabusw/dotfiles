@@ -11,7 +11,7 @@ related tools listed below can be found in this repository.
 * Backup tool - [btrbk](https://digint.ch/btrbk/)
 * Automatic snapshot - a custom vibe coded script snapk for use with apk
 * privilege escalation - [doas](https://github.com/Duncaen/OpenDoas)
-* Using openRC user services at 'gui' runlevel for the following services with :
+* Using openRC user services at 'gui' runlevel for the following services:
   * Break reminder to avoid eye strain- [swayeyes](https://git.sr.ht/~prabuanand/swayeyes)
   * Audio stack - [Pipewire](https://pipewire.org/)
   * Day/night gamma adjustments for Wayland - [wlsunset](https://git.sr.ht/~kennylevinsen/wlsunset)
