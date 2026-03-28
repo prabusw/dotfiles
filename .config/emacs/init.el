@@ -13,12 +13,18 @@
   (interactive "f")
   "Load a file in current user's configuration directory"
   (load-file (expand-file-name file user-init-dir)))
-;; https://www.reddit.com/r/emacs/comments/o6do4k/enabling_a_minor_mode_only_in_files_that_are_in_a/
-;; (setq enable-local-variables :all)
 
-;; https://www.emacswiki.org/emacs/LoadPath
-(add-to-list 'load-path "~/.emacs.d/lisp/")
-;; (add-to-list 'load-path user-init-dir/lisp)
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "better-defaults" user-emacs-directory))
+
+;;;; better-defaults
+;; Found about better-defaults from
+;; https://git.sr.ht/~technomancy/better-defaults
+(use-package better-defaults
+  :ensure nil
+  :init
+  (require 'better-defaults)
+  )
 ;;;; Backup settings
 ;; Based on https://git.sr.ht/~technomancy/better-defaults
 (setq backup-directory-alist `(("." . ,(concat user-emacs-directory
@@ -90,13 +96,6 @@
 ;; (set-face-attribute 'default nil :font "Roboto Mono-13" )
 (set-face-attribute 'default nil :font "Hack-13" )
 
-
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-(setq display-line-numbers-type 'relative)
-
-;; To make Tab-width consistent with all OS as per "Learning Emacs" 3rd Edition pg175
-(setq-default tab-width 4)
-
 ;;;; Transparency
 
 (setq window-divider-default-places t)
@@ -123,15 +122,6 @@
 (setq initial-scratch-message "")
 ;; (setq initial-buffer-choice "/home/prabu/newfile.txt")
 (setq initial-major-mode 'fundamental-mode)
-
-;;;; better-defaults
-;; Found about better-defaults from
-;; https://git.sr.ht/~technomancy/better-defaults
-(use-package better-defaults
-  :load-path "better-defaults"
-  :init
-  (require 'better-defaults)
-  )
 
 ;;;; theme
 (use-package nord-theme
@@ -177,19 +167,19 @@ e.g. Sunday, September 17, 2000."
 ;; 			   (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
 
 ;; Define a reusable function for general programming mode setup
+
 (defun my-programming-setup ()
-  "Sets up common features for programming modes, including indentation and column display."
-  (setq-local tab-width 4)
-  (setq-local indent-tabs-mode t)
-  (column-number-mode 1))
+  "General settings for ALL programming modes"
+  (display-line-numbers-mode 1)
+  (setq-local display-line-numbers-type 'relative)
+  ;; The below two disabled as they break PEP
+  ;; (setq-local tab-width 4)
+  ;; (setq-local indent-tabs-mode t)
+  )
+;; Apply this to every programming language automatically
+(add-hook 'prog-mode-hook #'my-programming-setup)
 
-;; Define a function for sh-mode specific settings, which also calls the general setup
-(defun my-sh-mode-setup ()
-  "Setup for `sh-mode` that applies a specific offset after general programming setup."
-  (my-programming-setup)
-  (setq-local sh-basic-offset 4))
 ;;; packages
-
 ;;;; helpful
 ;; https://github.com/jeffkreeftmeijer/.emacs.d/blob/main/emacs-configuration.org
 (use-package helpful
@@ -319,6 +309,8 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :custom
   (org-return-follows-link t) ;;Allows links to be opened without C-c C-o in emacs
+  (org-cycle-emulate-tab t)
+  (org-tab-first-arg 'check-indent)
   ;; Use ONLY ONE of the below:
   (org-id-link-to-org-use-id t) ;; Adds properties to record org ID's to non-roam files too
   ;; (org-id-link-to-org-use-id 'use-existing) ;; doesn't add ID, so links break, if file renamed
@@ -484,7 +476,6 @@ e.g. Sunday, September 17, 2000."
               (setq mode-name "Python-TS")   ;; Set custom mode name for python-ts-mode
               ;; Ensure proper indentation in `python-ts-mode`
               (setq python-indent-offset 4)  ;; Use 4 spaces for indentation (PEP 8)
-              (setq tab-width 4)            ;; Set tab width to 4
               (electric-indent-local-mode 1)))) ;; Enable automatic indentation
 
 (use-package pet
@@ -531,7 +522,7 @@ e.g. Sunday, September 17, 2000."
              ("M-p" . flymake-goto-prev-error)
              ("<f2>" . flymake-show-buffer-diagnostics)
   ))
-
+;;;; corfu
 (use-package corfu
   :ensure t
   :if (display-graphic-p)
@@ -556,26 +547,31 @@ e.g. Sunday, September 17, 2000."
         (left-fringe . 8)
         (right-fringe . 8)))
   )
-
 ;;;; cape
 ;; Provides in-buffer drop-down completion
+(defun my-cape-keyword-setup ()
+  "Add keyword completion to the current buffer."
+  (add-to-list 'completion-at-point-functions #'cape-keyword t))
+
 (use-package cape
   :ensure t
+  :bind ("C-c p f" . cape-file)
   :init
-  ;; Add to the global completion list
-  (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-keyword))
-
-;;;; aports
+  :hook (prog-mode . my-cape-keyword-setup)
+  )
+;;;; shell scripts
+(defun my-sh-mode-setup ()
+  "Specific settings for shell scripts."
+  ;; sh-mode-hook inherits prog-mode-hook!
+  (setq-local sh-basic-offset 4)
+  (setq-local indent-tabs-mode t)
+  (setq-local tab-width 4)
+  )
 ;; Use custom function if sh-mode is activated anywhere
-(add-hook 'sh-mode-hook 'my-sh-mode-setup)
-;; Use a directory-local file (`.dir-locals.el`) to activate these settings
-;; automatically in the aports project directory. The .dir-locals.el file should
-;; be placed at the root of the aports tree with the following content:
-;; ((nil . ((mode . sh))))
-;; Earlier i used the following approach to use tabs for indentation in APKBUILD files
-;; (add-to-list 'auto-mode-alist '("APKBUILD\\'" . sh-mode))
+(add-hook 'sh-mode-hook #'my-sh-mode-setup)
+;; Ensure APKBUILD files open in sh-mode so the hook above triggers
+(add-to-list 'auto-mode-alist '("APKBUILD\\'" . sh-mode))
 
 ;;;; Eglot
 ;; See: https://github.com/joaotavora/eglot.
@@ -659,33 +655,17 @@ e.g. Sunday, September 17, 2000."
   :bind (:map projectile-mode-map
               ("s-p" . projectile-command-map)
               ("C-c p" . projectile-command-map)))
-;;;;
+;;;; C / C++ Standard Configuration
 ;; https://github.com/ZachMassia/platformio-mode
 ;; https://nickgeorge.net/programming/platformio-emcas/
-;; Code from nickgeorge website converted by chatgpt
-;; Enable irony for all c++ files, and platformio-mode only
-;; when needed (platformio.ini present in project root).
-(defun my/c++-mode-setup ()
-  (when (derived-mode-p 'c++-mode)
-    (irony-mode)
-    (irony-eldoc)
-    (platformio-conditionally-enable)))
-
-;; (use-package irony-eldoc
-;;   :ensure t
-;;   )
-;; (use-package irony
-;;   :ensure t
-;;   :config
-;;   (add-hook 'irony-mode-hook 'irony-eldoc)
-;;   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-;;   (add-hook 'c++-mode-hook 'my/c++-mode-setup)
-;;   :init
-;;   (eval-after-load 'irony
-;;     '(progn
-;;        (define-key irony-mode-map [remap completion-at-point] 'irony-completion-at-point-async)
-;;        (define-key irony-mode-map [remap complete-symbol] 'irony-completion-at-point-async)))
-;;   )
+(defun my-c-common-setup ()
+  "Standardized settings for C-family languages."
+  ;; Standards: PEP 8 (Python) and modern C++ (LLVM/Google) prefer spaces.
+  ;; Install clangd or clang-extra-tools package for LSP features with eglot
+  (setq-local indent-tabs-mode nil)
+  (setq-local c-basic-offset 4) ; 4 is the modern industry standard
+  (eglot-ensure))
+(add-hook 'c-mode-common-hook #'my-c-common-setup)
 ;;;; Arduino
 (use-package arduino-mode
   :ensure t
@@ -694,9 +674,9 @@ e.g. Sunday, September 17, 2000."
 ;;;; platformio
 (use-package platformio-mode
   :ensure t
-  :hook (c++-mode . platformio-conditionally-enable)
+  :hook ((c-mode . platformio-conditionally-enable)
+         (c++-mode . platformio-conditionally-enable))
   )
-
 ;;;; rainbow-delimiters
 (use-package rainbow-delimiters
   :ensure t

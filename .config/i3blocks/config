@@ -38,7 +38,8 @@ full_text=" "
 # The below to be used for scale 1.25
 # min_width=640
 # The below to be used for scale 1
-min_width=800
+# min_width=800
+min_width=500
 align=center
 
 [backup]

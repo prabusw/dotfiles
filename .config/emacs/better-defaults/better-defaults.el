@@ -95,14 +95,14 @@
         ;; Below settings are set in orderless and ediff packages
         ;; completion-ignore-case t
         ;; ediff-window-setup-function 'ediff-setup-windows-plain
-        custom-file (expand-file-name "custom.el" user-emacs-directory))
-  (when (file-exists-p custom-file)
-    (load-file custom-file))
+        ;;       custom-file (expand-file-name "custom.el" user-emacs-directory))
+        ;; (when (file-exists-p custom-file)
+        ;;   (load-file custom-file))
 
   ;; (unless backup-directory-alist
   ;;   (setq backup-directory-alist `(("." . ,(concat user-emacs-directory
   ;;                                                  "backups")))))
+	)
   )
-
 (provide 'better-defaults)
 ;;; better-defaults.el ends here
