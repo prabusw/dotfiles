@@ -473,24 +473,54 @@ e.g. Sunday, September 17, 2000."
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))   ;; Remap python-mode to python-ts-mode
   (add-hook 'python-ts-mode-hook
             (lambda ()
-              (setq mode-name "Python-TS")   ;; Set custom mode name for python-ts-mode
-              ;; Ensure proper indentation in `python-ts-mode`
               (setq python-indent-offset 4)  ;; Use 4 spaces for indentation (PEP 8)
-              (electric-indent-local-mode 1)))) ;; Enable automatic indentation
+              )
+            )
+  )
+;;;;; Configure Eglot for Hybrid Speed
+;; This tells pylsp to provide intelligence but NOT formatting/linting.
+(with-eval-after-load 'eglot
+  (setq-default eglot-workspace-configuration
+                '((:pylsp :plugins (
+                           :autopep8 (:enabled :json-false)
+                           :yapf (:enabled :json-false)
+                           :pycodestyle (:enabled :json-false)
+                           :mccabe (:enabled :json-false)
+                           :flake8 (:enabled :json-false)
+                           :pylint (:enabled :json-false)))))
+  )
+
+(use-package ruff-format
+  :ensure t
+  :hook (python-base-mode . ruff-format-on-save-mode)
+  )
 
 (use-package pet
   :ensure t
   :config
-  (add-hook 'python-base-mode-hook 'pet-mode -10)
-  (add-hook 'python-mode-hook
+  ;; (add-hook 'python-base-mode-hook 'pet-mode -10)
+  (add-hook 'python-base-mode-hook 'pet-mode +1)
+  (add-hook 'beancount-mode-hook 'pet-mode +1)
+  (add-hook 'python-base-mode-hook
             (lambda ()
               (setq-local python-shell-interpreter (pet-executable-find "python")
                           python-shell-virtualenv-root (pet-virtualenv-root))
               (pet-eglot-setup)
               (eglot-ensure)
-              ))
+              )
+            )
+  (add-hook 'beancount-mode-hook
+            (lambda ()
+              ;; Use the current directory to find ledger files
+              (setq-local beancount-accounts-files
+                          (directory-files default-directory t "\\.beancount$"))
+              ;; Ensure flymake-bean-check uses the 'bean-check' inside your venv
+              (let ((venv-bin (expand-file-name "bin" (pet-virtualenv-root))))
+                (when (file-directory-p venv-bin)
+                  (setq-local exec-path (append (list venv-bin) exec-path))))
+              )
+            )
   )
-
 ;;;;; hide-mode-line
 
 ;; Hide the modeline for inferior python processes.  This is not a necessary
@@ -582,9 +612,6 @@ e.g. Sunday, September 17, 2000."
 (use-package eglot
   :ensure t
   :defer t
-  :hook
-  (python-mode . eglot-ensure)
-  (python-ts-mode . eglot-ensure)
   :config
   (with-eval-after-load 'eglot
     (add-hook 'eglot-managed-mode-hook
@@ -610,6 +637,7 @@ e.g. Sunday, September 17, 2000."
 ;;;; beancount
 (use-package beancount
   :commands beancount-mode
+  :mode ("\\.beancount\\'" . beancount-mode)
   :hook
   (beancount-mode . (lambda ()
                       (outline-minor-mode)
