@@ -10,8 +10,8 @@
         (t "~/.emacs.d/")))
 
 (defun load-user-file (file)
-  (interactive "f")
   "Load a file in current user's configuration directory"
+  (interactive "f")
   (load-file (expand-file-name file user-init-dir)))
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
@@ -60,22 +60,8 @@
   (package-install 'use-package)
   (use-package use-package-ensure
     :config  (setq use-package-always-ensure t)))
-
-;; ;;;; quelpa
-;; ;; Build and install your Emacs Lisp packages on-the-fly and directly
-;; ;; from source either locally or from remote sources
-
-;; ;; Install quelpa-use-package
-;; (quelpa
-;;  '(quelpa-use-package
-;;    :fetcher git
-;;    :url "https://github.com/quelpa/quelpa-use-package.git"))
-;; (require 'quelpa-use-package)
-
-
 ;;; settings
-;;;; Trailing whitespace and Tabs
-;; There are few custom functions related to Tabs
+;;;; Trailing whitespace
 ;; Remove trailing whitespace before saving
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;;;; smooth scrolling
@@ -116,11 +102,9 @@
 ;; Turn off the startup screen, splash screen and puts straight into
 ;; the scratch buffer to quickly type or paste in emacs instead of
 ;; standard emacs startpage
-(setq-default inhibit-startup-screen t)
-(setq inhibit-splash-screen t)
+(setq inhibit-startup-screen t)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
-;; (setq initial-buffer-choice "/home/prabu/newfile.txt")
 (setq initial-major-mode 'fundamental-mode)
 
 ;;;; theme
@@ -136,17 +120,17 @@
   "Insert string for the current time formatted like '2:34 PM'."
   (interactive)                 ; permit invocation in minibuffer
   ;; (insert (format-time-string "%-I:%M %p"))
-  (insert (format-time-string "%R"))
-)
+  (insert (format-time-string "%R")))
 
 (defun today ()
   "Insert string for today's date nicely formatted in American style,
 e.g. Sunday, September 17, 2000."
   (interactive)                 ; permit invocation in minibuffer
   ;; (insert (format-time-string "%A, %B %e, %Y"))
-  (insert (format-time-string "%F"))
-  )
+  (insert (format-time-string "%F")))
+
 (defun my/doasedit ()
+  "Re-open current file with doas (elevated) privileges."
   (interactive)
   (if (buffer-file-name)
       (let ((cursor-pos (point))
@@ -157,6 +141,7 @@ e.g. Sunday, September 17, 2000."
 
 ;; https://emacs.stackexchange.com/questions/77295/org-roam-case-insensitive-search
 (defun case-insensitive-org-roam-node-read (orig-fn &rest args)
+  "Make org-roam node search case-insensitive."
   (let ((completion-ignore-case t))
     (apply orig-fn args)))
 
@@ -192,67 +177,38 @@ e.g. Sunday, September 17, 2000."
    ("C-h k" . helpful-key)       ; Replace describe-key
    ("C-h x" . helpful-command))) ; Replace describe-command
 ;;;; ediff
+;; Define a function to quit ediff with a single 'q' press
 ;; Enhanced settings for ediff in Emacs
 (use-package ediff
   :config
-  ;; Split window horizontally for ediff
   (setq ediff-split-window-function 'split-window-horizontally
-        ;; Use a single frame for ediff
         ediff-window-setup-function 'ediff-setup-windows-plain
-        ;; Keep the cursor in the same position when scrolling in ediff
-        scroll-preserve-screen-position t
-        ;; Do not highlight all differences
-        ediff-highlight-all-diffs 'nil
-        ;; Make ediff diffing algorithm more aggressive
-        ediff-diff-options "-w"
-        ;; Auto-refine differences
-        ediff-auto-refine 'on
-        ;; Automatically merge non-conflicting changes
-        ediff-merge-split-window-function 'split-window-horizontally
-        ;; Show help messages in the echo area
-        ediff-show-clashes-only t
-        ;; Ignore whitespace differences
-        ediff-ignore-similar-regions t)
-
-  ;; Define a function to quit ediff with a single 'q' press
+        ediff-diff-options "-w")
   (defun my-ediff-quit-session ()
     (interactive)
     (ediff-quit 'no-confirm))
-
-  ;; Hook to set custom key bindings
   (add-hook 'ediff-keymap-setup-hook
             (lambda ()
-              (define-key ediff-mode-map (kbd "q") 'my-ediff-quit-session)))
-
-  :bind (
-         ;; Add any additional key bindings here if needed
-         )
-  )
-
+              (define-key ediff-mode-map (kbd "q") 'my-ediff-quit-session))))
 ;;;; outshine
 ;; Outshine brings Org Mode to the world outside of Org;; https://github.com/alphapapa/outshine
 
 (use-package outshine
-  ;; :quelpa (outshine :fetcher github :repo "alphapapa/outshine")
   :ensure t
   :diminish outline-minor-mode
   :commands outshine-hook-function
-  :hook (;;(outline-minor-mode . outshine-mode) ;;this command affected beancount
-         ;; (emacs-lisp-mode . outline-minor-mode))
-         (emacs-lisp-mode . outshine-mode))
+  :hook (emacs-lisp-mode . outshine-mode)
   :init
   (setq outshine-imenu-show-headlines-p nil))
-
-;; To use outshine hook with a major mode, alternate way or command is
-;; (add-hook 'emacs-lisp-mode-hook 'outshine-mode)
 
 ;;;; diminish
 ;; Diminished modes are minor modes with no modeline display
 (use-package diminish
-  ;; :quelpa
   :ensure t
   )
 ;;;; Vertico
+;; vertico, consult, marginalia, orderless, embark, corfu and cape
+;; together have replaced helm, company and org-rifle etc
 (use-package vertico
   :ensure t
   :init
@@ -299,24 +255,53 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :after (embark consult))
 
+;;;; corfu
+(use-package corfu
+  :ensure t
+  :if (display-graphic-p)
+  :custom
+  (corfu-auto t)                 ; Enable auto-completion
+  (corfu-auto-prefix 3)          ; Wait for 3 characters
+  (corfu-auto-delay 0.2)         ; Wait 0.2s
+  :bind (:map corfu-map
+              ("M-p" . corfu-popupinfo-scroll-down)
+              ("M-n" . corfu-popupinfo-scroll-up)
+              ("M-d" . corfu-popupinfo-toggle))
+  :init
+  (global-corfu-mode)
+  :config
+  ;; Enable the documentation popup
+  (corfu-popupinfo-mode 1)
+  ;; Visual tweaks for the documentation child-frame
+  (setq corfu-popupinfo-parameters
+      '((vertical-scroll-bars . nil)
+        (horizontal-scroll-bars . nil)
+        (inner-border-width . 1)
+        (left-fringe . 8)
+        (right-fringe . 8)))
+  )
+;;;; cape
+;; Provides in-buffer drop-down completion
+(defun my-cape-keyword-setup ()
+  "Add keyword completion to the current buffer."
+  (add-to-list 'completion-at-point-functions #'cape-keyword t))
+
+(use-package cape
+  :ensure t
+  :bind ("C-c p f" . cape-file)
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  :hook (prog-mode . my-cape-keyword-setup)
+  )
 ;;;; org mode
 ;; https://orgmode.org/worg/org-tutorials/orgtutorial_dto.html
 ;; https://www.reddit.com/r/emacs/comments/dv02lk/how_to_force_emacs_to_prefer_manually_installed/
 
 (use-package org
-  ;; :quelpa
-  ;; :pin gnu
   :ensure t
   :custom
   (org-return-follows-link t) ;;Allows links to be opened without C-c C-o in emacs
-  (org-cycle-emulate-tab t)
-  (org-tab-first-arg 'check-indent)
-  ;; Use ONLY ONE of the below:
   (org-id-link-to-org-use-id t) ;; Adds properties to record org ID's to non-roam files too
-  ;; (org-id-link-to-org-use-id 'use-existing) ;; doesn't add ID, so links break, if file renamed
-  ;; (org-directory (file-truename "/data/docs/prabu/Dropbox/org"))
-  ;; (org-cite-global-bibliography '("/data/myhome/prabu/Dropbox/org/Resources/my_library.bib"))
-  ;; (org-cite-csl-styles-dir '("~/Zotero/styles"))
   (org-agenda-files '("/data/myhome/prabu/org/agenda"
                       "/data/myhome/prabu/org/Resources/daily_journal.org"))
   (org-log-done t)
@@ -339,14 +324,9 @@ e.g. Sunday, September 17, 2000."
   (setq time-stamp-format "[%Y-%m-%d %a %H:%M:%S]")
   (add-hook 'org-mode-hook
             (lambda ()
-              (add-hook 'before-save-hook 'time-stamp nil t)))
-  ;; Undefine keys "C-c [" and "C-c ]" which expands the agenda list files
-  (add-hook 'org-mode-hook
-	        (lambda ()
-	          (org-defkey org-mode-map "\C-c[" 'undefined)
-	          (org-defkey org-mode-map "\C-c]" 'undefined))
-	        'append))
-
+              (add-hook 'before-save-hook 'time-stamp nil t)
+              (org-defkey org-mode-map "\C-c[" 'undefined)
+              (org-defkey org-mode-map "\C-c]" 'undefined))))
 ;;;; org-roam
 ;; Install and configure org-roam as per following sources
 ;; https://www.orgroam.com/manual.html and for dailies
@@ -359,7 +339,6 @@ e.g. Sunday, September 17, 2000."
   "Runs the graph gen, hugo build, and syncthing scan."
   (interactive)
   (message "Publishing site...")
-  ;; Note: Using the actual path we verified earlier
   (shell-command "/data/myhome/prabu/org/my_hugo_site/scripts/publish_hugo_site.sh &"))
 
 (use-package org-roam
@@ -411,8 +390,7 @@ e.g. Sunday, September 17, 2000."
             (lambda ()
               (setq org-id-extra-files (org-roam--list-files org-roam-directory))))
   (advice-add 'org-roam-node-read :around #'case-insensitive-org-roam-node-read)
-  (message "org-roam loaded")
-)
+  (message "org-roam loaded"))
 ;; #for ox-hugo# https://hugocisneros.com/org-config/#org-roam
 
 (use-package org-roam-ui
@@ -474,26 +452,17 @@ e.g. Sunday, September 17, 2000."
   (add-hook 'python-ts-mode-hook
             (lambda ()
               (setq python-indent-offset 4)  ;; Use 4 spaces for indentation (PEP 8)
-              )
-            )
-  )
-;;;;; Configure Eglot for Hybrid Speed
-;; This tells pylsp to provide intelligence but NOT formatting/linting.
-(with-eval-after-load 'eglot
-  (setq-default eglot-workspace-configuration
-                '((:pylsp :plugins (
-                           :autopep8 (:enabled :json-false)
-                           :yapf (:enabled :json-false)
-                           :pycodestyle (:enabled :json-false)
-                           :mccabe (:enabled :json-false)
-                           :flake8 (:enabled :json-false)
-                           :pylint (:enabled :json-false)))))
-  )
-
+              (setq-local eglot-workspace-configuration
+                        '((:pylsp :plugins
+                                  (:autopep8 (:enabled :json-false)
+                                   :yapf (:enabled :json-false)
+                                   :pycodestyle (:enabled :json-false)
+                                   :mccabe (:enabled :json-false)
+                                   :flake8 (:enabled :json-false)
+                                   :pylint (:enabled :json-false)))))))) ;; do not use pylsp for linting
 (use-package ruff-format
   :ensure t
-  :hook (python-base-mode . ruff-format-on-save-mode)
-  )
+  :hook (python-base-mode . ruff-format-on-save-mode))
 
 (use-package pet
   :ensure t
@@ -545,51 +514,12 @@ e.g. Sunday, September 17, 2000."
 
 (use-package flymake
   ;; https://www.gnu.org/software/emacs/manual/html_node/flymake/Finding-diagnostics.html
-  :config
   :bind(
         :map flymake-mode-map
              ("M-n" . flymake-goto-next-error)
              ("M-p" . flymake-goto-prev-error)
-             ("<f2>" . flymake-show-buffer-diagnostics)
-  ))
-;;;; corfu
-(use-package corfu
-  :ensure t
-  :if (display-graphic-p)
-  :custom
-  (corfu-auto t)                 ; Enable auto-completion
-  (corfu-auto-prefix 3)          ; Wait for 3 characters
-  (corfu-auto-delay 0.2)         ; Wait 0.2s
-  :bind (:map corfu-map
-              ("M-p" . corfu-popupinfo-scroll-down)
-              ("M-n" . corfu-popupinfo-scroll-up)
-              ("M-d" . corfu-popupinfo-toggle))
-  :init
-  (global-corfu-mode)
-  :config
-  ;; Enable the documentation popup
-  (corfu-popupinfo-mode 1)
-  ;; Visual tweaks for the documentation child-frame
-  (setq corfu-popupinfo-parameters
-      '((vertical-scroll-bars . nil)
-        (horizontal-scroll-bars . nil)
-        (inner-border-width . 1)
-        (left-fringe . 8)
-        (right-fringe . 8)))
-  )
-;;;; cape
-;; Provides in-buffer drop-down completion
-(defun my-cape-keyword-setup ()
-  "Add keyword completion to the current buffer."
-  (add-to-list 'completion-at-point-functions #'cape-keyword t))
+             ("<f2>" . flymake-show-buffer-diagnostics)))
 
-(use-package cape
-  :ensure t
-  :bind ("C-c p f" . cape-file)
-  :init
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  :hook (prog-mode . my-cape-keyword-setup)
-  )
 ;;;; shell scripts
 (defun my-sh-mode-setup ()
   "Specific settings for shell scripts."
@@ -608,31 +538,27 @@ e.g. Sunday, September 17, 2000."
 ;; https://www.adventuresinwhy.com/post/eglot/
 ;; In alpine installed py3-lsp-server, ruff-lsp and beancount-language-server
 ;; https://www.reddit.com/r/emacs/comments/106oq11/eglot_flymake_eldoc/
-  ;; https://www.reddit.com/r/emacs/comments/16fvmow/disable_eglotinlayhintsmode_in_every_buffer/
+;; https://www.reddit.com/r/emacs/comments/16fvmow/disable_eglotinlayhintsmode_in_every_buffer/
 (use-package eglot
   :ensure t
   :defer t
   :config
-  (with-eval-after-load 'eglot
-    (add-hook 'eglot-managed-mode-hook
-              (lambda ()
-                ;; Show flymake diagnostics first.
-                (setq eldoc-documentation-functions
-                      (cons #'flymake-eldoc-function
-                            (remove #'flymake-eldoc-function eldoc-documentation-functions)))
-                ;; Show all eldoc feedback.
-                (setq eldoc-documentation-strategy #'eldoc-documentation-compose))))
+  (add-hook 'eglot-managed-mode-hook
+            (lambda ()
+              ;; Show flymake diagnostics first.
+              (setq eldoc-documentation-functions
+                    (cons #'flymake-eldoc-function
+                          (remove #'flymake-eldoc-function eldoc-documentation-functions)))
+              ;; Show all eldoc feedback.
+              (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
   :bind(
         :map eglot-mode-map
              ("C-c r" . eglot-rename)
              ("C-c o" . eglot-code-action-organize-imports)
-             ("C-c h" . eldoc)
-             )
-  )
+             ("C-c h" . eldoc)))
 
 (use-package flymake-bean-check
-  :after flymake
-  )
+  :after flymake)
 
 ;;;; beancount
 (use-package beancount
@@ -640,12 +566,10 @@ e.g. Sunday, September 17, 2000."
   :mode ("\\.beancount\\'" . beancount-mode)
   :hook
   (beancount-mode . (lambda ()
+                      (setq-local electric-indent-chars nil)
                       (outline-minor-mode)
                       (flymake-mode) ; Enable flymake-mode here
-                      (flymake-bean-check-enable)
-                      ))
-  :config
-  (setq-local electric-indent-chars nil)
+                      (flymake-bean-check-enable)))
   :bind (:map beancount-mode-map
               ("C-c C-n" . outline-next-visible-heading)
               ("C-c C-p" . outline-previous-visible-heading)
@@ -653,36 +577,20 @@ e.g. Sunday, September 17, 2000."
               ("C-c C-b" . outline-backward-same-level)
               ("C-c C-f" . outline-forward-same-level)
               ("C-c C-a" . outline-show-all)
-              ([backtab] . beancount-outline-cycle)
-              ))
+              ([backtab] . beancount-outline-cycle)))
 
 ;;;; magit
-
 (use-package magit
-  ;; :quelpa (magit :fetcher github :repo "magit/magit")
   :ensure t
-  ;; :after
   :bind (
          ("C-x g" .	magit-status)
          ("C-x M-g"	. magit-dispatch)
-         ("C-c M-g"	. magit-file-dispatch)
-         )
-  )
-;;
+         ("C-c M-g"	. magit-file-dispatch)))
 
 ;;;; tree-sitter-module
 ;; https://www.adventuresinwhy.com/post/eglot/
 ;; https://github.com/casouri/tree-sitter-module
 
-;;;; projectile
-;; Needed for platformio-mode
-(use-package projectile
-  :ensure t
-  :init
-  (projectile-mode +1)
-  :bind (:map projectile-mode-map
-              ("s-p" . projectile-command-map)
-              ("C-c p" . projectile-command-map)))
 ;;;; C / C++ Standard Configuration
 ;; https://github.com/ZachMassia/platformio-mode
 ;; https://nickgeorge.net/programming/platformio-emcas/
@@ -695,16 +603,25 @@ e.g. Sunday, September 17, 2000."
   (eglot-ensure))
 (add-hook 'c-mode-common-hook #'my-c-common-setup)
 ;;;; Arduino
-(use-package arduino-mode
-  :ensure t
-  :mode ("\\.ino$" . arduino-mode)
-  )
+;; (use-package arduino-mode
+;;   :ensure t
+;;   :mode ("\\.ino$" . arduino-mode)
+;;   )
 ;;;; platformio
-(use-package platformio-mode
-  :ensure t
-  :hook ((c-mode . platformio-conditionally-enable)
-         (c++-mode . platformio-conditionally-enable))
-  )
+;; (use-package platformio-mode
+;;   :ensure t
+;;   :hook ((c-mode . platformio-conditionally-enable)
+;;          (c++-mode . platformio-conditionally-enable))
+;;   )
+;;;; projectile
+;; Needed for platformio-mode
+;; (use-package projectile
+;;   :ensure t
+;;   :init
+;;   (projectile-mode +1)
+;;   :bind (:map projectile-mode-map
+;;               ("s-p" . projectile-command-map)
+;;               ("C-c p" . projectile-command-map)))
 ;;;; rainbow-delimiters
 (use-package rainbow-delimiters
   :ensure t
