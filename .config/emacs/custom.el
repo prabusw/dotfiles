@@ -8,7 +8,13 @@
  '(custom-safe-themes
    '("5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64"
      default))
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(arduino-mode cape corfu diminish elfeed embark-consult helpful
+                  hide-mode-line live-py-mode magit marginalia
+                  markdown-mode nord-theme nov orderless org-noter
+                  org-noter-pdftools org-roam-ui org-transclusion
+                  outshine ox-hugo pet platformio-mode
+                  rainbow-delimiters ruff-format vertico))
  '(safe-local-variable-values '((org-hugo-auto-export-on-save . t))))
 
 (custom-set-faces

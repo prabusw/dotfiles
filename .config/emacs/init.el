@@ -414,6 +414,7 @@ e.g. Sunday, September 17, 2000."
   :config
   (setq org-hugo-auto-set-lastmod t)
   (setq org-hugo-export-with-section-modified-time t)
+  (setq org-hugo-allow-all-export-keywords t)
   ;; (citeproc-org-org-bib-header "* Bibliography\n<ol class=\"biblio-list\">")
   ;; (citeproc-org-org-bib-footer "</ol>")
 )
@@ -428,6 +429,10 @@ e.g. Sunday, September 17, 2000."
   ;;  :leader
   ;;  :prefix "n"
   ;;  :desc "Org Transclusion Mode" "t" #'org-transclusion-mode)
+  )
+;;;; org-noter
+(use-package org-noter
+  :ensure t
   )
 ;;;; markdown-Mode
 ;; Installed markdown package in the OS for preview
