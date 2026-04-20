@@ -53,7 +53,7 @@ signal_i3blocks() {
 # Check if Sway is running and set SWAYSOCK
 setup_sway() {
     if [ -z "$SWAYSOCK" ]; then
-        SWAYSOCK=$(find /run/user/$(id -u) -type s -name 'sway-ipc.*' 2>/dev/null | head -n 1)
+        SWAYSOCK=$(find "$RUNTIME_DIR" -type s -name 'sway-ipc.*' 2>/dev/null | head -n 1)
         export SWAYSOCK
     fi
 
