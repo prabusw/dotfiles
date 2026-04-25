@@ -439,6 +439,8 @@ e.g. Sunday, September 17, 2000."
 (use-package markdown-mode
   :ensure t
   )
+
+
 ;;;; python IDE
 ;; Current IDE uses emacs packages Python,hide-mode-line,live-py-mode,flymake,Company, Eglot
 ;; Eglot connects to python-lsp and ruff
@@ -547,7 +549,16 @@ e.g. Sunday, September 17, 2000."
 (use-package eglot
   :ensure t
   :defer t
+  :hook ((html-mode . eglot-ensure)
+         (mhtml-mode . eglot-ensure))
+  :bind(
+        :map eglot-mode-map
+             ("C-c r" . eglot-rename)
+             ("C-c o" . eglot-code-action-organize-imports)
+             ("C-c h" . eldoc))
   :config
+  (add-to-list 'eglot-server-programs
+               '((html-mode mhtml-mode) . ("superhtml" "lsp")))
   (add-hook 'eglot-managed-mode-hook
             (lambda ()
               ;; Show flymake diagnostics first.
@@ -556,11 +567,7 @@ e.g. Sunday, September 17, 2000."
                           (remove #'flymake-eldoc-function eldoc-documentation-functions)))
               ;; Show all eldoc feedback.
               (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
-  :bind(
-        :map eglot-mode-map
-             ("C-c r" . eglot-rename)
-             ("C-c o" . eglot-code-action-organize-imports)
-             ("C-c h" . eldoc)))
+  )
 
 (use-package flymake-bean-check
   :after flymake)

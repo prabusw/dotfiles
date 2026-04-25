@@ -63,3 +63,7 @@ fi
 
 # Set ENV to point to shell config file for BusyBox Ash
 export ENV="$HOME/.ashrc" #
+
+if [ "$(tty)" = "/dev/tty1" ]; then
+     exec SwayWM
+fi
