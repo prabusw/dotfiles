@@ -3,3 +3,6 @@ update-cache
 add /data/audio/tamil
 set output_plugin=alsa
 set softvol=true
+set replaygain=track
+# set replaygain_limit=true
+# set replaygain_preamp=0

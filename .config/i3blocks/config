@@ -36,10 +36,11 @@ signal=4
 [spaceblock]
 full_text=" "
 # The below to be used for scale 1.25
-# min_width=640
+min_width=640
 # The below to be used for scale 1
 # min_width=800
-min_width=500
+# min_width=500
+# min_width=350
 align=center
 
 [backup]

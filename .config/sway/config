@@ -55,7 +55,7 @@ output HDMI-A-1 {
        # Set the resolution and refresh rate
        mode 1920x1080@99.999Hz
        # Use 'scale' only if you are *not* using a background image with fill
-       # scale 1.25
+       scale 1.25
 }
 
 # ========================

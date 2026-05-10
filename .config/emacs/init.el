@@ -1,6 +1,5 @@
 ;;; init.el -*- lexical-binding: t; -*-
-;;; initialization
-;;;; files and folders
+
 ;; https://stackoverflow.com/questions/2079095/how-to-modularize-an-emacs-configuration/2079146
 (defconst user-init-dir
   (cond ((boundp 'user-emacs-directory)
@@ -17,15 +16,12 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "better-defaults" user-emacs-directory))
 
-;;;; better-defaults
-;; Found about better-defaults from
-;; https://git.sr.ht/~technomancy/better-defaults
 (use-package better-defaults
   :ensure nil
   :init
   (require 'better-defaults)
   )
-;;;; Backup settings
+
 ;; Based on https://git.sr.ht/~technomancy/better-defaults
 (setq backup-directory-alist `(("." . ,(concat user-emacs-directory
                                                "backups"))))
@@ -35,7 +31,6 @@
 (setq backup-by-copying t)
 (setq create-lockfiles nil)         ;; Prevents .# creation
 
-;;;; package sources
 ; Define the package archives
 (setq package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
@@ -47,33 +42,28 @@
 ;; Initialize the package system
 (package-initialize)
 
-;;;; use-package
-;; The original code snippet for use-package based
-;; https://ianyepan.github.io/posts/setting-up-use-package/ Later
-;; modified based on https://github.com/jwiegley/use-package ,
-;; https://github.com/kingcons/dotemacs/blob/master/init.el and
-;; currently based on https://framagit.org/steckerhalter/steckemacs.el
-
 (unless (require 'use-package nil t)
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install 'use-package)
   (use-package use-package-ensure
     :config  (setq use-package-always-ensure t)))
-;;; settings
-;;;; Trailing whitespace
+
+(defmacro use-feature (name &rest args)
+  "Like `use-package' but for built-in features (sets :ensure nil).
+NAME and ARGS as in `use-package'."
+  (declare (indent defun))
+  `(use-package ,name
+     :ensure nil
+     ,@args))
+
 ;; Remove trailing whitespace before saving
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
-;;;; smooth scrolling
 
+;;https://batsov.com/articles/2021/12/19/building-emacs-from-source-with-pgtk/
 (pixel-scroll-precision-mode)
 
-;; https://batsov.com/articles/2021/12/19/building-emacs-from-source-with-pgtk/
-
-;;;; Enable column number mode
 (column-number-mode 1)
-
-;;;; consistency
 
 ;; To change default font or size in Emacs https://stackoverflow.com/questions/294664/how-to-set-the-font-size-in-emacs
 ;; (set-face-attribute 'default nil :height 130)
@@ -81,8 +71,6 @@
 ;; (set-face-attribute 'default nil :font "Hack-13:embolden=true" )
 ;; (set-face-attribute 'default nil :font "Roboto Mono-13" )
 (set-face-attribute 'default nil :font "Hack-13" )
-
-;;;; Transparency
 
 (setq window-divider-default-places t)
 (set-face-background 'internal-border (face-background 'default))
@@ -98,7 +86,6 @@
 
 (global-set-key (kbd "C-c t") 'toggle-transparency)
 
-;;;; scratch buffer
 ;; Turn off the startup screen, splash screen and puts straight into
 ;; the scratch buffer to quickly type or paste in emacs instead of
 ;; standard emacs startpage
@@ -107,14 +94,12 @@
 (setq initial-scratch-message "")
 (setq initial-major-mode 'fundamental-mode)
 
-;;;; theme
 (use-package nord-theme
   :ensure t
   :init
   (setq nord-region-highlight "frost")
   :config
   (load-theme 'nord t))
-;;;; custom functions
 
 (defun now ()
   "Insert string for the current time formatted like '2:34 PM'."
@@ -151,6 +136,7 @@ e.g. Sunday, September 17, 2000."
 ;; 			   (message (format "[build] Exporting %s" org-file))
 ;; 			   (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
 
+
 ;; Define a reusable function for general programming mode setup
 
 (defun my-programming-setup ()
@@ -164,8 +150,6 @@ e.g. Sunday, September 17, 2000."
 ;; Apply this to every programming language automatically
 (add-hook 'prog-mode-hook #'my-programming-setup)
 
-;;; packages
-;;;; helpful
 ;; https://github.com/jeffkreeftmeijer/.emacs.d/blob/main/emacs-configuration.org
 (use-package helpful
   :ensure t
@@ -176,10 +160,10 @@ e.g. Sunday, September 17, 2000."
    ("C-h v" . helpful-variable)  ; Replace describe-variable
    ("C-h k" . helpful-key)       ; Replace describe-key
    ("C-h x" . helpful-command))) ; Replace describe-command
-;;;; ediff
+
 ;; Define a function to quit ediff with a single 'q' press
 ;; Enhanced settings for ediff in Emacs
-(use-package ediff
+(use-feature ediff
   :config
   (setq ediff-split-window-function 'split-window-horizontally
         ediff-window-setup-function 'ediff-setup-windows-plain
@@ -190,7 +174,7 @@ e.g. Sunday, September 17, 2000."
   (add-hook 'ediff-keymap-setup-hook
             (lambda ()
               (define-key ediff-mode-map (kbd "q") 'my-ediff-quit-session))))
-;;;; outshine
+
 ;; Outshine brings Org Mode to the world outside of Org;; https://github.com/alphapapa/outshine
 
 (use-package outshine
@@ -201,14 +185,11 @@ e.g. Sunday, September 17, 2000."
   :init
   (setq outshine-imenu-show-headlines-p nil))
 
-;;;; diminish
 ;; Diminished modes are minor modes with no modeline display
 (use-package diminish
   :ensure t
   )
-;;;; Vertico
-;; vertico, consult, marginalia, orderless, embark, corfu and cape
-;; together have replaced helm, company and org-rifle etc
+
 (use-package vertico
   :ensure t
   :init
@@ -255,7 +236,6 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   :after (embark consult))
 
-;;;; corfu
 (use-package corfu
   :ensure t
   :if (display-graphic-p)
@@ -280,7 +260,7 @@ e.g. Sunday, September 17, 2000."
         (left-fringe . 8)
         (right-fringe . 8)))
   )
-;;;; cape
+
 ;; Provides in-buffer drop-down completion
 (defun my-cape-keyword-setup ()
   "Add keyword completion to the current buffer."
@@ -293,12 +273,8 @@ e.g. Sunday, September 17, 2000."
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   :hook (prog-mode . my-cape-keyword-setup)
   )
-;;;; org mode
-;; https://orgmode.org/worg/org-tutorials/orgtutorial_dto.html
-;; https://www.reddit.com/r/emacs/comments/dv02lk/how_to_force_emacs_to_prefer_manually_installed/
 
-(use-package org
-  :ensure t
+(use-feature org
   :custom
   (org-return-follows-link t) ;;Allows links to be opened without C-c C-o in emacs
   (org-id-link-to-org-use-id t) ;; Adds properties to record org ID's to non-roam files too
@@ -311,7 +287,11 @@ e.g. Sunday, September 17, 2000."
                    ("@errands" . ?e)
                    (:endgroup . nil)
                    ("@computer" . ?c) ("@phone" . ?p) ("@reading" . ?r)))
-  :bind (
+  (org-structure-template-alist '(("el" . "src emacs-lisp")
+                                   ("s" . "src")
+                                   ("e" . "example")
+                                   ("q" . "quote")))
+ :bind (
          ("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c c" . org-capture)
@@ -326,14 +306,16 @@ e.g. Sunday, September 17, 2000."
             (lambda ()
               (add-hook 'before-save-hook 'time-stamp nil t)
               (org-defkey org-mode-map "\C-c[" 'undefined)
-              (org-defkey org-mode-map "\C-c]" 'undefined))))
-;;;; org-roam
-;; Install and configure org-roam as per following sources
-;; https://www.orgroam.com/manual.html and for dailies
-;; https://www.orgroam.com/manual.html#org_002droam_002ddailies
-;; https://lucidmanager.org/productivity/taking-notes-with-emacs-org-mode-and-org-roam/
-;; https://systemcrafters.net/build-a-second-brain-in-emacs/keep-a-journal/
-;; https://org-roam.discourse.group/t/how-to-put-all-the-org-roam-dailies-in-one-file-with-a-date-tree-structure/1561/2
+              (org-defkey org-mode-map "\C-c]" 'undefined)
+              (electric-indent-local-mode -1)
+              (when (string-equal buffer-file-name
+                                (expand-file-name "20260510115218-emacs_config_file.org"
+                                                  org-roam-directory))
+              (add-hook 'after-save-hook #'org-babel-tangle nil t)))))
+
+(use-feature org-tempo
+  :after org)
+
 ;; --- Custom Helper Functions ---
 (defun my/org-roam-publish-site ()
   "Runs the graph gen, hugo build, and syncthing scan."
@@ -353,8 +335,10 @@ e.g. Sunday, September 17, 2000."
   ;; Daily Template
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
-      "* %?\n:PROPERTIES:\n:CONTEXT: %a\n:END:"
-      :target (file+datetree "daily_journal.org" day))));;either day|week|month is allowed
+      "* %^{Title}\n%?"
+      :target (file+datetree "daily_journal.org" day)
+      :empty-lines 1
+      :no-id t)));;either day|week|month is allowed
   :bind
   (("C-c n f" . org-roam-node-find)
    ("C-c n r" . org-roam-node-random)
@@ -368,23 +352,24 @@ e.g. Sunday, September 17, 2000."
    ("C-c n a" . org-roam-alias-add)
    ("C-c n l" . org-roam-buffer-toggle)
    ("C-M-i" . completion-at-point))
-  :bind-keymap
-  ("C-c n d" . org-roam-dailies-map);; To use C-c n d Y or C-c n d T
   :config
   (require 'org-roam-dailies)
+  (global-set-key (kbd "C-c n d") org-roam-dailies-map)
   ;; Dailies Keymap definitions
   (define-key org-roam-dailies-map (kbd "Y") #'org-roam-dailies-capture-yesterday)
   (define-key org-roam-dailies-map (kbd "T") #'org-roam-dailies-capture-tomorrow)
   ;; Notes Template
   (setq org-roam-capture-templates
-      '(("d" "default" plain
-         "%?"
-         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n#+date: %<%Y-%m-%dT%H:%M:%S%:z>\n#+filetags: :draft:\n")
-         :unnarrowed t)))
+        '(("d" "default" plain
+           "%?"
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+date: %<%Y-%m-%dT%H:%M:%S%:z>\n#+filetags: :draft:\n")
+           :unnarrowed t)))
   ;; org-Roam Database and Sync
   (org-roam-db-autosync-mode)
   (setq org-id-extra-files (org-roam--list-files org-roam-directory))
+  (setq org-roam-db-node-include-function
+        (lambda () (= (org-outline-level) 0)))
   ;; Refresh the list automatically whenever node is changed or saved
   (add-hook 'org-roam-db-sync-hook
             (lambda ()
@@ -395,7 +380,6 @@ e.g. Sunday, September 17, 2000."
 
 (use-package org-roam-ui
   :ensure t)
-;;;; ox-hugo
 
 (defun my/ox-hugo-export-all-org-to-md ()
   "Force export all Org-roam notes to Hugo Markdown."
@@ -418,7 +402,7 @@ e.g. Sunday, September 17, 2000."
   ;; (citeproc-org-org-bib-header "* Bibliography\n<ol class=\"biblio-list\">")
   ;; (citeproc-org-org-bib-footer "</ol>")
 )
-;;;; org-transclusion
+
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
   ;; :config
@@ -430,29 +414,17 @@ e.g. Sunday, September 17, 2000."
   ;;  :prefix "n"
   ;;  :desc "Org Transclusion Mode" "t" #'org-transclusion-mode)
   )
-;;;; org-noter
+
 (use-package org-noter
   :ensure t
   )
-;;;; markdown-Mode
+
 ;; Installed markdown package in the OS for preview
 (use-package markdown-mode
   :ensure t
   )
 
-
-;;;; python IDE
-;; Current IDE uses emacs packages Python,hide-mode-line,live-py-mode,flymake,Company, Eglot
-;; Eglot connects to python-lsp and ruff
-;; https://gitlab.com/nathanfurnal/dotemacs/-/snippets/2060535
-;; https://robbmann.io/emacsd/#language-specific-major-modes
-;; python-mode is the builtin major-mode for the Python language.
-;; https://www.adventuresinwhy.com/post/eglot/
-;; https://stackoverflow.com/questions/1259873/how-can-i-use-emacs-flymake-mode-for-python-with-pyflakes-and-pylint-checking-co
-;;;;; Python
-;; Using inbuilt python.el. Other alternates are python-mode, elpy etc..
-
-(use-package python
+(use-feature python
   :config
   (setq python-indent-guess-indent-offset-verbose nil)   ;; Remove guess indent python message
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))   ;; Remap python-mode to python-ts-mode
@@ -467,6 +439,7 @@ e.g. Sunday, September 17, 2000."
                                    :mccabe (:enabled :json-false)
                                    :flake8 (:enabled :json-false)
                                    :pylint (:enabled :json-false)))))))) ;; do not use pylsp for linting
+
 (use-package ruff-format
   :ensure t
   :hook (python-base-mode . ruff-format-on-save-mode))
@@ -497,7 +470,6 @@ e.g. Sunday, September 17, 2000."
               )
             )
   )
-;;;;; hide-mode-line
 
 ;; Hide the modeline for inferior python processes.  This is not a necessary
 ;; package but it's helpful to make better use of the screen real-estate at our
@@ -508,18 +480,12 @@ e.g. Sunday, September 17, 2000."
   :hook (inferior-python-mode . hide-mode-line-mode)
   )
 
-;;;;; live-py-mode
 ;; https://github.com/donkirkby/live-py-plugin
 (use-package live-py-mode
   :ensure t
   )
 
-;; The configuration related to Python has ended with the above line.
-
-;;;; flymake
-;; This package is inbuilt within emacs
-
-(use-package flymake
+(use-feature flymake
   ;; https://www.gnu.org/software/emacs/manual/html_node/flymake/Finding-diagnostics.html
   :bind(
         :map flymake-mode-map
@@ -527,7 +493,6 @@ e.g. Sunday, September 17, 2000."
              ("M-p" . flymake-goto-prev-error)
              ("<f2>" . flymake-show-buffer-diagnostics)))
 
-;;;; shell scripts
 (defun my-sh-mode-setup ()
   "Specific settings for shell scripts."
   ;; sh-mode-hook inherits prog-mode-hook!
@@ -540,14 +505,7 @@ e.g. Sunday, September 17, 2000."
 ;; Ensure APKBUILD files open in sh-mode so the hook above triggers
 (add-to-list 'auto-mode-alist '("APKBUILD\\'" . sh-mode))
 
-;;;; Eglot
-;; See: https://github.com/joaotavora/eglot.
-;; https://www.adventuresinwhy.com/post/eglot/
-;; In alpine installed py3-lsp-server, ruff-lsp and beancount-language-server
-;; https://www.reddit.com/r/emacs/comments/106oq11/eglot_flymake_eldoc/
-;; https://www.reddit.com/r/emacs/comments/16fvmow/disable_eglotinlayhintsmode_in_every_buffer/
-(use-package eglot
-  :ensure t
+(use-feature eglot
   :defer t
   :hook ((html-mode . eglot-ensure)
          (mhtml-mode . eglot-ensure))
@@ -572,7 +530,6 @@ e.g. Sunday, September 17, 2000."
 (use-package flymake-bean-check
   :after flymake)
 
-;;;; beancount
 (use-package beancount
   :commands beancount-mode
   :mode ("\\.beancount\\'" . beancount-mode)
@@ -591,7 +548,6 @@ e.g. Sunday, September 17, 2000."
               ("C-c C-a" . outline-show-all)
               ([backtab] . beancount-outline-cycle)))
 
-;;;; magit
 (use-package magit
   :ensure t
   :bind (
@@ -599,13 +555,6 @@ e.g. Sunday, September 17, 2000."
          ("C-x M-g"	. magit-dispatch)
          ("C-c M-g"	. magit-file-dispatch)))
 
-;;;; tree-sitter-module
-;; https://www.adventuresinwhy.com/post/eglot/
-;; https://github.com/casouri/tree-sitter-module
-
-;;;; C / C++ Standard Configuration
-;; https://github.com/ZachMassia/platformio-mode
-;; https://nickgeorge.net/programming/platformio-emcas/
 (defun my-c-common-setup ()
   "Standardized settings for C-family languages."
   ;; Standards: PEP 8 (Python) and modern C++ (LLVM/Google) prefer spaces.
@@ -614,19 +563,18 @@ e.g. Sunday, September 17, 2000."
   (setq-local c-basic-offset 4) ; 4 is the modern industry standard
   (eglot-ensure))
 (add-hook 'c-mode-common-hook #'my-c-common-setup)
-;;;; Arduino
+
 ;; (use-package arduino-mode
 ;;   :ensure t
 ;;   :mode ("\\.ino$" . arduino-mode)
 ;;   )
-;;;; platformio
+
 ;; (use-package platformio-mode
 ;;   :ensure t
 ;;   :hook ((c-mode . platformio-conditionally-enable)
 ;;          (c++-mode . platformio-conditionally-enable))
 ;;   )
-;;;; projectile
-;; Needed for platformio-mode
+
 ;; (use-package projectile
 ;;   :ensure t
 ;;   :init
@@ -634,19 +582,17 @@ e.g. Sunday, September 17, 2000."
 ;;   :bind (:map projectile-mode-map
 ;;               ("s-p" . projectile-command-map)
 ;;               ("C-c p" . projectile-command-map)))
-;;;; rainbow-delimiters
+
 (use-package rainbow-delimiters
   :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
-;;;; TRAMP
-(use-package tramp
+
+(use-feature tramp
   :defer t
   :config
   (setq tramp-auto-save-directory (expand-file-name "tramp-autosave" user-emacs-directory)
-        password-cache-expiry 3600)
-  )
+        password-cache-expiry 3600))
 
-;;;; custom
 ;; Redirect the "Custom" stuff to a separate file
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
