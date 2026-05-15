@@ -72,6 +72,13 @@ NAME and ARGS as in `use-package'."
 ;; (set-face-attribute 'default nil :font "Roboto Mono-13" )
 (set-face-attribute 'default nil :font "Hack-13" )
 
+;; (advice-add 'ispell-completion-at-point :override #'ignore)
+(with-eval-after-load 'ispell
+  (setq ispell-program-name "hunspell")
+  (setenv "DICPATH" "/usr/share/hunspell")
+  (setq corfu-popupinfo-mode nil)
+  (remove-hook 'completion-at-point-functions #'ispell-completion-at-point))
+
 (setq window-divider-default-places t)
 (set-face-background 'internal-border (face-background 'default))
 ;; For PGTK, use alpha-background instead of alpha
@@ -258,8 +265,7 @@ e.g. Sunday, September 17, 2000."
         (horizontal-scroll-bars . nil)
         (inner-border-width . 1)
         (left-fringe . 8)
-        (right-fringe . 8)))
-  )
+        (right-fringe . 8))))
 
 ;; Provides in-buffer drop-down completion
 (defun my-cape-keyword-setup ()
@@ -297,14 +303,14 @@ e.g. Sunday, September 17, 2000."
          ("C-c c" . org-capture)
          )
   :config
-  (setq time-stamp-active t)
-  (setq time-stamp-line-limit 10)               ; Plenty of room for line 4
-  (setq time-stamp-start "^#\\+date:[ \t]*")    ; Just find the header
-  (setq time-stamp-end "$")                     ; Replace everything until end of line
-  (setq time-stamp-format "[%Y-%m-%d %a %H:%M:%S]")
+  ;; (setq time-stamp-active t)
+  ;; (setq time-stamp-line-limit 10)               ; Plenty of room for line 4
+  ;; (setq time-stamp-start "^#\\+date:[ \t]*")    ; Just find the header
+  ;; (setq time-stamp-end "$")                     ; Replace everything until end of line
+  ;; (setq time-stamp-format "[%Y-%m-%d %a %H:%M:%S]")
   (add-hook 'org-mode-hook
             (lambda ()
-              (add-hook 'before-save-hook 'time-stamp nil t)
+              ;; (add-hook 'before-save-hook 'time-stamp nil t)
               (org-defkey org-mode-map "\C-c[" 'undefined)
               (org-defkey org-mode-map "\C-c]" 'undefined)
               (electric-indent-local-mode -1)
@@ -322,7 +328,23 @@ e.g. Sunday, September 17, 2000."
   (interactive)
   (message "Publishing site...")
   (shell-command "/data/myhome/prabu/org/my_hugo_site/scripts/publish_hugo_site.sh &"))
-
+(defun my/set-daily-export-file-name ()
+  (let* ((target-buf (org-capture-get :buffer))
+         (target-file (when target-buf (buffer-file-name target-buf))))
+    (when (and target-file
+               (string-match-p "daily_journal\\.org$" target-file))
+      (save-excursion
+        (org-up-heading-safe)
+        ;; (message "Hook fired at: %s" (org-entry-get nil "EXPORT_FILE_NAME"))
+        (org-entry-get nil "EXPORT_FILE_NAME")
+        (unless (org-entry-get nil "EXPORT_FILE_NAME")
+          (org-entry-put nil "EXPORT_FILE_NAME"
+                         (format-time-string "%Y-%m-%d" (org-capture-get :default-time))))
+        (unless (org-entry-get nil "EXPORT_DATE")
+          ;; (message "Setting EXPORT_DATE")
+          (org-entry-put nil "EXPORT_DATE"
+                         (or (org-entry-get nil "EXPORT_FILE_NAME")
+                             (format-time-string "%Y-%m-%d" (org-capture-get :default-time)))))))))
 (use-package org-roam
   :ensure t
   :init
@@ -332,10 +354,17 @@ e.g. Sunday, September 17, 2000."
   (org-roam-completion-everywhere t)
   (org-roam-directory (file-truename "/data/myhome/prabu/org/Resources"))
   (org-roam-dailies-directory ".")
-  ;; Daily Template
+  ;; (org-roam-dailies-directory "daily/")
+  ;; ;; Daily Template
+  ;; (org-roam-dailies-capture-templates
+  ;;  '(("d" "default" entry
+  ;;     "* %^{Title}\n%?"
+  ;;     :target (file+head "%<%Y-%m-%d>.org"
+  ;;                        "#+title: %<%Y-%m-%d %A>\n"))))
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
       "* %^{Title}\n%?"
+      ;; "* %^{Title}\n:PROPERTIES:\n:EXPORT_FILE_NAME: %(format-time-string \"%Y-%m-%d\" (org-capture-get :default-time))\n:END:\n%?"
       :target (file+datetree "daily_journal.org" day)
       :empty-lines 1
       :no-id t)));;either day|week|month is allowed
@@ -374,6 +403,7 @@ e.g. Sunday, September 17, 2000."
   (add-hook 'org-roam-db-sync-hook
             (lambda ()
               (setq org-id-extra-files (org-roam--list-files org-roam-directory))))
+  (add-hook 'org-capture-before-finalize-hook #'my/set-daily-export-file-name)
   (advice-add 'org-roam-node-read :around #'case-insensitive-org-roam-node-read)
   (message "org-roam loaded"))
 ;; #for ox-hugo# https://hugocisneros.com/org-config/#org-roam
@@ -399,6 +429,9 @@ e.g. Sunday, September 17, 2000."
   (setq org-hugo-auto-set-lastmod t)
   (setq org-hugo-export-with-section-modified-time t)
   (setq org-hugo-allow-all-export-keywords t)
+  ;; (setq org-hugo-link-desc-insert-type 'id)
+  ;; (setq org-id-extra-files
+  ;;       (directory-files-recursively org-roam-directory "\\.org$"))
   ;; (citeproc-org-org-bib-header "* Bibliography\n<ol class=\"biblio-list\">")
   ;; (citeproc-org-org-bib-footer "</ol>")
 )
@@ -418,6 +451,80 @@ e.g. Sunday, September 17, 2000."
 (use-package org-noter
   :ensure t
   )
+
+;; (defun my/org-roam-to-zine-link (link contents info)
+;;   "Convert org-roam ID links to Zine $link.page() syntax during export."
+;;   (let* ((type (org-element-property :type link))
+;;          (id (org-element-property :path link))
+;;          (description (or contents "")))
+;;     (if (string= type "id")
+;;         (let ((file-path (org-roam-node-file (org-roam-node-from-id id))))
+;;           (if file-path
+;;               (let ((filename (file-name-base file-path)))
+;;                 ;; Formats as: [Description]($link.page("filename.smd"))
+;;                 (format "[%s]($link.page(\"%s.smd\"))" description filename))
+;;             ;; Fallback if ID is not found in Roam DB
+;;             (format "[%s](id:%s)" description id)))
+;;       ;; If it's not an 'id' link, use the standard MD export logic
+;;       (org-export-with-backend 'md link contents info))))
+
+;; (defun my/zine-publish ()
+;;   "Export current Org-roam file to Zine .smd with resolved links."
+;;   (interactive)
+;;   (let ((org-export-before-parsing-hook nil))
+;;     ;; Locally override the markdown link export for this session
+;;     (cl-letf (((symbol-function 'org-md-link) #'my/org-roam-to-zine-link))
+;;       (let ((outfile (concat (file-name-sans-extension (buffer-file-name)) ".smd")))
+;;         (org-md-export-to-markdown)
+;;         (rename-file (concat (file-name-sans-extension (buffer-file-name)) ".md")
+;;                      outfile t)
+;;         (message "Zine file published to %s" outfile)))))
+;; (defun my/zine-publish ()
+;;   "Export Org-roam file to Zine .smd with correct link syntax and location."
+;;   (interactive)
+;;   (let* ((zine-content-dir "/d/m/p/o/zine_site/content/") ;; ADJUST THIS PATH
+;;          (current-file (buffer-file-name))
+;;          (base-name (file-name-base current-file))
+;;          (outfile (expand-file-name (concat base-name ".smd") zine-content-dir)))
+
+;;     (with-temp-buffer
+;;       (insert-file-contents current-file)
+
+;;       ;; 1. GET METADATA FOR ZIGGY FRONTMATTER
+;;       (let ((title (or (cadar (org-collect-keywords '("TITLE"))) base-name))
+;;             (date (or (cadar (org-collect-keywords '("DATE")))
+;;                       (format-time-string "%Y-%m-%dT%H:%M:%S"))))
+
+;;         ;; 2. CUSTOMIZE EXPORTER BEHAVIOR
+;;         (let ((org-export-with-toc nil)
+;;               (org-md-toplevel-hlevel 1))
+
+;;           (cl-letf (((symbol-function 'org-md-link)
+;;                      (lambda (link contents info)
+;;                        (let* ((type (org-element-property :type link))
+;;                               (path (org-element-property :path link))
+;;                               (desc (or contents "")))
+;;                          (if (string= type "id")
+;;                              (let* ((node (org-roam-node-from-id path))
+;;                                     ;; Extract filename without extension
+;;                                     (target-slug (file-name-base (org-roam-node-file node))))
+;;                                ;; Output leading slash link for Zine $link.page resolution
+;;                                (format "[%s](/%s)" desc target-slug))
+;;                            ;; Standard external links
+;;                            (format "[%s](%s)" desc path))))))
+
+;;             (let ((exported-md (org-export-as 'md)))
+;;               ;; 3. ASSEMBLE FILE: FRONTMATTER + CONTENT
+;;               (erase-buffer)
+;;               (insert "---\n{\n")
+;;               (insert (format "    .title = \"%s\",\n" title))
+;;               (insert (format "    .date = @date(\"%s\"),\n" date))
+;;               (insert "    .layout = \"post.shtml\",\n")
+;;               (insert "}\n---\n\n")
+;;               (insert exported-md)
+;;               (write-region (point-min) (point-max) outfile)))))
+
+;;     (message "Zine file published to: %s" outfile)))
 
 ;; Installed markdown package in the OS for preview
 (use-package markdown-mode
