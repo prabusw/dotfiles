@@ -157,7 +157,6 @@ e.g. Sunday, September 17, 2000."
 ;; Apply this to every programming language automatically
 (add-hook 'prog-mode-hook #'my-programming-setup)
 
-;; https://github.com/jeffkreeftmeijer/.emacs.d/blob/main/emacs-configuration.org
 (use-package helpful
   :ensure t
   :init
@@ -182,8 +181,6 @@ e.g. Sunday, September 17, 2000."
             (lambda ()
               (define-key ediff-mode-map (kbd "q") 'my-ediff-quit-session))))
 
-;; Outshine brings Org Mode to the world outside of Org;; https://github.com/alphapapa/outshine
-
 (use-package outshine
   :ensure t
   :diminish outline-minor-mode
@@ -192,7 +189,6 @@ e.g. Sunday, September 17, 2000."
   :init
   (setq outshine-imenu-show-headlines-p nil))
 
-;; Diminished modes are minor modes with no modeline display
 (use-package diminish
   :ensure t
   )
@@ -267,7 +263,6 @@ e.g. Sunday, September 17, 2000."
         (left-fringe . 8)
         (right-fringe . 8))))
 
-;; Provides in-buffer drop-down completion
 (defun my-cape-keyword-setup ()
   "Add keyword completion to the current buffer."
   (add-to-list 'completion-at-point-functions #'cape-keyword t))
@@ -452,7 +447,6 @@ e.g. Sunday, September 17, 2000."
   :ensure t
   )
 
-;; Installed markdown package in the OS for preview
 (use-package markdown-mode
   :ensure t
   )
@@ -504,16 +498,11 @@ e.g. Sunday, September 17, 2000."
             )
   )
 
-;; Hide the modeline for inferior python processes.  This is not a necessary
-;; package but it's helpful to make better use of the screen real-estate at our
-;; disposal. See: https://github.com/hlissner/emacs-hide-mode-line.
-
 (use-package hide-mode-line
   :ensure t
   :hook (inferior-python-mode . hide-mode-line-mode)
   )
 
-;; https://github.com/donkirkby/live-py-plugin
 (use-package live-py-mode
   :ensure t
   )
@@ -626,7 +615,6 @@ e.g. Sunday, September 17, 2000."
   (setq tramp-auto-save-directory (expand-file-name "tramp-autosave" user-emacs-directory)
         password-cache-expiry 3600))
 
-;; Redirect the "Custom" stuff to a separate file
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
   (load custom-file))

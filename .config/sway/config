@@ -198,7 +198,7 @@ bindsym Print exec $scripts/slurpshot
 # ========================
 # assign [app_id="emacs"] 3
 assign [app_id="firefox"] 1
-assign [app_id="org.gnome.Epiphany"] 1
+assign [app_id="org.gnome.Epiphany"] 5
 assign [app_id="chromium"] 5
 assign [app_id="librewolf"] 6
 for_window [app_id="emacs"] move to workspace 3
