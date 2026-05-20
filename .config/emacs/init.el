@@ -1,26 +1,12 @@
 ;;; init.el -*- lexical-binding: t; -*-
 
-;; https://stackoverflow.com/questions/2079095/how-to-modularize-an-emacs-configuration/2079146
-(defconst user-init-dir
-  (cond ((boundp 'user-emacs-directory)
-         user-emacs-directory)
-        ((boundp 'user-init-directory)
-         user-init-directory)
-        (t "~/.emacs.d/")))
-
-(defun load-user-file (file)
-  "Load a file in current user's configuration directory"
-  (interactive "f")
-  (load-file (expand-file-name file user-init-dir)))
-
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "better-defaults" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "beancount-mode" user-emacs-directory))
 
 (use-package better-defaults
   :ensure nil
-  :init
-  (require 'better-defaults)
-  )
+  :demand t)
 
 ;; Based on https://git.sr.ht/~technomancy/better-defaults
 (setq backup-directory-alist `(("." . ,(concat user-emacs-directory
@@ -42,12 +28,8 @@
 ;; Initialize the package system
 (package-initialize)
 
-(unless (require 'use-package nil t)
-  (when (not package-archive-contents)
-    (package-refresh-contents))
-  (package-install 'use-package)
-  (use-package use-package-ensure
-    :config  (setq use-package-always-ensure t)))
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 (defmacro use-feature (name &rest args)
   "Like `use-package' but for built-in features (sets :ensure nil).
@@ -76,7 +58,6 @@ NAME and ARGS as in `use-package'."
 (with-eval-after-load 'ispell
   (setq ispell-program-name "hunspell")
   (setenv "DICPATH" "/usr/share/hunspell")
-  (setq corfu-popupinfo-mode nil)
   (remove-hook 'completion-at-point-functions #'ispell-completion-at-point))
 
 (setq window-divider-default-places t)
@@ -167,19 +148,11 @@ e.g. Sunday, September 17, 2000."
    ("C-h k" . helpful-key)       ; Replace describe-key
    ("C-h x" . helpful-command))) ; Replace describe-command
 
-;; Define a function to quit ediff with a single 'q' press
-;; Enhanced settings for ediff in Emacs
-(use-feature ediff
+(use-feature tramp
+  :defer t
   :config
-  (setq ediff-split-window-function 'split-window-horizontally
-        ediff-window-setup-function 'ediff-setup-windows-plain
-        ediff-diff-options "-w")
-  (defun my-ediff-quit-session ()
-    (interactive)
-    (ediff-quit 'no-confirm))
-  (add-hook 'ediff-keymap-setup-hook
-            (lambda ()
-              (define-key ediff-mode-map (kbd "q") 'my-ediff-quit-session))))
+  (setq tramp-auto-save-directory (expand-file-name "tramp-autosave" user-emacs-directory)
+        password-cache-expiry 3600))
 
 (use-package outshine
   :ensure t
@@ -275,6 +248,34 @@ e.g. Sunday, September 17, 2000."
   :hook (prog-mode . my-cape-keyword-setup)
   )
 
+;; Define a function to quit ediff with a single 'q' press
+;; Enhanced settings for ediff in Emacs
+(use-feature ediff
+  :config
+  (setq ediff-split-window-function 'split-window-horizontally
+        ediff-window-setup-function 'ediff-setup-windows-plain
+        ediff-diff-options "-w")
+  (defun my-ediff-quit-session ()
+    (interactive)
+    (ediff-quit 'no-confirm))
+  (add-hook 'ediff-keymap-setup-hook
+            (lambda ()
+              (define-key ediff-mode-map (kbd "q") 'my-ediff-quit-session))))
+
+(use-package magit
+  :ensure t
+  :bind (
+         ("C-x g" .	magit-status)
+         ("C-x M-g"	. magit-dispatch)
+         ("C-c M-g"	. magit-file-dispatch)))
+
+(defun my-org-mode-setup ()
+  (electric-indent-local-mode -1)
+  (when (and buffer-file-name
+             (string-equal buffer-file-name
+                           "/data/myhome/prabu/org/Resources/20260510115218-emacs_config_file.org"))
+    (add-hook 'after-save-hook #'org-babel-tangle nil t)))
+
 (use-feature org
   :custom
   (org-return-follows-link t) ;;Allows links to be opened without C-c C-o in emacs
@@ -289,30 +290,23 @@ e.g. Sunday, September 17, 2000."
                    (:endgroup . nil)
                    ("@computer" . ?c) ("@phone" . ?p) ("@reading" . ?r)))
   (org-structure-template-alist '(("el" . "src emacs-lisp")
-                                   ("s" . "src")
-                                   ("e" . "example")
-                                   ("q" . "quote")))
- :bind (
+                                  ("s" . "src")
+                                  ("e" . "example")
+                                  ("q" . "quote")))
+  :bind (
          ("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c c" . org-capture)
          )
   :config
+  (keymap-set org-mode-map "C-c [" nil)
+  (keymap-set org-mode-map "C-c ]" nil)
   ;; (setq time-stamp-active t)
   ;; (setq time-stamp-line-limit 10)               ; Plenty of room for line 4
   ;; (setq time-stamp-start "^#\\+date:[ \t]*")    ; Just find the header
   ;; (setq time-stamp-end "$")                     ; Replace everything until end of line
   ;; (setq time-stamp-format "[%Y-%m-%d %a %H:%M:%S]")
-  (add-hook 'org-mode-hook
-            (lambda ()
-              ;; (add-hook 'before-save-hook 'time-stamp nil t)
-              (org-defkey org-mode-map "\C-c[" 'undefined)
-              (org-defkey org-mode-map "\C-c]" 'undefined)
-              (electric-indent-local-mode -1)
-              (when (string-equal buffer-file-name
-                                (expand-file-name "20260510115218-emacs_config_file.org"
-                                                  org-roam-directory))
-              (add-hook 'after-save-hook #'org-babel-tangle nil t)))))
+  :hook (org-mode . my-org-mode-setup))
 
 (use-feature org-tempo
   :after org)
@@ -433,14 +427,7 @@ e.g. Sunday, September 17, 2000."
 
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
-  ;; :config
-  ;; (setq org-tranclusion-modes '(org-mode))
   :hook (org-mode . org-transclusion-mode)
-  ;; (map
-  ;;  :map global-map "<f12>" #'org-transclusion-add
-  ;;  :leader
-  ;;  :prefix "n"
-  ;;  :desc "Org Transclusion Mode" "t" #'org-transclusion-mode)
   )
 
 (use-package org-noter
@@ -450,6 +437,58 @@ e.g. Sunday, September 17, 2000."
 (use-package markdown-mode
   :ensure t
   )
+
+(use-feature flymake
+  ;; https://www.gnu.org/software/emacs/manual/html_node/flymake/Finding-diagnostics.html
+  :bind(
+        :map flymake-mode-map
+             ("M-n" . flymake-goto-next-error)
+             ("M-p" . flymake-goto-prev-error)
+             ("<f2>" . flymake-show-buffer-diagnostics)))
+
+(use-feature eglot
+  :defer t
+  :hook ((html-mode . eglot-ensure)
+         (mhtml-mode . eglot-ensure))
+  :bind(
+        :map eglot-mode-map
+             ("C-c o" . eglot-code-action-organize-imports)
+             ("C-c h" . eldoc))
+  :config
+  (add-to-list 'eglot-server-programs
+               '((html-mode mhtml-mode) . ("superhtml" "lsp")))
+  (add-hook 'eglot-managed-mode-hook
+            (lambda ()
+              ;; Show flymake diagnostics first.
+              (setq eldoc-documentation-functions
+                    (cons #'flymake-eldoc-function
+                          (remove #'flymake-eldoc-function eldoc-documentation-functions)))
+              ;; Show all eldoc feedback.
+              (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
+  )
+
+(use-package beancount
+  :ensure nil
+  :commands beancount-mode
+  :mode ("\\.beancount\\'" . beancount-mode)
+  :hook
+  (beancount-mode . (lambda ()
+                      (setq-local electric-indent-chars nil)
+                      (outline-minor-mode)
+                      (flymake-mode) ; Enable flymake-mode here
+                      (flymake-bean-check-enable)))
+  :bind (:map beancount-mode-map
+              ("C-c C-n" . outline-next-visible-heading)
+              ("C-c C-p" . outline-previous-visible-heading)
+              ("C-c C-u" . outline-up-heading)
+              ("C-c C-b" . outline-backward-same-level)
+              ("C-c C-f" . outline-forward-same-level)
+              ("C-c C-a" . outline-show-all)
+              ([backtab] . beancount-outline-cycle)))
+
+(use-package flymake-bean-check
+  :ensure nil
+  :after (flymake beancount))
 
 (use-feature python
   :config
@@ -479,24 +518,19 @@ e.g. Sunday, September 17, 2000."
   (add-hook 'beancount-mode-hook 'pet-mode +1)
   (add-hook 'python-base-mode-hook
             (lambda ()
-              (setq-local python-shell-interpreter (pet-executable-find "python")
-                          python-shell-virtualenv-root (pet-virtualenv-root))
+              (when-let* ((python (pet-executable-find "python")))
+                (setq-local python-shell-interpreter python
+                            python-shell-virtualenv-root (pet-virtualenv-root)))
               (pet-eglot-setup)
-              (eglot-ensure)
-              )
-            )
+              (eglot-ensure)))
   (add-hook 'beancount-mode-hook
             (lambda ()
-              ;; Use the current directory to find ledger files
               (setq-local beancount-accounts-files
                           (directory-files default-directory t "\\.beancount$"))
-              ;; Ensure flymake-bean-check uses the 'bean-check' inside your venv
-              (let ((venv-bin (expand-file-name "bin" (pet-virtualenv-root))))
-                (when (file-directory-p venv-bin)
-                  (setq-local exec-path (append (list venv-bin) exec-path))))
-              )
-            )
-  )
+              (when-let* ((root (pet-virtualenv-root))
+                          (venv-bin (expand-file-name "bin" root))
+                          (_ (file-directory-p venv-bin)))
+                (setq-local exec-path (append (list venv-bin) exec-path))))))
 
 (use-package hide-mode-line
   :ensure t
@@ -506,14 +540,6 @@ e.g. Sunday, September 17, 2000."
 (use-package live-py-mode
   :ensure t
   )
-
-(use-feature flymake
-  ;; https://www.gnu.org/software/emacs/manual/html_node/flymake/Finding-diagnostics.html
-  :bind(
-        :map flymake-mode-map
-             ("M-n" . flymake-goto-next-error)
-             ("M-p" . flymake-goto-prev-error)
-             ("<f2>" . flymake-show-buffer-diagnostics)))
 
 (defun my-sh-mode-setup ()
   "Specific settings for shell scripts."
@@ -527,63 +553,14 @@ e.g. Sunday, September 17, 2000."
 ;; Ensure APKBUILD files open in sh-mode so the hook above triggers
 (add-to-list 'auto-mode-alist '("APKBUILD\\'" . sh-mode))
 
-(use-feature eglot
-  :defer t
-  :hook ((html-mode . eglot-ensure)
-         (mhtml-mode . eglot-ensure))
-  :bind(
-        :map eglot-mode-map
-             ("C-c r" . eglot-rename)
-             ("C-c o" . eglot-code-action-organize-imports)
-             ("C-c h" . eldoc))
-  :config
-  (add-to-list 'eglot-server-programs
-               '((html-mode mhtml-mode) . ("superhtml" "lsp")))
-  (add-hook 'eglot-managed-mode-hook
-            (lambda ()
-              ;; Show flymake diagnostics first.
-              (setq eldoc-documentation-functions
-                    (cons #'flymake-eldoc-function
-                          (remove #'flymake-eldoc-function eldoc-documentation-functions)))
-              ;; Show all eldoc feedback.
-              (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
-  )
-
-(use-package flymake-bean-check
-  :after flymake)
-
-(use-package beancount
-  :commands beancount-mode
-  :mode ("\\.beancount\\'" . beancount-mode)
-  :hook
-  (beancount-mode . (lambda ()
-                      (setq-local electric-indent-chars nil)
-                      (outline-minor-mode)
-                      (flymake-mode) ; Enable flymake-mode here
-                      (flymake-bean-check-enable)))
-  :bind (:map beancount-mode-map
-              ("C-c C-n" . outline-next-visible-heading)
-              ("C-c C-p" . outline-previous-visible-heading)
-              ("C-c C-u" . outline-up-heading)
-              ("C-c C-b" . outline-backward-same-level)
-              ("C-c C-f" . outline-forward-same-level)
-              ("C-c C-a" . outline-show-all)
-              ([backtab] . beancount-outline-cycle)))
-
-(use-package magit
-  :ensure t
-  :bind (
-         ("C-x g" .	magit-status)
-         ("C-x M-g"	. magit-dispatch)
-         ("C-c M-g"	. magit-file-dispatch)))
-
 (defun my-c-common-setup ()
   "Standardized settings for C-family languages."
   ;; Standards: PEP 8 (Python) and modern C++ (LLVM/Google) prefer spaces.
   ;; Install clangd or clang-extra-tools package for LSP features with eglot
   (setq-local indent-tabs-mode nil)
   (setq-local c-basic-offset 4) ; 4 is the modern industry standard
-  (eglot-ensure))
+  (when (executable-find "clangd")
+    (eglot-ensure)))
 (add-hook 'c-mode-common-hook #'my-c-common-setup)
 
 ;; (use-package arduino-mode
@@ -608,12 +585,6 @@ e.g. Sunday, September 17, 2000."
 (use-package rainbow-delimiters
   :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
-
-(use-feature tramp
-  :defer t
-  :config
-  (setq tramp-auto-save-directory (expand-file-name "tramp-autosave" user-emacs-directory)
-        password-cache-expiry 3600))
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
