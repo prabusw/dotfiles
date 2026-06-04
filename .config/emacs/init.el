@@ -269,11 +269,19 @@ e.g. Sunday, September 17, 2000."
          ("C-x M-g"	. magit-dispatch)
          ("C-c M-g"	. magit-file-dispatch)))
 
+(defvar my/auto-tangle-files
+  '("20260510115218-emacs_config_file.org"
+    "20260529152048-graph_js.org"
+    "20260529114550-gen_graph.org"
+    "20260531212337-neighbour-loader_js.org"
+    "20260601134637-neighbour_utils_js.org"
+    "20260601135932-mobile_menu_js.org"
+    "20260601144841-search_js.org"))
 (defun my-org-mode-setup ()
   (electric-indent-local-mode -1)
   (when (and buffer-file-name
-             (string-equal buffer-file-name
-                           "/data/myhome/prabu/org/Resources/20260510115218-emacs_config_file.org"))
+             (member (file-name-nondirectory buffer-file-name)
+                     my/auto-tangle-files))
     (add-hook 'after-save-hook #'org-babel-tangle nil t)))
 
 (use-feature org
@@ -290,6 +298,8 @@ e.g. Sunday, September 17, 2000."
                    (:endgroup . nil)
                    ("@computer" . ?c) ("@phone" . ?p) ("@reading" . ?r)))
   (org-structure-template-alist '(("el" . "src emacs-lisp")
+                                  ("py" . "src python")
+                                  ("js" . "src javascript")
                                   ("s" . "src")
                                   ("e" . "example")
                                   ("q" . "quote")))
