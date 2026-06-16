@@ -16,9 +16,8 @@ related tools listed below can be found in this repository.
   * Audio stack - [Pipewire](https://pipewire.org/)
   * Day/night gamma adjustments for Wayland - [wlsunset](https://git.sr.ht/~kennylevinsen/wlsunset)
 * Wayland stack
-  * For runtime directory (XDG_RUNTIME_DIR) [pam-rundir](https://jjacky.com/pam_rundir/)
+  * For runtime directory (XDG_RUNTIME_DIR) [mkrundir](https://sr.ht/~whynothugo/mkrundir/)
   * Seat manager - [seatd](https://sr.ht/~kennylevinsen/seatd/)
-  * Login manager - [greetd](https://sr.ht/~kennylevinsen/greetd/) with [gtkgreet](https://git.sr.ht/~kennylevinsen/gtkgreet) greeter.
   * Window manager - [Sway](https://swaywm.org/)
 
 ## Sway configuration
@@ -73,12 +72,11 @@ $ sysconfig commit -m "added Readme.md"
 $ sysconfig push origin master
 ```
 
-Some dotfiles may still have references to Arch Linux. They have not
-been used since Jan'25.
+Some dotfiles may still have references to Arch Linux, which was last
+used in Jan'25.
 
 Besides the below, other sources are cited in individual files.
 
 Sources:
-
 * https://news.ycombinator.com/item?id=11071754
 * https://www.atlassian.com/git/tutorials/dotfiles
