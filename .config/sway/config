@@ -1,5 +1,8 @@
 exec dbus-update-activation-environment WAYLAND_DISPLAY
 
+set $config_dir /home/prabu/.config/sway
+set $scripts $config_dir/scripts
+
 set $mod Mod4
 set $term foot
 set $menu tofi-run | xargs -r -I {} swaymsg exec "$term -e {}"
@@ -11,7 +14,6 @@ set $XF86AudioLowerVolume XF86AudioLowerVolume
 set $XF86AudioRaiseVolume XF86AudioRaiseVolume
 set $XF86AudioMute XF86AudioMute
 
-# For keyboards without Multimedia keys
 # set $XF86AudioPlay $mod+F12
 # set $XF86AudioNext $mod+Shift+F12
 # set $XF86AudioPrev $mod+Alt+F12
@@ -19,35 +21,21 @@ set $XF86AudioMute XF86AudioMute
 # set $XF86AudioRaiseVolume $mod+F11
 # set $XF86AudioMute F12
 
-## Keys
-set $left h
-set $down j
-set $up k
-set $right l
-set $config_dir /home/prabu/.config/sway
-set $scripts $config_dir/scripts
-
 font pango:Cantarell 11
 seat seat0 xcursor_theme Adwaita 24
 exec $scripts/toggle_theme init
 include $config_dir/current_theme.conf
 bindsym $mod+Shift+t exec $scripts/toggle_theme
 
-# This default is applied to ANY monitor connected
 output * {
        subpixel rgb
        background $wallpaper_color solid_color
-       # background /usr/share/backgrounds/nordic/misty_mountains.jpg fill
 }
 output HDMI-A-1 {
-# This is used, when HDMI-A-1 is available
-       # Set the resolution and refresh rate
        mode 1920x1080@99.999Hz
-       # Use 'scale' only if you are *not* using a background image with fill
        scale 1.25
 }
 
-# exec touch /tmp/swaylock-sleep && inotifyd swaylockd /tmp/swaylock-sleep
 exec swayidle -w \
     timeout 300 '$scripts/check_player.sh && swaylockd' \
     timeout 500 'swaymsg "output * dpms off"' \
@@ -62,7 +50,6 @@ bar {
     status_padding 5
     status_command SCRIPT_DIR=$scripts/i3blocks i3blocks
 
-    # Color settings for the status bar
     colors {
         statusline $bar_text
         background $bar_bg
@@ -83,7 +70,6 @@ client.unfocused        $border_unfocus  $bg_unfocus    $text_unfocus    $indica
 client.urgent           $border_urgent   $bg_urgent     $text_urgent     $indicator_urgent    $border_urgent
 
 bindsym $mod+Shift+Return exec $term fish
-# bindsym $mod+Shift+Return exec $term
 bindsym $mod+Shift+c kill
 bindsym $mod+d exec $drun
 bindsym $mod+Shift+d exec $menu
@@ -124,8 +110,6 @@ bindsym $mod+Shift+0 move container to workspace number 10
 
 bindsym $mod+h splith
 bindsym $mod+v splitv
-# bindsym $mod+s layout stacking
-# bindsym $mod+t layout tabbed
 bindsym $mod+m exec $scripts/monocle_sway_toggle
 bindsym $mod+e layout toggle split
 bindsym $mod+f fullscreen
@@ -135,6 +119,9 @@ bindsym $mod+a focus prev
 #Toggle focus script
 exec_always $scripts/track_prev_focus
 bindsym $mod+Tab [con_mark=_prev] focus
+
+# bindsym $mod+s layout stacking
+# bindsym $mod+t layout tabbed
 
 bindsym $mod+Shift+minus move scratchpad
 bindsym $mod+minus scratchpad show
@@ -160,7 +147,6 @@ bindsym Print exec $scripts/slurpshot
 
 exec wl-paste --watch cliphist store
 bindsym $mod+p exec foot -T clip_history_fzf_foot -L sh -c "cliphist list | fzf -d $'\t' --with-nth 2 | cliphist decode | wl-copy" -H
-# bindsym $mod+Shift+p exec cliphist list | tofi --width 80% | cliphist decode | wl-copy
 
 bindsym --locked $XF86AudioLowerVolume exec $scripts/sway-volume-notify "-"
 bindsym --locked $XF86AudioRaiseVolume exec $scripts/sway-volume-notify "+"
@@ -172,7 +158,6 @@ bindsym Alt+$XF86AudioPlay exec sway-notify -i multimedia-audio-player "cmus sta
 
 bindsym $mod+F1 exec cat ~/.config/sway/config |grep bindsym |grep -v "^#"| sed 's/^[[:space:]]*//'|sed 's/bindsym//'| tofi
 
-# assign [app_id="emacs"] 3
 assign [app_id="firefox"] 1
 assign [app_id="org.gnome.Epiphany"] 5
 assign [app_id="chromium"] 5
@@ -183,7 +168,6 @@ for_window [app_id="org.twosheds.iwgtk"] floating enable, move position 900 0
 for_window [app_id="nemo"] floating enable
 for_window [app_id="xed"] floating enable, focus, resize set width 30 ppt height 40 ppt, border pixel 2
 for_window [title=^clip_history_fzf_foot$] floating enable,focus,resize set width 80 ppt height 50 ppt, border pixel 2
-#Alternate coding style
 for_window [app_id=^play_cmus_in_scratch$] {
            move scratchpad
            inhibit_idle open
