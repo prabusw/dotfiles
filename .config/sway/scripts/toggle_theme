@@ -1,25 +1,33 @@
 #!/bin/sh
+set -u
 
-# Define your light and dark theme names
 DARK_THEME="Nordic"
 LIGHT_THEME="Adwaita"
 
-# Define sway config paths
 SWAY_CONFIG_DIR="$HOME/.config/sway"
-THEMES_DIR="$SWAY_CONFIG_DIR/themes"
-DARK_SWAY_CONFIG="$THEMES_DIR/nord.conf"
-LIGHT_SWAY_CONFIG="$THEMES_DIR/adwaita.conf"
+SWAY_THEMES_DIR="$SWAY_CONFIG_DIR/themes"
+SWAY_DARK_CONFIG="$SWAY_THEMES_DIR/nord.conf"
+SWAY_LIGHT_CONFIG="$SWAY_THEMES_DIR/adwaita.conf"
 GTK3_CONFIG="$HOME/.config/gtk-3.0/settings.ini"
+FOOT_THEMES_DIR="$HOME/.config/foot/themes"
+FOOT_DARK_CONFIG="$FOOT_THEMES_DIR/dark.ini"
+FOOT_LIGHT_CONFIG="$FOOT_THEMES_DIR/light.ini"
+FOOT_CURRENT_LINK="$HOME/.config/foot/current_theme.ini"
+
+apply_foot_theme() {
+    local theme_file="$1"
+    if [ -f "$theme_file" ]; then
+        ln -sf "$theme_file" "$FOOT_CURRENT_LINK"
+    fi
+}
 
 apply_gtk_theme() {
     local theme=$1
     local color_scheme=$2
 
-    # Update D-Bus for modern apps
     gsettings set org.gnome.desktop.interface gtk-theme "$theme"
     gsettings set org.gnome.desktop.interface color-scheme "$color_scheme"
 
-    # Update physical config for legacy apps
     if [ -f "$GTK3_CONFIG" ]; then
         sed -i "s/^gtk-theme-name=.*/gtk-theme-name=$theme/" "$GTK3_CONFIG"
     fi
@@ -30,9 +38,7 @@ apply_sway_theme() {
     local target="$SWAY_CONFIG_DIR/current_theme.conf"
 
     if [ -f "$theme_file" ]; then
-        # -s: symbolic, -f: force (overwrites existing link)
         ln -sf "$theme_file" "$target"
-
         swaymsg reload
         logger "Symlinked $theme_file to $target"
     fi
@@ -40,26 +46,26 @@ apply_sway_theme() {
 
 set_dark_theme() {
     echo "Switching to dark theme ($DARK_THEME)..."
-    apply_gtk_theme "$DARK_THEME" "prefer-dark"
-    apply_sway_theme "$DARK_SWAY_CONFIG"
+	apply_foot_theme "$FOOT_DARK_CONFIG"
 	pkill -SIGUSR1 foot
+	apply_gtk_theme "$DARK_THEME" "prefer-dark"
+	apply_sway_theme "$SWAY_DARK_CONFIG"
 }
 
 set_light_theme() {
     echo "Switching to light theme ($LIGHT_THEME)..."
-    apply_gtk_theme "$LIGHT_THEME" "prefer-light"
-    apply_sway_theme "$LIGHT_SWAY_CONFIG"
+	apply_foot_theme "$FOOT_LIGHT_CONFIG"
 	pkill -SIGUSR2 foot
+	apply_gtk_theme "$LIGHT_THEME" "prefer-light"
+	apply_sway_theme "$SWAY_LIGHT_CONFIG"
 }
 
-# Initialize sway with dark theme
-if [ "$1" = "init" ]; then
+if [ "${1:-}" = "init" ]; then
     logger "Sway Init: Forcing dark theme"
     set_dark_theme
     exit 0
 fi
 
-# Normal toggle logic
 CURRENT_GTK_THEME=$(gsettings get org.gnome.desktop.interface gtk-theme)
 CURRENT_GTK_THEME=$(echo "$CURRENT_GTK_THEME" | tr -d "'")
 
