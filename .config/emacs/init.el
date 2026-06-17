@@ -74,9 +74,6 @@ NAME and ARGS as in `use-package'."
 
 (global-set-key (kbd "C-c t") 'toggle-transparency)
 
-;; Turn off the startup screen, splash screen and puts straight into
-;; the scratch buffer to quickly type or paste in emacs instead of
-;; standard emacs startpage
 (setq inhibit-startup-screen t)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
@@ -88,6 +85,13 @@ NAME and ARGS as in `use-package'."
   (setq nord-region-highlight "frost")
   :config
   (load-theme 'nord t))
+
+(use-package auto-dark
+  :ensure t
+  :after nord-theme
+  :custom
+  (auto-dark-themes '((nord) (modus-operandi)))
+  :init (auto-dark-mode))
 
 (defun now ()
   "Insert string for the current time formatted like '2:34 PM'."
