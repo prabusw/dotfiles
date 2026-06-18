@@ -275,6 +275,7 @@ e.g. Sunday, September 17, 2000."
 
 (defvar my/auto-tangle-files
   '("20260510115218-emacs_config_file.org"
+    "20240317205837-swaywm.org"
     "20260616190442-sway_configuration_file.org"
     "20260617160421-sway_theme_toggle_script.org"
     "20260529152048-graph_js.org"

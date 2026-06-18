@@ -1,0 +1,31 @@
+#!/bin/sh
+set -u
+
+export XDG_RUNTIME_DIR=$(mkrundir)
+
+# https://man.sr.ht/~kennylevinsen/greetd/#how-to-set-xdg_session_typewayland
+# Session
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=sway
+export XDG_CURRENT_DESKTOP=sway
+
+# Wayland stuff
+# export MOZ_ENABLE_WAYLAND=1
+# export MOZ_DISABLE_GMP_SANDBOX=1
+# export WLR_BACKENDS=drm,libinput
+# export WLR_LIBINPUT_NO_DEVICES=1
+
+# Intel Graphics Drivers
+export LIBVA_DRIVER_NAME=iHD
+export MESA_LOADER_DRIVER_OVERRIDE=iris
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+
+# Below settings added to handle errors on ebabling debug
+export WLR_DRM_NO_ATOMIC=1
+export WLR_NO_HARDWARE_CURSORS=1
+
+export ADW_DISABLE_PORTAL=1
+
+# Enable debug for sway, only if needed
+# exec dbus-run-session sway -d 2> "$HOME/sway_error.log"
+exec dbus-run-session sway "$@" 2> "$HOME/sway_error.log"
