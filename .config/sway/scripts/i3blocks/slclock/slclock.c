@@ -100,36 +100,21 @@ int get_update_interval(const char *format) {
     return 86400;
 }
 
-long ms_until_next_update(int interval, const struct tm *tm) {
+long ms_until_next_update(int interval) {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    long ms = ts.tv_nsec / 1000000;
-
-    if (interval == 1) {
-        // Next second boundary
-        long result = 1000 - ms;
-        return result > 0 ? result : 1;
-    } else if (interval == 60) {
-        // Next minute boundary
-        int sec_to_min = (60 - tm->tm_sec) % 60;
-        if (sec_to_min == 0 && ms > 0) sec_to_min = 60;
-        long result = sec_to_min * 1000 - ms;
-        return result > 0 ? result : 1;
-    } else if (interval == 3600) {
-        // Next hour boundary
-        int sec_to_hour = ((60 - tm->tm_min) % 60) * 60 + (60 - tm->tm_sec) % 60;
-        if (sec_to_hour == 0 && ms > 0) sec_to_hour = 3600;
-        long result = sec_to_hour * 1000 - ms;
-        return result > 0 ? result : 1;
-    } else {
-        // Next day boundary (midnight)
-        int sec_to_midnight = ((24 - tm->tm_hour) % 24) * 3600
-                            + ((60 - tm->tm_min) % 60) * 60
-                            + (60 - tm->tm_sec) % 60;
-        if (sec_to_midnight == 0 && ms > 0) sec_to_midnight = 86400;
-        long result = sec_to_midnight * 1000 - ms;
-        return result > 0 ? result : 1;
+    if (interval == 86400) {
+        // Align to local midnight, not UTC midnight
+        time_t now = ts.tv_sec;
+        struct tm tm;
+        localtime_r(&now, &tm);
+        int sec_since_midnight = tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
+        long ms = (86400 - sec_since_midnight) * 1000L - ts.tv_nsec / 1000000;
+        return ms > 0 ? ms : 1;
     }
+    long epoch_ms = (long)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    long ms = interval * 1000 - (epoch_ms % (interval * 1000));
+    return ms > 0 ? ms : 1;
 }
 
 int main(int argc, char *argv[]) {
@@ -204,8 +189,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        long ms = ms_until_next_update(interval, &tm_info);
+        long ms = ms_until_next_update(interval);
         if (ms <= 0) ms = 1;
+        // Add 10ms padding so the scheduler safely crosses
+        // into the next minute boundary before reading time
+        ms += 10;
 
         int ret = poll(fds, 1, ms);
 
