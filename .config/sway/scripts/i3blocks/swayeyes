@@ -59,7 +59,7 @@ handle_button() {
 	[ -z "$BLOCK_BUTTON" ] && return 0
     case "$BLOCK_BUTTON" in
         1)  "$NOTIFY_CMD" "$swayeyes_status" && pkill -RTMIN+3 i3blocks ;;
-        2) "$SWAYEYES_SCRIPT" toggle && pkill -RTMIN+3 i3blocks ;;
+        2) $HOME/.config/sway/scripts/toggle_swayeyes && pkill -RTMIN+3 i3blocks ;;
     esac
 }
 

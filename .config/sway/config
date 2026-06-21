@@ -138,7 +138,7 @@ bindsym $mod+r mode "resize"
 bindsym $mod+Shift+r resize set width 60
 
 bindsym $mod+F3 exec $scripts/toggle_wlsunset
-bindsym $mod+Shift+s exec $scripts/swayeyes toggle
+bindsym $mod+Shift+s exec $scripts/toggle_swayeyes
 bindsym $mod+w exec firefox
 bindsym $mod+Shift+w exec "epiphany -i"
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"

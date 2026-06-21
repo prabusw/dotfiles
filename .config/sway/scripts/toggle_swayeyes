@@ -1,0 +1,60 @@
+#!/usr/bin/env sh
+
+SERVICE_NAME="swayeyes"
+MAX_WAIT_TIME=20
+POLLING_INTERVAL=1
+
+signal_i3blocks() {
+    pkill -RTMIN+3 i3blocks 2>/dev/null
+}
+
+get_service_status() {
+    if command -v rc-service >/dev/null 2>&1; then
+        rc-service -U "$SERVICE_NAME" status >/dev/null 2>&1 && echo "started" || echo "stopped"
+    elif command -v systemctl >/dev/null 2>&1; then
+        systemctl --user is-active "$SERVICE_NAME" >/dev/null 2>&1 && echo "started" || echo "stopped"
+    else
+        notify-send "$SERVICE_NAME" "No supported service manager found"
+        exit 1
+    fi
+}
+
+initial_state=$(get_service_status)
+if [ -z "$initial_state" ]; then
+    exit 1
+fi
+
+if [ "$initial_state" = "started" ]; then
+    desired_state="stopped"
+    NOTIFICATION_ID=$(notify-send -p "$SERVICE_NAME will be stopped shortly")
+    if command -v rc-service >/dev/null 2>&1; then
+        rc-service -U "$SERVICE_NAME" stop
+    else
+        systemctl --user stop "$SERVICE_NAME"
+    fi
+else
+    desired_state="started"
+    NOTIFICATION_ID=$(notify-send -p "$SERVICE_NAME will be started shortly")
+    if command -v rc-service >/dev/null 2>&1; then
+        rc-service -U "$SERVICE_NAME" start
+    else
+        systemctl --user start "$SERVICE_NAME"
+    fi
+fi
+
+elapsed_time=0
+while [ "$elapsed_time" -lt "$MAX_WAIT_TIME" ]; do
+    current_status=$(get_service_status)
+    [ "$current_status" = "$desired_state" ] && break
+    sleep "$POLLING_INTERVAL"
+    elapsed_time=$((elapsed_time + POLLING_INTERVAL))
+done
+
+final_state=$(get_service_status)
+if [ -n "$NOTIFICATION_ID" ]; then
+    notify-send -r "$NOTIFICATION_ID" "$SERVICE_NAME $final_state"
+else
+    notify-send "$SERVICE_NAME $final_state"
+fi
+
+signal_i3blocks
