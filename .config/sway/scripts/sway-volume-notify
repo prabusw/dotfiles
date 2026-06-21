@@ -1,8 +1,5 @@
 #!/usr/bin/env sh
 
-# Based on https://github.com/rileyrg/linux-init/blob/master/directories/bin/sway/sway-volume-notify
-# https://github.com/swaywm/sway/wiki#how-can-i-setup-keyboard-volume-keys
-# Changed symbols from 🔊 to others like 🔇, 🔈 and 🔊 where U+1F507, U+1F508 and U+1F50A respectively.
 NOTIFY_CMD="sway-notify"
 get_volume(){
     volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)

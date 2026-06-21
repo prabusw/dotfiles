@@ -1,5 +1,4 @@
 #!/bin/sh
-# https://github.com/bdwalton/config/blob/main/dotfiles/_bdwscripts/tofi-exit
 set -e
 set -u
 
@@ -15,19 +14,20 @@ selection=$(
          )
 
 case "${selection}" in
-    *"Lock"*)
-        swaylockd
-        ;;
-    *"Exit"*)
-        swaymsg exit
-        ;;
-    *"Suspend"*)
-        swaylockd && powerctl mem
-        ;;
-    *"Reboot"*)
-        doas /sbin/reboot
-        ;;
-    *"PowerOff"*)
-        doas /sbin/poweroff
-        ;;
+	*"Lock"*)
+		swaylockd
+		;;
+	*"Exit"*)
+		swaymsg exit
+		;;
+	*"Suspend"*)
+		powerctl mem
+		swaylockd
+		;;
+	*"Reboot"*)
+		doas /sbin/reboot
+		;;
+	*"PowerOff"*)
+		doas /sbin/poweroff
+		;;
 esac

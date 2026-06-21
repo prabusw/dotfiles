@@ -1,4 +1,2 @@
 #!/usr/bin/env sh
-
-# Maintained in linux-config.org
-notify-send -t 3000 "${@}" || true
+notify-send "${@}" || logger -t sway-notify -p user.err "Notification failed to send."

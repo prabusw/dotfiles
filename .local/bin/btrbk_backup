@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Configuration
+INDICATOR_FILE="/tmp/btrbk_running"
+I3BLOCKS_SIGNAL=5 # matches the number in $HOME/.config/i3blocks/config
+BTRBK_CONFIG="/home/prabu/.config/btrbk/btrbk.conf"
+
+send_signal() {
+    pkill -RTMIN+$I3BLOCKS_SIGNAL i3blocks
+}
+
+# Log the start time
+echo "btrbk backup process started."
+
+# Create the lock file
+touch "$INDICATOR_FILE"
+
+# Signal i3blocks to refresh
+send_signal
+
+# Cleanup runs on EXIT (success or failure)
+trap "rm -f \"$INDICATOR_FILE\" &>/dev/null; send_signal" EXIT
+
+#  Run the Btrbk Job
+# Use 'exec' to replace the current shell process with the btrbk process.
+/usr/bin/btrbk -q -c "$BTRBK_CONFIG" run
+
+# Log the end time
+echo "btrbk backup process ended."

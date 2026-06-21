@@ -1,19 +1,9 @@
-# i3blocks configuration file
-#
-# The i3blocks man page describes the usage of the binary,
-# and its website describes the configuration:
-#
-#     https://vivien.github.io/i3blocks
-
 # Global properties
-# separator=true
 align=center
 separator=false
 align=center
-# color=#f8f8f2
 separator_block_width=15
 markup=pango
-# $SCRIPT_DIR set in status_command in sway config file
 command=$SCRIPT_DIR/$BLOCK_NAME
 
 # [active]
@@ -27,24 +17,15 @@ interval=persist
 LABEL=
 CLICK_SCRIPT=/home/prabu/.config/sway/scripts/i3blocks/calendar
 signal=4
-# # Fancy text with multiple colors and shapes
-# [funky]
-# full_text=<span foreground="red" size="x-large">Roses</span> and <i><span color="#EE37B8">violets</span></i>!
-# markup=pango
 
-# This block is present to ensure that time appears in the center of the bar
+# The min_width has to adjusted to ensure that time appears in the center of the bar
 [spaceblock]
 full_text=" "
-# The below to be used for scale 1.25
 min_width=640
-# The below to be used for scale 1
-# min_width=800
 # min_width=500
-# min_width=350
 align=center
 
 [backup]
-# command=/usr/local/bin/btrbk_status.sh
 interval=once
 signal=5
 
@@ -52,11 +33,6 @@ signal=5
 interval=60
 signal=2
 min_width=20
-
-# [mpd]
-# interval=once
-# min_width=20
-# signal=3
 
 [swayeyes]
 interval=60
@@ -67,24 +43,3 @@ min_width=20
 interval=once
 signal=1
 min_width=20
-
-# align=center
-# [documentation]
-# full_text=Documentation
-# website=https://vivien.github.io/i3blocks
-# command=xdg-open "$website"
-# color=#f12711
-
-
-# [greetings]
-# color=#f5af19
-# command=echo "Hello, $USER?"
-# interval=once
-
-# Update time every 5 seconds
-# [time]
-# command=date +%T
-# interval=5
-
-# sources:
-# https://codeberg.org/trill/dotfiles/src/branch/master/.local/bin/i3blocks/volume-pipewire

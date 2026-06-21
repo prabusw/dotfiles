@@ -5,7 +5,7 @@
 
 # Timout
 sort=-time
-default-timeout=10000
+default-timeout=3000
 # ignore-timeout=1
 layer=overlay
 # icon-path="/usr/share/icons/Nordzy:/usr/share/icons/Nordzy-dark:/usr/share/icons/Mint-Y"

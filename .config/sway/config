@@ -5,7 +5,7 @@ set $scripts $config_dir/scripts
 
 set $mod Mod4
 set $term foot
-set $menu tofi-run | xargs -r -I {} swaymsg exec "$term -e {}"
+set $menu tofi-run --require-match false | xargs -r -I {} swaymsg exec "$term --hold -e {}"
 set $drun tofi-drun | xargs swaymsg exec --
 set $XF86AudioPlay XF86AudioPlay
 set $XF86AudioNext XF86AudioNext
@@ -37,9 +37,8 @@ output HDMI-A-1 {
 }
 
 exec swayidle -w \
-    timeout 300 '$scripts/check_player.sh && swaylockd' \
-    timeout 500 'swaymsg "output * dpms off"' \
-            resume 'swaymsg "output * dpms on"' \
+    timeout 300 '$scripts/check_player.sh && swaylockd'  \
+    timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
     timeout 600 'powerctl mem' \
     before-sleep 'swaylockd'
 

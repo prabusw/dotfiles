@@ -20,7 +20,7 @@ color=2e3440
 
 # Detach from the controlling terminal after locking
 # Note: this is the default behavior of i3lock
-daemonize
+# daemonize
 
 # Display the given image
 # image [[<output>]:]<path>
