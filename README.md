@@ -26,17 +26,17 @@ SwayWM has been configured using the following tools:
 * Terminal - [foot](https://codeberg.org/dnkl/foot)
 * Notification daemon - [mako](https://github.com/emersion/mako)
 * Locking tool - [swaylockd](https://github.com/jirutka/swaylockd)
-* Feed generator for swaybar - [i3blocks](https://vivien.github.io/i3blocks/) with custom [scripts](home/prabu/.config/sway/scripts/i3blocks)
-* Display time on swaybar - [slclock](home/prabu/.config/sway/scripts/i3blocks/slclock), a custom vibe coded script in C
+* Feed generator for swaybar - [i3blocks](https://vivien.github.io/i3blocks/) with custom [scripts](tree/master/.config/sway/scripts/i3blocks)
+* Display time on swaybar - [slclock](tree/master/.config/sway/scripts/i3blocks/slclock), a custom vibe coded script in C
 * Launcher menu - [tofi](https://github.com/philj56/tofi)
-* Logout menu - [tofi-exit](home/prabu/.config/sway/scripts/tofi-exit) - a custom script based on [tofi](https://github.com/philj56/tofi)
+* Logout menu - [tofi-exit](tree/master/.config/sway/scripts/tofi-exit) - a custom script based on [tofi](https://github.com/philj56/tofi)
 * power management tool - [powerctl](https://sr.ht/~sircmpwn/powerctl/)
 
 To achieve consistent nord theme:
 * Gtk theme - [nordic](https://github.com/EliverLara/Nordic)
 * Icon theme - [nordzy](https://github.com/MolassesLover/Nordzy-icon)
 * Firefox - Uses custom userChrome.css based on [KeyFox](https://github.com/alfaaarex/keyfox)
-* Theme switching - [toggle_theme](home/prabu/.config/sway/scripts/toggle_theme) - a custom script is used to toggle dark/light mode
+* Theme switching - [toggle_theme](tree/master/.config/sway/scripts/toggle_theme) - a custom script is used to toggle dark/light mode
 
 
 ## Other tools used
