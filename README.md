@@ -27,7 +27,7 @@ SwayWM has been configured using the following tools:
 * Notification daemon - [mako](https://github.com/emersion/mako)
 * Locking tool - [swaylockd](https://github.com/jirutka/swaylockd)
 * Feed generator for swaybar - [i3blocks](https://vivien.github.io/i3blocks/) with custom [scripts](home/prabu/.config/sway/scripts/i3blocks)
-* Display time on swaybar - i3blocks uses [wayclock](home/prabu/.config/sway/scripts/i3blocks/wayclock), a custom vibe coded script in C
+* Display time on swaybar - [slclock](home/prabu/.config/sway/scripts/i3blocks/slclock), a custom vibe coded script in C
 * Launcher menu - [tofi](https://github.com/philj56/tofi)
 * Logout menu - [tofi-exit](home/prabu/.config/sway/scripts/tofi-exit) - a custom script based on [tofi](https://github.com/philj56/tofi)
 * power management tool - [powerctl](https://sr.ht/~sircmpwn/powerctl/)
