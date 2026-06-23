@@ -39,7 +39,7 @@ output HDMI-A-1 {
 exec swayidle -w \
     timeout 300 '$scripts/check_player.sh && swaylockd'  \
     timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-    timeout 600 'powerctl mem' \
+    timeout 600 'powerctl mem' resume 'pkill -SIGRTMIN+4 i3blocks'\
     before-sleep 'swaylockd'
 
 bar {
