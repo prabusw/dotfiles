@@ -35,8 +35,8 @@ for any status bar that supports persistent commands or custom modules.
 | Wall-clock alignment | No | Yes | Yes |
 | Output deduplication | No | Yes | Yes |
 | Click handling | External | Built-in | Built-in |
-| Dependencies | sh, coreutils | GTK, C++ runtime... | libc only |
-| Binary size | N/A | ~2MB+ | ~19KB |
+| Dependencies | sh, coreutils | GTK, C++ runtime... | libc,linux kernel|
+| Binary size | N/A | ~2MB+ | ~14KB |
 | Composable | Limited | No | Yes |
 | Bar agnostic | Yes | No | Yes |
 
@@ -137,15 +137,17 @@ simple tools together. Each piece remains simple and replaceable.
 
 ## i3blocks configuration
 
+i3blocks needs complete path for the CLICK_SCRIPT.
+
 ```ini
 [calendar]
 command=slclock "%H:%M" "" --action
 interval=persist
-CLICK_SCRIPT=~/.config/sway/scripts/calendar
-signal=4
+CLICK_SCRIPT=/home/prabu/.config/sway/scripts/i3blocks/calendar
 ```
 
 ## Build
 
 ```sh
 cc -O2 -o slclock slclock.c
+```
