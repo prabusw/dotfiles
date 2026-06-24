@@ -22,7 +22,6 @@ case "${selection}" in
 		;;
 	*"Suspend"*)
 		powerctl mem
-		pkill -SIGRTMIN+4 i3blocks
 		swaylockd
 		;;
 	*"Reboot"*)

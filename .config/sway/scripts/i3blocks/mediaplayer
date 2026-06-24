@@ -3,7 +3,7 @@
 now_playing() {
     local current_song
 	current_song=$(playerctl metadata --format '{{ title }} from {{ album }} by {{artist }} is playing in {{ playerName }}')
-    makoctl dismiss && sway-notify "$current_song"
+    fnottctl dismiss all && sway-notify "$current_song"
 }
 print_block() {
     # Check player status

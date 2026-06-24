@@ -5,6 +5,8 @@
 #include <poll.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/timerfd.h>
+#include <stdint.h>
 
 // Volatile flag for signal handling
 static volatile sig_atomic_t running = 1;
@@ -13,82 +15,6 @@ static void handle_signal(int sig) {
     (void)sig;  // Unused parameter
     running = 0;
 }
-
-// Compile with -DNOHELP to exclude help text and reduce binary size
-#ifndef NOHELP
-static void print_help(const char *progname) {
-    printf("slclock - simple/suckless/statusline clock\n\n");
-    printf("USAGE:\n");
-    printf("  %s [FORMAT] [LABEL] [CLICK_ARGS...]\n\n", progname);
-
-    printf("ARGUMENTS:\n");
-    printf("  FORMAT       strftime format string (default: %%H:%%M:%%S)\n");
-    printf("  LABEL        optional prefix text (default: empty)\n");
-    printf("  CLICK_ARGS   arguments passed to CLICK_SCRIPT on mouse events\n\n");
-
-    printf("ENVIRONMENT VARIABLES:\n");
-    printf("  DATEFMT      time format (fallback if FORMAT not provided)\n");
-    printf("  LABEL        prefix label (fallback if LABEL not provided)\n");
-    printf("  CLICK_SCRIPT script to execute on click events\n\n");
-
-    printf("PRIORITY:\n");
-    printf("  CLI arguments > Environment variables > Defaults\n\n");
-
-    printf("ADAPTIVE UPDATES:\n");
-    printf("  Automatically determines update interval from format:\n");
-    printf("    - Formats with seconds (%%S, %%T): updates every 1 second\n");
-    printf("    - Formats with minutes (%%M, %%R): updates every 60 seconds\n");
-    printf("    - Formats with hours (%%H, %%I):   updates every 3600 seconds\n");
-    printf("    - Date-only formats:              updates every 86400 seconds\n");
-    printf("  Updates are aligned to wall-clock boundaries for efficiency.\n\n");
-
-    printf("EXAMPLES:\n");
-    printf("  # Standalone usage\n");
-    printf("  %s '%%H:%%M'\n", progname);
-    printf("  %s '%%I:%%M %%p' '🕐 '\n", progname);
-    printf("  %s '%%Y-%%m-%%d %%H:%%M:%%S'\n\n", progname);
-
-    printf("  # With click handler\n");
-    printf("  CLICK_SCRIPT=~/my-script %s '%%H:%%M' '' --action\n\n", progname);
-
-    printf("  # i3blocks configuration\n");
-    printf("  [clock]\n");
-    printf("  command=%s\n", progname);
-    printf("  interval=persist\n");
-    printf("  DATEFMT=+%%H:%%M\n");
-    printf("  LABEL=📅 \n");
-    printf("  CLICK_SCRIPT=~/.config/sway/scripts/calendar\n\n");
-
-    printf("  # Waybar configuration\n");
-    printf("  \"custom/clock\": {\n");
-    printf("    \"exec\": \"%s '%%H:%%M'\",\n", progname);
-    printf("    \"interval\": \"once\"\n");
-    printf("  }\n\n");
-
-    printf("FORMAT SPECIFIERS:\n");
-    printf("  Common strftime formats:\n");
-    printf("    %%H  Hour (00-23)          %%M  Minute (00-59)\n");
-    printf("    %%I  Hour (01-12)          %%S  Second (00-59)\n");
-    printf("    %%p  AM/PM                 %%A  Weekday name\n");
-    printf("    %%Y  Year (4-digit)        %%m  Month (01-12)\n");
-    printf("    %%d  Day of month (01-31)  %%B  Month name\n");
-    printf("    %%T  Time (%%H:%%M:%%S)        %%R  Time (%%H:%%M)\n\n");
-
-    printf("FEATURES:\n");
-    printf("  - Minimal CPU usage via adaptive sleep intervals\n");
-    printf("  - Wall-clock aligned updates (updates at :00 for minute formats)\n");
-    printf("  - Non-blocking click handling with fork/exec\n");
-    printf("  - Automatic child process cleanup (no zombie processes)\n");
-    printf("  - Output deduplication (only updates when display changes)\n");
-    printf("  - Graceful shutdown on SIGTERM, SIGINT (Ctrl+C), SIGHUP\n");
-    printf("  - Auto-exit when parent process dies (POLLHUP detection)\n");
-    printf("  - Works as both standalone tool and status bar component\n\n");
-
-    printf("AUTHORS:\n");
-    printf("  Originally designed for i3blocks/sway integration\n");
-    printf("  Optimized for minimal wake-ups and CPU efficiency\n\n");
-}
-#endif
 
 int get_update_interval(const char *format) {
     if (strstr(format, "%S") || strstr(format, "%s") || strstr(format, "%T"))
@@ -100,31 +26,7 @@ int get_update_interval(const char *format) {
     return 86400;
 }
 
-long ms_until_next_update(int interval) {
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    if (interval == 86400) {
-        // Align to local midnight, not UTC midnight
-        time_t now = ts.tv_sec;
-        struct tm tm;
-        localtime_r(&now, &tm);
-        int sec_since_midnight = tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
-        long ms = (86400 - sec_since_midnight) * 1000L - ts.tv_nsec / 1000000;
-        return ms > 0 ? ms : 1;
-    }
-    long epoch_ms = (long)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
-    long ms = interval * 1000 - (epoch_ms % (interval * 1000));
-    return ms > 0 ? ms : 1;
-}
-
 int main(int argc, char *argv[]) {
-#ifndef NOHELP
-    // Show help
-    if (argc > 1 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
-        print_help(argv[0]);
-        return 0;
-    }
-#endif
 
     // Priority: CLI arg > env var > default
     char *format = NULL;
@@ -170,8 +72,23 @@ int main(int argc, char *argv[]) {
     setvbuf(stdout, NULL, _IOLBF, 0);
 
     int interval = get_update_interval(format);
-    struct pollfd fds[1] = {{STDIN_FILENO, POLLIN, 0}};
     char last[128] = "";
+
+    // Create timer aligned to next wall-clock boundary
+    int tfd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC | TFD_NONBLOCK);
+    struct timespec now_ts;
+    clock_gettime(CLOCK_REALTIME, &now_ts);
+    long next = ((now_ts.tv_sec / interval) + 1) * interval;
+    struct itimerspec its = {
+        .it_value    = { .tv_sec = next, .tv_nsec = 10000000 }, // +10ms padding
+        .it_interval = { .tv_sec = interval, .tv_nsec = 0 }
+    };
+    timerfd_settime(tfd, TFD_TIMER_ABSTIME, &its, NULL);
+
+    struct pollfd fds[2] = {
+        { STDIN_FILENO, POLLIN, 0 },
+        { tfd,          POLLIN, 0 }
+    };
 
     while (running) {
         time_t now = time(NULL);
@@ -189,13 +106,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        long ms = ms_until_next_update(interval);
-        if (ms <= 0) ms = 1;
-        // Add 10ms padding so the scheduler safely crosses
-        // into the next minute boundary before reading time
-        ms += 10;
-
-        int ret = poll(fds, 1, ms);
+        int ret = poll(fds, 2, -1);
 
         // Check if we should exit due to signal
         if (!running) {
@@ -203,6 +114,10 @@ int main(int argc, char *argv[]) {
         }
 
         if (ret > 0) {
+            if (fds[1].revents & POLLIN) {
+                uint64_t exp;
+                read(tfd, &exp, sizeof(exp));
+            }
             // Check for stdin closure (bar shutdown/restart)
             if (fds[0].revents & (POLLHUP | POLLERR | POLLNVAL)) {
                 break;  // Exit cleanly when parent dies
@@ -241,6 +156,6 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-
+    close(tfd);
     return 0;
 }

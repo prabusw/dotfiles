@@ -1,38 +1,35 @@
 #!/usr/bin/env sh
-
-NOTIFY_CMD="sway-notify"
+WOBSOCK="${XDG_RUNTIME_DIR}/wob.sock"
 get_volume(){
     volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)
-	local volume_decimal
 	volume_decimal=$(echo "$volume" | awk '/Volume/ {print $2}')
 	volumep=$(echo "$volume_decimal * 100" | bc | awk '{printf "%d", $1}')
 	if echo "$volume" | grep -q '[Mm]UTED'; then
-        volume_status="MUTED"
+        muted=1
     else
-        volume_status="UNMUTED"
+        muted=0
     fi
 }
-# Initialise variables and clear notifications first
-get_volume && makoctl dismiss 2>/dev/null
 
 case "$1" in
     "0")
         # Toggle mute status
-        wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && pkill -RTMIN+1 i3blocks
+        wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
         ;;
     "+")
         # Unmute if needed and Increase volume by 5% (0.05)
 		wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
-		wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05+" -l 1.0 && pkill -RTMIN+1 i3blocks
-        get_volume && "$NOTIFY_CMD" -h "int:value:${volumep}" "🔊 ${volumep}%"
+		wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05+" -l 1.0
         ;;
     "-")
         # Decrease volume by 5% (0.05)
-        wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05-" -l 1.0 && pkill -RTMIN+1 i3blocks
-		get_volume && "$NOTIFY_CMD" -h "int:value:${volumep}" "🔈 ${volumep}%"
-        ;;
-    *)
-        # Default action is to show volume
-        get_volume && "$NOTIFY_CMD" -h "int:value:${volumep}" "${volumep}%"
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05-" -l 1.0
         ;;
 esac
+get_volume
+if [ "$muted" -eq 1 ]; then
+    echo "$volumep muted" > "$WOBSOCK"
+else
+    echo "$volumep" > "$WOBSOCK"
+fi
+pkill -RTMIN+1 i3blocks &
