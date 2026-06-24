@@ -18,6 +18,10 @@ stdin. slclock reads this and executes `CLICK_SCRIPT`, bypassing the
 normal i3blocks click model entirely. `SIGCHLD` set to `SIG_IGN` to
 prevent zombie processes from click script children.
 
+`CLICK_SCRIPT` requires a complete path — no environment variables
+like `$HOME` or i3blocks internals like `$SCRIPT_DIR` are expanded, as
+slclock executes the script directly without a shell.
+
 ## i3blocks
 
 ```ini
@@ -27,8 +31,9 @@ interval=persist
 CLICK_SCRIPT=/home/prabu/.config/sway/scripts/i3blocks/calendar
 ```
 
-## Build
+## Build & Install
 
 ```sh
 cc -O2 -o slclock slclock.c
+doas install -m755 slclock /usr/local/bin/
 ```

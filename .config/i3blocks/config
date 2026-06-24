@@ -11,7 +11,7 @@ command=$SCRIPT_DIR/$BLOCK_NAME
 # interval=once
 
 [calendar]
-command=slclock "%H:%M" "" --action
+command=slclock
 interval=persist
 CLICK_SCRIPT=/home/prabu/.config/sway/scripts/i3blocks/calendar
 
