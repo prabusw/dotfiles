@@ -11,12 +11,8 @@ command=$SCRIPT_DIR/$BLOCK_NAME
 # interval=once
 
 [calendar]
-command=slclock "%H:%M" "" --action
+command=slclock
 interval=persist
-# DATEFMT=+%H:%M
-LABEL=
-CLICK_SCRIPT=/home/prabu/.config/sway/scripts/i3blocks/calendar
-signal=4
 
 # The min_width has to adjusted to ensure that time appears in the center of the bar
 [spaceblock]

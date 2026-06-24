@@ -6,7 +6,7 @@ max-icon-size=64
 height=300
 background-color=#4c566a
 progress-color=over #5e81ac
-padding=0,5,20
+# padding=0,5,20
 border-color=#88c0d0
 border-radius=20
 format=<span font="Symbols Nerd Font 13" rise="5pt" color="#b48ead">%s</span>\n%b
