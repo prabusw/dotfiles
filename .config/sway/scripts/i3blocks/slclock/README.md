@@ -1,52 +1,24 @@
 # slclock — A minimal clock for status bars
 
-slclock is a single C file clock for status bars like i3blocks. No
-dependencies beyond libc and the Linux kernel. It runs as a persistent
-process and handles its own update timing.
+A single C file clock for i3blocks. No dependencies beyond libc and
+the Linux kernel.
 
-The original version created with assistance from LLMs like Claude and
-Gemini was updated based on [time.c](https://github.com/francma/dotfiles/blob/master/.config/sway/blocks/time.c)
-by francma.
-
-## Usage
-
-```
-slclock [FORMAT]
-```
-
-`FORMAT` is a strftime format string. Defaults to `%H:%M:%S`.
-
-## i3blocks
-
-```ini
-[calendar]
-command=slclock "%H:%M"
-interval=persist
-```
-
-## How it works
-
-The update interval is derived from the format string automatically:
-
-| Format contains | Update interval |
-|---|---|
-| `%S`, `%T` | 1 second |
-| `%M`, `%R` | 60 seconds |
-| `%H`, `%I` | 3600 seconds |
-| date-only | 86400 seconds |
-
-Updates are wall-clock aligned — a `%H:%M` format wakes at `:00`
-every minute, not at a fixed offset from when the program started.
-
-Uses `timerfd` with `CLOCK_REALTIME` and an absolute deadline. When
-the system wakes from sleep, the kernel fires the timer immediately if
-the boundary was already missed — no external signal or hook required.
-
-Output is deduplicated — nothing is printed if the formatted time
-hasn't changed.
+Based on [time.c](https://github.com/francma/dotfiles/blob/master/.config/sway/blocks/time.c)
+by francma. Renamed to slclock to avoid conflict with utilities having similar name. Removed `now.tv_sec += 1` based on suggestion from Claude.
 
 ## Build
 
 ```sh
 cc -O2 -o slclock slclock.c
+```
+
+## i3blocks
+
+Copy the above binary to $PATH, so slclock can be called without
+specifiying the path.
+
+```ini
+[calendar]
+command=slclock
+interval=persist
 ```
