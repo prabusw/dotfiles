@@ -4,8 +4,9 @@ slclock is a single C file clock for status bars like i3blocks. No
 dependencies beyond libc and the Linux kernel. It runs as a persistent
 process and handles its own update timing.
 
-This utility has been written with assistance from LLMs like
-Claude and Gemini.
+The original version created with assistance from LLMs like Claude and
+Gemini was updated based on [time.c](https://github.com/francma/dotfiles/blob/master/.config/sway/blocks/time.c)
+by francma.
 
 ## Usage
 
