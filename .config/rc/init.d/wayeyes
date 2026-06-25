@@ -1,12 +1,9 @@
 #!/sbin/openrc-run
 
 description="Screen blanker service for Wayland to protect your eyes"
-command="$HOME/.local/bin/wayeyes"
+command="wayeyes"
 supervisor=supervise-daemon
 error_logger="logger -t '${RC_SVCNAME}' -p daemon.error"
-# Enable below for debugging
-# output_log="$(eval echo ~$RC_RUNUSER)/.local/share/wayeyes/logs/openrc.out"
-# error_log="$(eval echo ~$RC_RUNUSER)/.local/share/wayeyes/logs/openrc.err"
 
 depends() {
 	use dbus

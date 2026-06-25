@@ -61,7 +61,6 @@ bar {
     }
 }
 
-exec wayeyes
 exec $scripts/start_wob
 
 default_border pixel 2

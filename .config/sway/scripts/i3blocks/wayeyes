@@ -4,7 +4,7 @@ STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/wayeyes.state"
 
 state=$(cat "$STATE_FILE" 2>/dev/null || echo "stopped")
 epoch=$(echo "$state" | awk '{print $2}')
-time=$(date -d "@$epoch" +%H:%M 2>/dev/null)
+time=$(date -d "@$epoch" +%H:%M:%S 2>/dev/null)
 
 case "$BLOCK_BUTTON" in
     1) case "$state" in
