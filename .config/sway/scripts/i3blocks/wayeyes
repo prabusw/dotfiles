@@ -1,0 +1,49 @@
+#!/usr/bin/env sh
+# Icons are FontAwesome eye-open & eye-slash
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/wayeyes.state"
+
+state=$(cat "$STATE_FILE" 2>/dev/null || echo "stopped")
+epoch=$(echo "$state" | awk '{print $2}')
+time=$(date -d "@$epoch" +%H:%M 2>/dev/null)
+
+case "$BLOCK_BUTTON" in
+    1) case "$state" in
+           running*|pre-alert*)
+               notify-send "wayeyes" "Next break at $time" ;;
+           paused*)
+               notify-send "wayeyes" "Paused" ;;
+           blanked*)
+               notify-send "wayeyes" "On break" ;;
+           *)
+               notify-send "wayeyes" "Not running" ;;
+       esac ;;
+    2) pkill -SIGUSR1 wayeyes ;;
+esac
+
+case "$state" in
+    pre-alert*)
+        echo ""
+        echo ""
+        echo "#FFA500"
+        ;;
+    running*)
+        echo ""
+        echo ""
+        echo ""
+        ;;
+    paused*)
+        echo ""
+        echo ""
+        echo "#FF0000"
+        ;;
+    blanked*)
+        echo ""
+        echo ""
+        echo ""
+        ;;
+    *)
+        echo ""
+        echo ""
+        echo "#FF0000"
+        ;;
+esac

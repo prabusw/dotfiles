@@ -40,7 +40,8 @@ exec swayidle -w \
     timeout 300 '$scripts/check_player.sh && swaylockd'  \
     timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
     timeout 600 'powerctl mem' \
-    before-sleep 'swaylockd'
+    before-sleep 'swaylockd' \
+    after-resume 'pkill -SIGUSR2 wayeyes'
 
 bar {
     position top
@@ -59,6 +60,9 @@ bar {
         binding_mode        $bar_binding_mode_border     $bar_binding_mode_bg     $bar_binding_mode_text
     }
 }
+
+exec wayeyes
+exec $scripts/start_wob
 
 default_border pixel 2
 smart_borders on
@@ -138,7 +142,7 @@ bindsym $mod+r mode "resize"
 bindsym $mod+Shift+r resize set width 60
 
 bindsym $mod+F3 exec $scripts/toggle_wlsunset
-bindsym $mod+Shift+s exec toggle_wayeyes
+bindsym $mod+Shift+s exec pkill -SIGUSR1 wayeyes
 bindsym $mod+w exec firefox
 bindsym $mod+Shift+w exec "epiphany -i"
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
@@ -147,7 +151,6 @@ bindsym Print exec $scripts/slurpshot
 exec wl-paste --watch cliphist store
 bindsym $mod+p exec foot -T clip_history_fzf_foot -L sh -c "cliphist list | fzf -d $'\t' --with-nth 2 | cliphist decode | wl-copy" -H
 
-exec $scripts/start_wob
 bindsym --locked $XF86AudioLowerVolume exec $scripts/sway-volume-notify "-"
 bindsym --locked $XF86AudioRaiseVolume exec $scripts/sway-volume-notify "+"
 bindsym --locked $XF86AudioMute exec $scripts/sway-volume-notify "0"

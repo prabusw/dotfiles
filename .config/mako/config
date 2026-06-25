@@ -15,7 +15,7 @@ text-alignment=center
 [grouped]
 format= <span font="Symbols Nerd Font 13" rise="5pt" color="#b48ead" font-weight="700">%s</span>\n%b
 
-[app-name=RSI]
+[app-name=wayeyes]
 default-timeout=20000
 background-color=#000000
 text-color=#000000

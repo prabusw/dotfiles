@@ -22,6 +22,7 @@ case "${selection}" in
 		;;
 	*"Suspend"*)
 		powerctl mem
+		pkill -SIGUSR2 wayeyes
 		swaylockd
 		;;
 	*"Reboot"*)
