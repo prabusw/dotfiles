@@ -34,6 +34,6 @@ CLICK_SCRIPT=/home/prabu/.config/sway/scripts/i3blocks/calendar
 ## Build & Install
 
 ```sh
-cc -O2 -o slclock slclock.c
-doas install -m755 slclock /usr/local/bin/
+make install
+make uninstall
 ```
