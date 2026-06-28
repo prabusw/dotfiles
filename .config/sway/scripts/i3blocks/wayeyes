@@ -22,11 +22,16 @@ esac
 
 case "$state" in
     pre-alert*)
+        if [ ! -f /tmp/wayeyes.alerted ]; then
+            notify-send "wayeyes" "Next break in a minute"
+            touch /tmp/wayeyes.alerted
+        fi
         echo ""
         echo ""
         echo "#FFA500"
         ;;
     running*)
+        rm -f /tmp/wayeyes.alerted
         echo ""
         echo ""
         echo ""
@@ -37,11 +42,13 @@ case "$state" in
         echo "#FF0000"
         ;;
     blanked*)
+        rm -f /tmp/wayeyes.alerted
         echo ""
         echo ""
         echo ""
         ;;
     *)
+        rm -f /tmp/wayeyes.alerted
         echo ""
         echo ""
         echo "#FF0000"
