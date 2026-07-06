@@ -1,7 +1,8 @@
 #!/bin/sh
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
 
 INDICATOR_FILE="/tmp/btrbk_running"
-
 
 # Function to print the icon and status
 print_block() {
@@ -14,6 +15,14 @@ print_block() {
             echo ""
         fi
 }
-
+handle_button() {
+    # Exit early if no button was pressed, which is the default behavior
+    [ -z "$BLOCK_BUTTON" ] && return 0
+    case "$BLOCK_BUTTON" in
+        1) notify-send "btrbk" "btrbk backup is in progress." ;;
+    esac
+}
+# Handle the mouse button click, and all its output is discarded
+handle_button > /dev/null 2>&1
 # Print the icon and status to i3blocks
 print_block

@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
 # Icons are FontAwesome eye-open & eye-slash
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/wayeyes.state"
 

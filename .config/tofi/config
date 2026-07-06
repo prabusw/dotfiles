@@ -1,3 +1,5 @@
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
 ### Fonts
 font = "/usr/share/fonts/hack/Hack-Bold.ttf"
 font-size = 15

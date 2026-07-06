@@ -1,13 +1,16 @@
 #!/bin/sh
 set -u
 
-DARK_THEME="Nordic"
-LIGHT_THEME="Adwaita"
+DARK_THEME="Nordic-darker"
+LIGHT_THEME="Nordic-Polar"
+
+DARK_ICONS="Nordzy-dark"
+LIGHT_ICONS="Nordzy"
 
 SWAY_CONFIG_DIR="$HOME/.config/sway"
 SWAY_THEMES_DIR="$SWAY_CONFIG_DIR/themes"
 SWAY_DARK_CONFIG="$SWAY_THEMES_DIR/nord.conf"
-SWAY_LIGHT_CONFIG="$SWAY_THEMES_DIR/adwaita.conf"
+SWAY_LIGHT_CONFIG="$SWAY_THEMES_DIR/nord_light.conf"
 GTK3_CONFIG="$HOME/.config/gtk-3.0/settings.ini"
 FOOT_THEMES_DIR="$HOME/.config/foot/themes"
 FOOT_DARK_CONFIG="$FOOT_THEMES_DIR/dark.ini"
@@ -24,12 +27,15 @@ apply_foot_theme() {
 apply_gtk_theme() {
     local theme=$1
     local color_scheme=$2
+    local icons=$3
 
     gsettings set org.gnome.desktop.interface gtk-theme "$theme"
     gsettings set org.gnome.desktop.interface color-scheme "$color_scheme"
+    gsettings set org.gnome.desktop.interface icon-theme "$icons"
 
     if [ -f "$GTK3_CONFIG" ]; then
         sed -i "s/^gtk-theme-name=.*/gtk-theme-name=$theme/" "$GTK3_CONFIG"
+        sed -i "s/^gtk-icon-theme-name=.*/gtk-icon-theme-name=$icons/" "$GTK3_CONFIG"
     fi
 }
 
@@ -46,18 +52,18 @@ apply_sway_theme() {
 
 set_dark_theme() {
     echo "Switching to dark theme ($DARK_THEME)..."
-	apply_foot_theme "$FOOT_DARK_CONFIG"
-	pkill -SIGUSR1 foot
-	apply_gtk_theme "$DARK_THEME" "prefer-dark"
-	apply_sway_theme "$SWAY_DARK_CONFIG"
+    apply_foot_theme "$FOOT_DARK_CONFIG"
+    pkill -SIGUSR1 foot
+    apply_gtk_theme "$DARK_THEME" "prefer-dark" "$DARK_ICONS"
+    apply_sway_theme "$SWAY_DARK_CONFIG"
 }
 
 set_light_theme() {
     echo "Switching to light theme ($LIGHT_THEME)..."
-	apply_foot_theme "$FOOT_LIGHT_CONFIG"
-	pkill -SIGUSR2 foot
-	apply_gtk_theme "$LIGHT_THEME" "prefer-light"
-	apply_sway_theme "$SWAY_LIGHT_CONFIG"
+    apply_foot_theme "$FOOT_LIGHT_CONFIG"
+    pkill -SIGUSR2 foot
+    apply_gtk_theme "$LIGHT_THEME" "prefer-light" "$LIGHT_ICONS"
+    apply_sway_theme "$SWAY_LIGHT_CONFIG"
 }
 
 if [ "${1:-}" = "init" ]; then

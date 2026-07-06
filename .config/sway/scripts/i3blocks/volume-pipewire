@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
-
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
 print_block() {
 	local volume
 	volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)

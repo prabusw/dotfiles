@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
 
 now_playing() {
     local current_song

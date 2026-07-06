@@ -1,3 +1,5 @@
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
 sort=-time
 default-timeout=3000
 layer=overlay

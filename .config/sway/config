@@ -39,9 +39,7 @@ output HDMI-A-1 {
 exec swayidle -w \
     timeout 300 '$scripts/check_player.sh && swaylockd'  \
     timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-    timeout 600 'powerctl mem' \
-    before-sleep 'swaylockd' \
-    after-resume 'pkill -SIGUSR2 wayeyes'
+    timeout 600 'powerctl mem && pkill -SIGUSR2 wayeyes && swaylockd'
 
 bar {
     position top

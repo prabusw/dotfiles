@@ -1,2 +1,4 @@
 #!/usr/bin/env sh
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
 notify-send "${@}" || logger -t sway-notify -p user.err "Notification failed to send."
