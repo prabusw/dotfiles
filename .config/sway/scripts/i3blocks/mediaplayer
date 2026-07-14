@@ -2,10 +2,21 @@
 # This file is maintained as a literate file in
 # 20240317205837-swaywm.org.
 
+# Source shared helpers for notification
+notify_lib="${HOME}/.config/sway/scripts/mako/notify-lib.sh"
+if ! . "$notify_lib" 2>/dev/null; then
+    logger -t "$(basename "$0")" -p user.err "Failed to source ${notify_lib}"
+    exit 1
+fi
+
 now_playing() {
-    local current_song
-	current_song=$(playerctl metadata --format '{{ title }} from {{ album }} by {{artist }} is playing in {{ playerName }}')
-    makoctl dismiss && notify-send "$current_song"
+    local current_player title album artist current_song
+    current_player=$(playerctl metadata --format '{{ playerName }}')
+    title=$(playerctl metadata --format '{{ title }}' | escape_pango_markup)
+    album=$(playerctl metadata --format '{{ album }}' | escape_pango_markup)
+    artist=$(playerctl metadata --format '{{ artist }}' | escape_pango_markup)
+    current_song="${title} from <span color=\"#88c0d0\" weight=\"bold\">${album}</span> by ${artist}"
+    makoctl dismiss && sway-notify "$current_player" "$current_song"
 }
 print_block() {
     # Check player status
@@ -42,14 +53,14 @@ print_block() {
 # 5 Wheel down: Prev song
 
 handle_button() {
-	# Exit early if no button was pressed, which is the default behavior
-	[ -z "$BLOCK_BUTTON" ] && return 0
+    # Exit early if no button was pressed, which is the default behavior
+    [ -z "$BLOCK_BUTTON" ] && return 0
     case "$BLOCK_BUTTON" in
         1) now_playing && pkill -RTMIN+2 i3blocks ;;
         2) playerctl play-pause && pkill -RTMIN+2 i3blocks ;;
         3) swaymsg "[app_id=\"play_cmus_in_scratch\"] scratchpad show" ;;
-		4) playerctl next && now_playing ;;
-		5) playerctl previous && now_playing  ;;
+        4) playerctl next && now_playing ;;
+        5) playerctl previous && now_playing  ;;
     esac
 }
 # Handle the mouse button click, and all its output is discarded

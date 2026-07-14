@@ -19,7 +19,7 @@ handle_button() {
     # Exit early if no button was pressed, which is the default behavior
     [ -z "$BLOCK_BUTTON" ] && return 0
     case "$BLOCK_BUTTON" in
-        1) notify-send "btrbk" "btrbk backup is in progress." ;;
+        1) notify-send "btrbk" "btrbk backup is in progress" ;;
     esac
 }
 # Handle the mouse button click, and all its output is discarded

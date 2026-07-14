@@ -6,26 +6,33 @@ layer=overlay
 icon-path=/usr/share/icons/Mint-Y:/usr/share/icons/Nordzy:/usr/share/icons/Nordzy-dark
 max-icon-size=64
 height=300
+
+font=Hack, Symbols Nerd Font 11
 background-color=#4c566a
-progress-color=over #5e81ac
-# padding=0,5,20
+text-color=#d8dee9
+progress-color=#88c0d0 over #3b4252
 border-color=#88c0d0
 border-radius=20
-format=<span font="Symbols Nerd Font 13" rise="5pt" color="#b48ead">%s</span>\n%b
+# padding=0,5,20
+padding=10,15,10,15
+
+format=<span font="Hack, Symbols Nerd Font 13" rise="5pt" color="#b48ead" weight="bold">%s</span>\n<span font="Hack, Symbols Nerd Font 11" color="#eceff4">%b</span>
 text-alignment=center
 
 [grouped]
-format= <span font="Symbols Nerd Font 13" rise="5pt" color="#b48ead" font-weight="700">%s</span>\n%b
+format=<span font="Hack, Symbols Nerd Font 13" rise="5pt" color="#b48ead" weight="bold">%s</span>\n<span font="Hack, Symbols Nerd Font 11" color="#eceff4">%b</span>
 
 [app-name=wayeyes]
-default-timeout=20000
+default-timeout=2000
 background-color=#000000
-text-color=#000000
-border-color=#000000
+text-color=#eceff4
+border-color=#4c566a
+# text-color=#000000
+# border-color=#000000
 border-radius=0
 width=1532
 height=820
-format=<span font="Symbols Nerd Font 12" line_height="42" rise="1pt" color="#b48ead">%s</span>\n%b
+format=<span font="Hack, Symbols Nerd Font 13" line_height="42" rise="1pt" color="#b48ead" weight="bold">%s</span>\n<span font="Hack, Symbols Nerd Font 11" color="#eceff4">%b</span>
 anchor=center
 
 [urgency=critical]

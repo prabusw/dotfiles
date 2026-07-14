@@ -2,5 +2,5 @@
 # This file is maintained as a literate file in
 # 20240317205837-swaywm.org.
 
-sway-notify "    $(date +'%A %F')"
+sway-notify "$(date +'%A %F')"
 date +'%A %F %H:%M:%S' | wl-copy
