@@ -1,0 +1,6 @@
+[Desktop Entry]
+# Exec='LANG=en_US.UTF-8 bwrap --bind /var/chroots/debian / --dev-bind /dev /dev --proc /proc --bind /sys /sys --bind /run /run --bind /home /home --ro-bind /etc/resolv.conf /etc/resolv.conf --ro-bind /etc/passwd /etc/passwd --ro-bind /etc/group /etc/group google-chrome --ozone-platform=wayland'
+Exec=/home/prabu/.local/bin/chrome
+Name=Google Chrome
+Type=Application
+# NoDisplay=true

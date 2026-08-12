@@ -1,12 +1,16 @@
 #!/usr/bin/env sh
 # This file is maintained as a literate file in
 # 20240317205837-swaywm.org.
+# ALSA/amixer version (replaces wpctl, for plain-ALSA setups without
+# PipeWire/WirePlumber).
+
 WOBSOCK="${XDG_RUNTIME_DIR}/wob.sock"
+MIXER="Master"   # change if `amixer scontrols` shows a different name on your card
+
 get_volume(){
-    volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@)
-	volume_decimal=$(echo "$volume" | awk '/Volume/ {print $2}')
-	volumep=$(echo "$volume_decimal * 100" | bc | awk '{printf "%d", $1}')
-	if echo "$volume" | grep -q '[Mm]UTED'; then
+    info=$(amixer get "$MIXER")
+    volumep=$(echo "$info" | grep -o '[0-9]*%' | head -1 | tr -d '%')
+    if echo "$info" | grep -q '\[off\]'; then
         muted=1
     else
         muted=0
@@ -16,18 +20,19 @@ get_volume(){
 case "$1" in
     "0")
         # Toggle mute status
-        wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+        amixer set "$MIXER" toggle > /dev/null
         ;;
     "+")
-        # Unmute if needed and Increase volume by 5% (0.05)
-		wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
-		wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05+" -l 1.0
+        # Unmute if needed and increase volume by 5%
+        amixer set "$MIXER" unmute > /dev/null
+        amixer set "$MIXER" 5%+ > /dev/null
         ;;
     "-")
-        # Decrease volume by 5% (0.05)
-        wpctl set-volume @DEFAULT_AUDIO_SINK@ "0.05-" -l 1.0
+        # Decrease volume by 5%
+        amixer set "$MIXER" 5%- > /dev/null
         ;;
 esac
+
 get_volume
 if [ "$muted" -eq 1 ]; then
     echo "$volumep muted" > "$WOBSOCK"

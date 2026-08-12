@@ -17,7 +17,10 @@
 (setq backup-by-copying t)
 (setq create-lockfiles nil)         ;; Prevents .# creation
 
-; Define the package archives
+;; define package-user-dir
+(setq package-user-dir
+      (expand-file-name (format "elpa-%s" (system-name)) user-emacs-directory))
+;;Define the package archives
 (setq package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 
@@ -531,7 +534,6 @@ e.g. Sunday, September 17, 2000."
 (use-package pet
   :ensure t
   :config
-  ;; (add-hook 'python-base-mode-hook 'pet-mode -10)
   (add-hook 'python-base-mode-hook 'pet-mode +1)
   (add-hook 'beancount-mode-hook 'pet-mode +1)
   (add-hook 'python-base-mode-hook
