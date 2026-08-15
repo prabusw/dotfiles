@@ -1,2 +1,2 @@
 #!/usr/bin/env fish
-mint google-chrome --ozone-platform=wayland --disk-cache-dir=/tmp/chrome-cache
+mint google-chrome --ozone-platform=wayland --disk-cache-dir=/tmp/sandbox-cache/chrome-cache
