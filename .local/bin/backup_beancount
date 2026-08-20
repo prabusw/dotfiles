@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# Get the current day of the week (0 for Sunday, 1 for Monday, ..., 6 for Saturday)
+day_of_week=$(date +%w)
+
+# Get the day of the month
+day_of_month=$(date +%d)
+
+# Determine the backup type based on the day
+if [ $day_of_week -eq 0 ]; then
+    # Sunday
+    if [ $day_of_month -le 7 ]; then
+        BACKUP_TYPE="monthly"
+    else
+        BACKUP_TYPE="weekly"
+    fi
+else
+    BACKUP_TYPE="daily"
+fi
+
+log_outcome()
+{
+    # Check if the backup was successful and log to system journal
+    if [ $? -eq 0 ]; then
+        # Log success to the system journal
+        logger -t beanbk "Backup successful: $FILENAME"
+    else
+        # Log failure to the system journal
+        logger -t beanbk "Backup failed: $FILENAME"
+    fi
+}
+
+# Define variables
+TIME=$(date +%F_%H%M%S)
+PREFIX="bean"
+# BACKUP_TYPE=$(basename $0)
+# BACKUP_TYPE=$1  # backup type passed as an argument when calling this script either in cron or anacron
+FILENAME=$PREFIX-$BACKUP_TYPE-$TIME.tar.gz    # filename includes timestamp and type of backup
+FILELIST="
+/data/myhome/prabu/beancount/ledgers/
+/data/myhome/prabu/beancount/importers-master/
+"
+# FILELIST=/data/myhome/prabu/linux_config/scripts/lists/beancount_backup_list #files to backup
+EXCLUDES="--exclude=__init__.py --exclude=__pycache__"
+DESDIR=/data/myhome/prabu/bean_backup                   # Destination of backup file.
+LOGDIR='/var/log'                          # To troubleshoot, capture standard error add "> $LOG 2> $ERRLOG" to tar command
+# LOG=${LOGDIR}/bean_backup.log
+ERRLOG=${LOGDIR}/bean_backup_error.log
+mkdir -p "$DESDIR" || { logger -t beanbk "Backup aborted: cannot create $DESDIR"; exit 1; }
+[ -n "$(printf '%s\n' "$FILELIST" | grep -v '^[[:space:]]*$')" ] || { logger -t beanbk "Backup aborted: FILELIST is empty"; exit 1; }
+# Perform backup
+# tar --ignore-failed-read --exclude-caches-under --exclude='__init__.py' --exclude='__pycache__' --exclude='.git' -cpzf $DESDIR/$FILENAME -T $FILELIST
+# tar --ignore-failed-read --exclude-caches-under --exclude='__init__.py' --exclude='__pycache__' -cpzf $DESDIR/$FILENAME -T $FILELIST
+printf '%s\n' "$FILELIST" | grep -v '^[[:space:]]*$' | tar --exclude-caches-under $EXCLUDES -cpzf "$DESDIR/$FILENAME" -T - 2>>"$ERRLOG"
+log_outcome
+
+
+# Remove old backups with logging
+# Keep 1 monthly backup and log removal
+find $DESDIR -type f -name 'bean-monthly-*' -mtime +32 -exec sh -c 'rm -v "$0" && logger -t beanbk "Removed old monthly backup: $0"' {} \;
+# Keep 4 weekly backups and log removal
+find $DESDIR -type f -name 'bean-weekly-*' -mtime +30 -exec sh -c 'rm -v "$0" && logger -t beanbk "Removed old weekly backup: $0"' {} \;
+# Keep 7 daily backups and log removal
+find $DESDIR -type f -name 'bean-daily-*' -mtime +7 -exec sh -c 'rm -v "$0" && logger -t beanbk "Removed old daily backup: $0"' {} \;
