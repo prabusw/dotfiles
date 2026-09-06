@@ -41,7 +41,7 @@ FILELIST="
 /data/myhome/prabu/beancount/importers-master/
 "
 # FILELIST=/data/myhome/prabu/linux_config/scripts/lists/beancount_backup_list #files to backup
-EXCLUDES="--exclude=__init__.py --exclude=__pycache__"
+EXCLUDES="--exclude=__init__.py --exclude=__pycache__ --exclude-vcs"
 DESDIR=/data/myhome/prabu/bean_backup                   # Destination of backup file.
 LOGDIR='/var/log'                          # To troubleshoot, capture standard error add "> $LOG 2> $ERRLOG" to tar command
 # LOG=${LOGDIR}/bean_backup.log
