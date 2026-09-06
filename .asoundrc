@@ -1,4 +1,9 @@
 pcm.!default {
     type plug
-    slave.pcm "surround51"
+    slave.pcm "dmix:CARD=0,CHANNELS=6"
 }
+# The following is mandatory if multiple cards are present
+# ctl.!default {
+#     type hw
+#     card 0
+# }
