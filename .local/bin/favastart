@@ -1,1 +1,40 @@
-/home/prabu/scripts/start_fava
+#!/bin/sh
+#Depending on parameter, different beancount ledgers are opened
+#if loop begins
+
+LEDGER_PATH="/data/myhome/prabu/beancount/ledgers"
+
+open_firefox() {
+  echo "Please check your browser window."
+  /usr/bin/firefox http://localhost:5000 &
+}
+
+if
+    pgrep -x "fava" > /dev/null
+then
+    echo 'fava already running. Run the command "pkill fava"'
+    exit
+else
+    source /data/myhome/prabu/bean_venv/bin/activate
+fi
+
+case "$1" in
+  home)
+      fava $LEDGER_PATH/household/kvnagar.beancount &
+      ;;
+  prabu)
+      fava $LEDGER_PATH/$1/prabu.beancount &
+      ;;
+  jeeva)
+      fava $LEDGER_PATH/$1/jeeva.beancount &
+      ;;
+  kali)
+      fava $LEDGER_PATH/kalivaradhan/kali.beancount &
+      ;;
+  *)
+      echo "usage: ${0##*/} home|prabu|jeeva|kali"
+      exit
+      ;;
+esac
+
+open_firefox &
