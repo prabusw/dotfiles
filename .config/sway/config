@@ -21,7 +21,7 @@ set $XF86AudioMute XF86AudioMute
 # set $XF86AudioRaiseVolume $mod+F11
 # set $XF86AudioMute F12
 
-font pango:Cantarell 11
+font pango:Roboto 11
 seat seat0 xcursor_theme Adwaita 24
 exec $scripts/toggle_theme init
 include $config_dir/current_theme.conf
@@ -43,7 +43,7 @@ exec swayidle -w \
 
 bar {
     position top
-    font pango:Symbols Nerd Font Bold 13
+    font pango:Roboto Bold 13
     status_edge_padding 10
     status_padding 5
     status_command SCRIPT_DIR=$scripts/i3blocks i3blocks
