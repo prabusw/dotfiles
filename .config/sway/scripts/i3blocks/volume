@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+# This file is maintained as a literate file in
+# 20240317205837-swaywm.org.
+MIXER="Master"   # check sound card name using `amixer scontrols`
+print_block() {
+	local info
+    info=$(amixer get "$MIXER")
+
+	case "$info" in
+		*off*)
+			echo ""
+			echo ""
+			echo "#FF0000"
+			;;
+		*)
+			echo ""
+			;;
+	esac
+}
+
+# Mouse click
+# 1 Left click: display current volume
+# 2 Middle click: Toggle mute
+# 3 Right click: Select sink - Not implemented yet
+# 4 Wheel up: increase volume
+# 5 Wheel down: decrease volume
+
+handle_button() {
+	# Exit early if no button was pressed, which is the default behavior
+    [ -z "$BLOCK_BUTTON" ] && return 0
+	local notify_cmd
+	notify_cmd="$HOME/.config/sway/scripts/sway-volume-notify"
+    case "$BLOCK_BUTTON" in
+        1) "$notify_cmd" ;;
+        2) "$notify_cmd" "0" ;;
+        4) "$notify_cmd" "+" ;;
+        5) "$notify_cmd" "-" ;;
+    esac
+}
+# Handle the mouse button click, and all its output is discarded
+handle_button > /dev/null 2>&1
+# Print the block to status bar
+print_block

@@ -36,7 +36,7 @@ interval=60
 signal=3
 min_width=20
 
-[volume-pipewire]
+[volume]
 interval=once
 signal=1
 min_width=20
