@@ -1,2 +1,27 @@
 #!/usr/bin/env fish
-mint google-chrome --ozone-platform=wayland --disk-cache-dir=/tmp/sandbox-cache/chrome-cache
+set runtime /tmp/sandbox-cache/chrome-profile
+set persist ~/.config/google-chrome/Default
+set persist_root ~/.config/google-chrome
+
+mkdir -p $runtime/Default
+if test -d $persist
+    cp $persist/Bookmarks $runtime/Default/ 2>/dev/null
+    cp $persist/Login\ Data $runtime/Default/ 2>/dev/null
+    cp $persist/Preferences $runtime/Default/ 2>/dev/null
+    cp -r $persist/Extensions $runtime/Default/ 2>/dev/null
+    cp -r $persist/Extension\ State $runtime/Default/ 2>/dev/null
+    cp -r $persist/Local\ Extension\ Settings $runtime/Default/ 2>/dev/null
+    cp $persist_root/Local\ State $runtime/ 2>/dev/null
+end
+
+mint google-chrome --ozone-platform=wayland \
+    --user-data-dir=$runtime \
+    --disk-cache-dir=/tmp/sandbox-cache/chrome-cache
+
+cp $runtime/Default/Bookmarks $persist/ 2>/dev/null
+cp $runtime/Default/Login\ Data $persist/ 2>/dev/null
+cp $runtime/Default/Preferences $persist/ 2>/dev/null
+cp -r $runtime/Default/Extensions $persist/ 2>/dev/null
+cp -r $runtime/Default/Extension\ State $persist/ 2>/dev/null
+cp -r $runtime/Default/Local\ Extension\ Settings $persist/ 2>/dev/null
+cp $runtime/Local\ State $persist_root/ 2>/dev/null

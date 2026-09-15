@@ -1,0 +1,48 @@
+# prune-chrome.sh — deletes everything in ~/.config/google-chrome
+# except the files/folders needed for bookmarks, logins, and extensions.
+base="$HOME/.config/google-chrome"
+
+if pgrep -x chrome > /dev/null 2>&1; then
+    echo "Chrome appears to be running. Close it first."
+    exit 1
+fi
+
+is_kept() {
+    name="$1"
+    list="$2"
+    printf '%s\n' "$list" | grep -qxF "$name"
+}
+
+keep_root="Default
+Local State
+First Run
+Last Version"
+
+for item in "$base"/*; do
+    name=$(basename "$item")
+    if ! is_kept "$name" "$keep_root"; then
+        echo "rm -rf $item"
+        rm -rf "$item"
+    fi
+done
+
+keep_default="Bookmarks
+Bookmarks.bak
+BookmarkMergedSurfaceOrdering
+Extension State
+Extensions
+Local Extension Settings
+Login Data
+Login Data-journal
+Preferences
+Secure Preferences
+PreferredApps
+README"
+
+for item in "$base"/Default/*; do
+    name=$(basename "$item")
+    if ! is_kept "$name" "$keep_default"; then
+        echo "rm -rf $item"
+        rm -rf "$item"
+    fi
+done
