@@ -1,0 +1,10 @@
+persist="$HOME/.config/mozilla/firefox/zt0dnxio.default-release"
+# cache_storage="$HOME/.cache/mozilla/firefox/zt0dnxio.default-release/storage"
+xdg_storage="$HOME/.local/share/mozilla/firefox/zt0dnxio.default-release/storage"
+if [ -L "$persist/storage" ]; then
+    echo "storage is already a symlink, nothing to do."
+    exit 0
+fi
+mkdir -p "$(dirname "$xdg_storage")"
+mv "$persist/storage" "$xdg_storage"
+ln -s "$xdg_storage" "$persist/storage"

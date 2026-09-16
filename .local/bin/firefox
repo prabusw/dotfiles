@@ -1,0 +1,37 @@
+#!/bin/sh
+runtime=/tmp/sandbox-cache/firefox-profile
+persist="$HOME/.config/mozilla/firefox/zt0dnxio.default-release"
+# cache_storage="$HOME/.cache/mozilla/firefox/zt0dnxio.default-release/storage"
+xdg_storage="$HOME/.local/share/mozilla/firefox/zt0dnxio.default-release/storage"
+
+keep_files="places.sqlite places.sqlite-wal places.sqlite-shm \
+favicons.sqlite favicons.sqlite-wal favicons.sqlite-shm \
+logins.json key4.db cert9.db \
+cookies.sqlite cookies.sqlite-wal cookies.sqlite-shm \
+permissions.sqlite \
+extensions.json addons.json extension-preferences.json \
+prefs.js handlers.json containers.json"
+
+keep_dirs="extensions chrome"
+
+mkdir -p "$runtime"
+
+if [ -d "$persist" ]; then
+    for f in $keep_files; do
+        cp "$persist/$f" "$runtime/" 2>/dev/null
+    done
+    for d in $keep_dirs; do
+        cp -r "$persist/$d" "$runtime/" 2>/dev/null
+    done
+    mkdir -p "$(dirname "$xdg_storage")"
+    ln -sf "$xdg_storage" "$runtime/storage"
+fi
+
+/usr/lib/firefox/firefox --profile "$runtime"
+
+for f in $keep_files; do
+    cp "$runtime/$f" "$persist/" 2>/dev/null
+done
+for d in $keep_dirs; do
+    cp -r "$runtime/$d" "$persist/" 2>/dev/null
+done

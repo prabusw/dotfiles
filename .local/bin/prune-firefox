@@ -1,0 +1,51 @@
+#!/bin/sh
+# prune-firefox.sh — deletes everything in the Firefox profile
+# except the files/folders needed for bookmarks, logins, and extensions.
+# storage/ is expected to be a symlink to ~/.cache (left alone either way).
+
+persist="$HOME/.config/mozilla/firefox/zt0dnxio.default-release"
+
+if pgrep -x firefox > /dev/null 2>&1; then
+    echo "Firefox appears to be running. Close it first."
+    exit 1
+fi
+
+is_kept() {
+    name="$1"
+    list="$2"
+    printf '%s\n' "$list" | grep -qxF "$name"
+}
+
+keep_profile="places.sqlite
+places.sqlite-wal
+places.sqlite-shm
+favicons.sqlite
+favicons.sqlite-wal
+favicons.sqlite-shm
+logins.json
+key4.db
+cert9.db
+cert9.db-journal
+extensions.json
+addons.json
+extension-preferences.json
+prefs.js
+handlers.json
+containers.json
+extensions
+chrome
+storage
+bookmarkbackups
+cookies.sqlite
+cookies.sqlite-wal
+cookies.sqlite-shm
+permissions.sqlite
+"
+
+for item in "$persist"/*; do
+    name=$(basename "$item")
+    if ! is_kept "$name" "$keep_profile"; then
+        echo "rm -rf $item"
+        rm -rf "$item"
+    fi
+done
