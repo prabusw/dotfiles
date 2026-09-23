@@ -478,18 +478,35 @@ then build and sync the Hugo site."
 (defvar org-gemini-root-files '("20260517153259-index" "20260513193407-about" "daily_journal")
   "Basenames (no extension) exported to the Gemini root instead of docs/.")
 
-(defun my/org-gemini--rewrite-id-links (links)
-  "Mutate LINKS (org-element link objects) in place: id: -> file:."
+(defun my/org-gemini--rewrite-id-links (links info)
+  "Mutate LINKS (org-element link objects) in place: id: -> file:,
+computing a path relative to the file currently being exported (from INFO).
+Keeps the .org extension so `org-gemini--describe-links' still performs
+its own .org -> .gmi conversion."
   (require 'org-id)
-  (dolist (link links)
-    (when (string= (org-element-property :type link) "id")
-      (let* ((id (org-element-property :path link))
-             (file (org-id-find-id-file id))
-             (filename (and file (file-name-nondirectory file))))
-        (when filename
-          (org-element-put-property link :type "file")
-          (org-element-put-property link :path filename)
-          (org-element-put-property link :raw-link (concat "file:" filename))))))
+  (let* ((source-file (plist-get info :input-file))
+         (source-base (and source-file
+                            (file-name-sans-extension (file-name-nondirectory source-file))))
+         (source-in-docs (and source-base
+                               (not (member source-base org-gemini-root-files)))))
+    (dolist (link links)
+      (when (string= (org-element-property :type link) "id")
+        (let* ((id (org-element-property :path link))
+               (file (org-id-find-id-file id))
+               (target-base (and file (file-name-sans-extension (file-name-nondirectory file))))
+               (target-in-docs (and target-base
+                                     (not (member target-base org-gemini-root-files))))
+               (prefix
+                (cond
+                 ((not target-base) nil)
+                 ((eq source-in-docs target-in-docs) "")
+                 ((and (not source-in-docs) target-in-docs) "docs/")
+                 ((and source-in-docs (not target-in-docs)) "../")))
+               (rel-org-path (and prefix (concat prefix target-base ".org"))))
+          (when rel-org-path
+            (org-element-put-property link :type "file")
+            (org-element-put-property link :path rel-org-path)
+            (org-element-put-property link :raw-link (concat "file:" rel-org-path)))))))
   links)
 
 (defun my/org-gemini-output-path (org-file target-dir)
@@ -533,7 +550,7 @@ then build and sync the Hugo site."
   (advice-add 'org-gemini--describe-links :filter-args
               (lambda (args)
                 (cl-destructuring-bind (links width info) args
-                  (list (my/org-gemini--rewrite-id-links links) width info)))))
+                  (list (my/org-gemini--rewrite-id-links links info) width info)))))
 
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
