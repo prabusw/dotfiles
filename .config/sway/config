@@ -37,9 +37,10 @@ output HDMI-A-1 {
 }
 
 exec swayidle -w \
-    timeout 300 '$scripts/check_player.sh && swaylockd'  \
-    timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-    timeout 600 'powerctl mem && pkill -SIGUSR2 wayeyes && swaylockd'
+     timeout 120 'pkill -RTMIN+1 wayeyes' resume 'pkill -RTMIN+2 wayeyes' \
+     timeout 300 '$scripts/check_player.sh && swaylockd'  \
+     timeout 500 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+     timeout 600 'powerctl mem && pkill -SIGUSR2 wayeyes && swaylockd'
 
 bar {
     position top
@@ -140,8 +141,8 @@ bindsym $mod+Shift+r resize set width 60
 
 bindsym $mod+F3 exec $scripts/toggle_wlsunset
 bindsym $mod+Shift+s exec pkill -SIGUSR1 wayeyes
-bindsym $mod+w exec firefox
-bindsym $mod+Shift+w exec "epiphany -i"
+bindsym $mod+w exec epiphany
+bindsym $mod+Shift+w exec firefox
 bindsym $mod+z exec swaymsg "workspace 4; exec $term nnn"
 bindsym Print exec $scripts/slurpshot
 
@@ -158,8 +159,8 @@ bindsym Alt+$XF86AudioPlay exec sway-notify -i multimedia-audio-player "cmus sta
 
 bindsym $mod+F1 exec cat ~/.config/sway/config |grep bindsym |grep -v "^#"| sed 's/^[[:space:]]*//'|sed 's/bindsym//'| tofi
 
-assign [app_id="firefox"] 1
-assign [app_id="org.gnome.Epiphany"] 5
+assign [app_id="firefox"] 5
+assign [app_id="org.gnome.Epiphany"] 1
 assign [app_id="chromium"] 5
 assign [app_id="librewolf"] 6
 for_window [app_id="emacs"] move to workspace 3

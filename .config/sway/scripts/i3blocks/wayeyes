@@ -12,6 +12,8 @@ case "$BLOCK_BUTTON" in
     1) case "$state" in
            running*|pre-alert*)
                notify-send "wayeyes" "Next break at $time" ;;
+           suspended*)
+               notify-send "wayeyes" "Suspended" ;;
            paused*)
                notify-send "wayeyes" "Paused" ;;
            blanked*)
@@ -23,9 +25,19 @@ case "$BLOCK_BUTTON" in
 esac
 
 case "$state" in
+    pre-alert*) ;;
+    *) rm -f /tmp/wayeyes.alerted ;;
+esac
+
+case "$state" in
     pre-alert*)
+        count=$(echo "$state" | awk '{print $3}')
         if [ ! -f /tmp/wayeyes.alerted ]; then
-            notify-send "wayeyes" "Next break in a minute"
+            if [ $(( (count + 1) % 4 )) -eq 0 ]; then
+                notify-send -u critical "wayeyes" "Next break in a minute is a Long break!"
+            else
+                notify-send "wayeyes" "Next break in a minute"
+            fi
             touch /tmp/wayeyes.alerted
         fi
         echo ""
@@ -33,24 +45,26 @@ case "$state" in
         echo "#FFA500"
         ;;
     running*)
-        rm -f /tmp/wayeyes.alerted
         echo ""
         echo ""
         echo ""
         ;;
-    paused*)
+    suspended*)
         echo ""
         echo ""
         echo "#FF0000"
         ;;
+    paused*)
+        echo ""
+        echo ""
+        echo "#FFFF00"
+        ;;
     blanked*)
-        rm -f /tmp/wayeyes.alerted
         echo ""
         echo ""
         echo ""
         ;;
     *)
-        rm -f /tmp/wayeyes.alerted
         echo ""
         echo ""
         echo "#FF0000"
