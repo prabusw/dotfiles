@@ -333,6 +333,32 @@ e.g. Sunday, September 17, 2000."
   :after org)
 
 ;; --- Custom Helper Functions ---
+(defun my/publish-all-sites ()
+  "Export all Org-roam notes to both Gemini and Hugo Markdown,
+then build and sync the Hugo site."
+  (interactive)
+  (require 'org-id)
+  (require 'ox-gemini)
+  (require 'ox-hugo)
+  (let* ((source-dir (file-name-as-directory org-roam-directory))
+         (target-dir (file-name-as-directory org-gemini-directory))
+         (org-files (directory-files-recursively source-dir "\\.org$"))
+         (org-export-with-broken-links t))
+    (org-id-update-id-locations org-files)
+    (dolist (org-file org-files)
+      (with-current-buffer (find-file-noselect org-file)
+        ;; --- Gemini export ---
+        (let ((output (my/org-gemini-output-path org-file target-dir)))
+          (make-directory (file-name-directory output) t)
+          (message "[build] Gemini: %s -> %s" org-file output)
+          (org-export-to-file 'gemini output nil nil nil nil))
+        ;; --- Hugo export ---
+        (message "[build] Hugo: %s" org-file)
+        (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
+  ;; --- Build + sync Hugo site ---
+  (message "Publishing Hugo site...")
+  (shell-command "/data/myhome/prabu/org/my_hugo_site/scripts/publish_hugo_site.sh &"))
+
 (defun my/org-roam-publish-site ()
   "Runs the graph gen, hugo build, and syncthing scan."
   (interactive)
@@ -445,6 +471,69 @@ e.g. Sunday, September 17, 2000."
   ;; (citeproc-org-org-bib-header "* Bibliography\n<ol class=\"biblio-list\">")
   ;; (citeproc-org-org-bib-footer "</ol>")
 )
+
+(defvar org-gemini-directory (file-truename "/data/myhome/prabu/org/gemini")
+  "Directory where exported Gemini files should be stored.")
+
+(defvar org-gemini-root-files '("20260517153259-index" "20260513193407-about" "daily_journal")
+  "Basenames (no extension) exported to the Gemini root instead of docs/.")
+
+(defun my/org-gemini--rewrite-id-links (links)
+  "Mutate LINKS (org-element link objects) in place: id: -> file:."
+  (require 'org-id)
+  (dolist (link links)
+    (when (string= (org-element-property :type link) "id")
+      (let* ((id (org-element-property :path link))
+             (file (org-id-find-id-file id))
+             (filename (and file (file-name-nondirectory file))))
+        (when filename
+          (org-element-put-property link :type "file")
+          (org-element-put-property link :path filename)
+          (org-element-put-property link :raw-link (concat "file:" filename))))))
+  links)
+
+(defun my/org-gemini-output-path (org-file target-dir)
+  (let ((base (file-name-sans-extension (file-name-nondirectory org-file))))
+    (if (member base org-gemini-root-files)
+        (expand-file-name (concat base ".gmi") target-dir)
+      (expand-file-name (concat base ".gmi")
+                         (expand-file-name "docs" target-dir)))))
+
+(defun my/org-gemini-site-url (org-file)
+  (let ((base (file-name-sans-extension (file-name-nondirectory org-file))))
+    (if (member base org-gemini-root-files)
+        (concat "/" base ".gmi")
+      (concat "/docs/" base ".gmi"))))
+
+(defun my/ox-gemini-export-all-org-to-gmi ()
+  "Force export all Org-roam notes to Gemini."
+  (interactive)
+  (require 'org-id)
+  (require 'ox-gemini)
+  (let* ((source-dir (file-name-as-directory org-roam-directory))
+         (target-dir (file-name-as-directory org-gemini-directory))
+         (org-files (directory-files-recursively source-dir "\\.org$")))
+    (org-id-update-id-locations org-files)
+    (dolist (org-file org-files)
+      (with-current-buffer (find-file-noselect org-file)
+        (let* ((relative (file-relative-name org-file source-dir))
+               (output (expand-file-name
+                        (concat (file-name-sans-extension relative) ".gmi")
+                        target-dir)))
+          (make-directory (file-name-directory output) t)
+          (message "[build] Exporting %s -> %s" org-file output)
+          (org-export-to-file 'gemini output nil nil nil nil))))))
+
+(use-package ox-gemini
+  :ensure t   ;;Auto-install the package from Melpa
+  :pin melpa
+  :after ox
+  :config
+  (require 'cl-lib)
+  (advice-add 'org-gemini--describe-links :filter-args
+              (lambda (args)
+                (cl-destructuring-bind (links width info) args
+                  (list (my/org-gemini--rewrite-id-links links) width info)))))
 
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
