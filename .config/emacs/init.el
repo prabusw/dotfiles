@@ -404,7 +404,7 @@ e.g. Sunday, September 17, 2000."
 (defvar my/org-html-directory (file-truename "/data/myhome/prabu/org/html_site")
   "Directory where exported html files should be stored.")
 
-(defvar my/sitemap-exclude-files '("20260517153259-index.org" "20260513193407-about.org")
+(defvar my/sitemap-exclude-files '("20260517153259-index.org" "20260513193407-about.org" "daily_journal.org")
   "Files published normally, but omitted from auto-generated sitemaps.")
 
 (defun my/sitemap-excluded-p (file)
@@ -504,7 +504,7 @@ swap -- both downstream, after this filter has already run."
 (add-to-list 'org-export-filter-parse-tree-functions #'my/rewrite-id-links)
 
 ;; --- Nav + CSS ---
-(defvar my/site-scss-file (expand-file-name "../assets/simple.scss" my/org-html-directory))
+(defvar my/site-scss-file (expand-file-name "css/simple.scss" org-roam-directory))
 (defvar my/site-css-output (expand-file-name "style.css" my/org-html-directory))
 
 (defun my/compile-site-css ()
@@ -535,6 +535,9 @@ swap -- both downstream, after this filter has already run."
          :html-preamble my/org-html-preamble
          :html-head-include-default-style nil
          :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">"
+         :html-divs ((preamble "div" "preamble")
+                     (content "div" "content")
+                     (postamble "div" "postamble"))
          :auto-sitemap t
          :sitemap-filename "notes.html"
          :sitemap-title "Notes"
@@ -552,16 +555,20 @@ swap -- both downstream, after this filter has already run."
          :sitemap-title "Notes"
          ;; :sitemap-sort-files anti-chronologically
          :sitemap-function my/gemini-sitemap-function
-         :completion-function my/sitemap-cleanup-artifact)))
+         :completion-function my/sitemap-cleanup-artifact)
+        ("all-sites"
+         :components ("notes-html" "notes-gemini"))
+        ))
 
-(defvar my/publish-site-script "/data/myhome/prabu/org/publish_site.sh")
+(defvar my/publish-site-script "publish_site")
 
 (defun my/trigger-syncthing-scan ()
   "Asynchronously run publish_site.sh to trigger a Syncthing rescan."
-  (if (file-executable-p my/publish-site-script)
-      (start-process "publish-site-scan" "*publish-site-scan*"
-                      my/publish-site-script)
-    (message "my/trigger-syncthing-scan: %s not executable" my/publish-site-script)))
+  (let ((script (executable-find my/publish-site-script)))
+    (if script
+        (start-process "publish-site-scan" "*publish-site-scan*" script)
+      (message "my/trigger-syncthing-scan: %s not found on exec-path"
+               my/publish-site-script))))
 
 (defun my/publish-complete-html-site ()
   "Force-export every org-roam note to HTML site."
@@ -585,11 +592,35 @@ swap -- both downstream, after this filter has already run."
   (interactive)
   (require 'org-id)
   (org-id-update-id-locations (org-roam--list-files org-roam-directory))
-  (org-publish "notes-html")
+  (org-publish "all-sites")
   (my/compile-site-css)
-  (org-publish "notes-gemini")
   (my/trigger-syncthing-scan)
   (message "Publishing to both html and gemini completed."))
+
+(defvar my/publish-log-buffer "*org-publish-log*")
+(defvar my/publish-running-process nil
+  "Tracks the background publish process, to avoid overlapping runs.")
+
+(defun my/publish-all-sites-async ()
+  "Run my/publish-all-sites in a background Emacs batch process,
+so this Emacs session doesn't block while publishing."
+  (interactive)
+  (if (process-live-p my/publish-running-process)
+      (message "A publish is already running -- see %s" my/publish-log-buffer)
+    (let ((init-file (expand-file-name "init.el" user-emacs-directory)))
+      (setq my/publish-running-process
+            (start-process "org-publish" my/publish-log-buffer
+                            "emacs" "--batch" "-l" init-file
+                            "--eval" "(my/publish-all-sites)"))
+      (set-process-sentinel
+       my/publish-running-process
+       (lambda (_proc event)
+         (cond
+          ((string-match-p "finished" event)
+           (message "Publish finished. See %s for details." my/publish-log-buffer))
+          ((string-match-p "\\(exited abnormally\\|failed\\)" event)
+           (message "Publish FAILED -- check %s" my/publish-log-buffer)))))
+      (message "Publishing started in background..."))))
 
 (defun my/gemini-nav-block ()
   "Site nav block, gemtext link-line format."

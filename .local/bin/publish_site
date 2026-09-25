@@ -1,0 +1,10 @@
+#!/bin/sh
+SAVED_KEY=$(grep "SYNCTHING_API_KEY" /home/prabu/.config/syncthing/apikey | cut -d'"' -f2)
+# Hugo_site="/data/myhome/prabu/org/my_hugo_site"
+# Generating the json required to update the graph. Python venv has fa2, networkx and python-louvain
+# /data/myhome/prabu/org/.venv/bin/python "$Hugo_site/scripts/gen_graph.py"
+# Build the Site using hugo
+# /usr/bin/hugo --source "$Hugo_site" --destination "$Hugo_site/public" -D --gc --minify
+#Force Syncthing to sync org-Roam folder
+curl -s -X POST -H "X-API-Key:$SAVED_KEY" "http://localhost:8384/rest/db/scan?folder=scwmx-w9vj5"
+echo "Syncthing scan triggered."
