@@ -332,55 +332,6 @@ e.g. Sunday, September 17, 2000."
 (use-feature org-tempo
   :after org)
 
-;; --- Custom Helper Functions ---
-(defun my/publish-all-sites ()
-  "Export all Org-roam notes to both Gemini and Hugo Markdown,
-then build and sync the Hugo site."
-  (interactive)
-  (require 'org-id)
-  (require 'ox-gemini)
-  (require 'ox-hugo)
-  (let* ((source-dir (file-name-as-directory org-roam-directory))
-         (target-dir (file-name-as-directory org-gemini-directory))
-         (org-files (directory-files-recursively source-dir "\\.org$"))
-         (org-export-with-broken-links t))
-    (org-id-update-id-locations org-files)
-    (dolist (org-file org-files)
-      (with-current-buffer (find-file-noselect org-file)
-        ;; --- Gemini export ---
-        (let ((output (my/org-gemini-output-path org-file target-dir)))
-          (make-directory (file-name-directory output) t)
-          (message "[build] Gemini: %s -> %s" org-file output)
-          (org-export-to-file 'gemini output nil nil nil nil))
-        ;; --- Hugo export ---
-        (message "[build] Hugo: %s" org-file)
-        (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
-  ;; --- Build + sync Hugo site ---
-  (message "Publishing Hugo site...")
-  (shell-command "/data/myhome/prabu/org/my_hugo_site/scripts/publish_hugo_site.sh &"))
-
-(defun my/org-roam-publish-site ()
-  "Runs the graph gen, hugo build, and syncthing scan."
-  (interactive)
-  (message "Publishing site...")
-  (shell-command "/data/myhome/prabu/org/my_hugo_site/scripts/publish_hugo_site.sh &"))
-(defun my/set-daily-export-file-name ()
-  (let* ((target-buf (org-capture-get :buffer))
-         (target-file (when target-buf (buffer-file-name target-buf))))
-    (when (and target-file
-               (string-match-p "daily_journal\\.org$" target-file))
-      (save-excursion
-        (org-up-heading-safe)
-        ;; (message "Hook fired at: %s" (org-entry-get nil "EXPORT_FILE_NAME"))
-        (org-entry-get nil "EXPORT_FILE_NAME")
-        (unless (org-entry-get nil "EXPORT_FILE_NAME")
-          (org-entry-put nil "EXPORT_FILE_NAME"
-                         (format-time-string "%Y-%m-%d" (org-capture-get :default-time))))
-        (unless (org-entry-get nil "EXPORT_DATE")
-          ;; (message "Setting EXPORT_DATE")
-          (org-entry-put nil "EXPORT_DATE"
-                         (or (org-entry-get nil "EXPORT_FILE_NAME")
-                             (format-time-string "%Y-%m-%d" (org-capture-get :default-time)))))))))
 (use-package org-roam
   :ensure t
   :init
@@ -439,7 +390,7 @@ then build and sync the Hugo site."
   (add-hook 'org-roam-db-sync-hook
             (lambda ()
               (setq org-id-extra-files (org-roam--list-files org-roam-directory))))
-  (add-hook 'org-capture-before-finalize-hook #'my/set-daily-export-file-name)
+  ;; (add-hook 'org-capture-before-finalize-hook #'my/set-daily-export-file-name)
   (advice-add 'org-roam-node-read :around #'case-insensitive-org-roam-node-read)
   (message "org-roam loaded"))
 ;; #for ox-hugo# https://hugocisneros.com/org-config/#org-roam
@@ -447,110 +398,220 @@ then build and sync the Hugo site."
 (use-package org-roam-ui
   :ensure t)
 
-(defun my/ox-hugo-export-all-org-to-md ()
-  "Force export all Org-roam notes to Hugo Markdown."
-  (interactive)
-  (let ((org-export-with-broken-links t))
-    (dolist (org-file (directory-files-recursively org-roam-directory "\\.org$"))
-      (with-current-buffer (find-file-noselect org-file)
-        (message (format "[build] Exporting %s" org-file))
-        (org-hugo-export-wim-to-md :all-subtrees nil nil nil)))))
-
-(use-package ox-hugo
-  ;; uses /data/myhome/prabu/org/Resources/.dir-locals.el
-  :ensure t   ;;Auto-install the package from Melpa
-  :pin melpa  ;;`package-archives' should already have ("melpa" . "https://melpa.org/packages/")
-  :after ox
-  :config
-  (setq org-hugo-auto-set-lastmod t)
-  (setq org-hugo-export-with-section-modified-time t)
-  (setq org-hugo-allow-all-export-keywords t)
-  ;; (setq org-hugo-link-desc-insert-type 'id)
-  ;; (setq org-id-extra-files
-  ;;       (directory-files-recursively org-roam-directory "\\.org$"))
-  ;; (citeproc-org-org-bib-header "* Bibliography\n<ol class=\"biblio-list\">")
-  ;; (citeproc-org-org-bib-footer "</ol>")
-)
-
-(defvar org-gemini-directory (file-truename "/data/myhome/prabu/org/gemini")
+(defvar my/org-gemini-directory (file-truename "/data/myhome/prabu/org/gemini")
   "Directory where exported Gemini files should be stored.")
 
-(defvar org-gemini-root-files '("20260517153259-index" "20260513193407-about" "daily_journal")
-  "Basenames (no extension) exported to the Gemini root instead of docs/.")
+(defvar my/org-html-directory (file-truename "/data/myhome/prabu/org/html_site")
+  "Directory where exported html files should be stored.")
 
-(defun my/org-gemini--rewrite-id-links (links info)
-  "Mutate LINKS (org-element link objects) in place: id: -> file:,
-computing a path relative to the file currently being exported (from INFO).
-Keeps the .org extension so `org-gemini--describe-links' still performs
-its own .org -> .gmi conversion."
+(defvar my/sitemap-exclude-files '("20260517153259-index.org" "20260513193407-about.org")
+  "Files published normally, but omitted from auto-generated sitemaps.")
+
+(defun my/sitemap-excluded-p (file)
+  (member (file-name-nondirectory file) my/sitemap-exclude-files))
+
+(defun my/sitemap-sorted-files (project-name)
+  "Return (PROJECT . FILES) for PROJECT-NAME, filtered and sorted newest-first.
+Excludes the project's own :sitemap-filename, since org-publish-get-base-files
+can include it as an expected file even when it doesn't yet exist on disk --
+which crashes org-publish-find-date."
+  (let* ((project (assoc project-name org-publish-project-alist))
+         (sitemap-name (plist-get (cdr project) :sitemap-filename))
+         (files (seq-remove
+                 (lambda (f)
+                   (or (my/sitemap-excluded-p f)
+                       (and sitemap-name
+                            (string= (file-name-nondirectory f) sitemap-name))))
+                 (org-publish-get-base-files project))))
+    (cons project
+          (sort files
+                (lambda (a b)
+                  (time-less-p
+                   ;; (org-publish-find-date b project)
+                   ;;             (org-publish-find-date a project)
+                   (file-attribute-modification-time (file-attributes b))
+                   (file-attribute-modification-time (file-attributes a))
+                               ))))))
+
+(defun my/html-sitemap-function (title _list)
+  (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files "notes-html")))
+    (concat
+     "#+title: " title "\n\n"
+     (mapconcat
+      (lambda (file)
+        (format "- [[file:%s][%s]]\n"
+                (file-name-nondirectory file)
+                (org-publish-find-title file project)))
+      files ""))))
+
+(defun my/gemini-sitemap-function (title _list)
+  (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files "notes-gemini")))
+    (concat
+     "#+title: " title "\n\n"
+     "#+begin_export gemini\n"
+     (mapconcat
+      (lambda (file)
+        (format "=> %s\t%s\n"
+                (concat (file-name-sans-extension (file-name-nondirectory file)) ".gmi")
+                (org-publish-find-title file project)))
+      files "")
+     "#+end_export\n")))
+
+(defun my/sitemap-cleanup-artifact (project-plist)
+  "Delete the raw sitemap source file org-publish leaves in :base-directory.
+`org-publish-sitemap' writes its Org-syntax sitemap directly into
+:base-directory using :sitemap-filename verbatim, before
+:publishing-function ever processes it. That leftover file then
+lingers in the source tree and can get picked up as a spurious
+entry in later sitemap runs. PROJECT-PLIST is the plist Org
+passes to :completion-function -- no per-project hardcoding needed."
+  (let* ((base (plist-get project-plist :base-directory))
+         (name (plist-get project-plist :sitemap-filename)))
+    (when (and base name)
+      (let ((f (expand-file-name name base)))
+        (when (file-exists-p f)
+          (delete-file f))))))
+
+
+(defun my/rewrite-id-links (tree backend _info)
+  "Rewrite id: links to file: links so HTML and Gemini exports can
+resolve links across files. Both backends only resolve id: links
+found within the file currently being exported (see
+org-export-resolve-id-link in ox.el) -- a link to a heading/file in
+a different file otherwise throws org-link-broken (html) or is left
+as a raw id: string (gemini). This filter runs on the parsed tree
+before either backend transcodes it, rewriting every id: link into
+a file: link pointing at the correct .org source file. The .org
+extension is kept deliberately: ox-html's
+org-html-link-org-files-as-html (on by default) swaps .org -> .html,
+and org-gemini--describe-links performs the equivalent .org -> .gmi
+swap -- both downstream, after this filter has already run."
+  (when (org-export-derived-backend-p backend 'html 'gemini)
+    (require 'org-id)
+    (org-element-map tree 'link
+      (lambda (link)
+        (when (string= (org-element-property :type link) "id")
+          (let* ((id (org-element-property :path link))
+                 (file (org-id-find-id-file id))
+                 (filename (and file (file-name-nondirectory file))))
+            (when filename
+              (org-element-put-property link :type "file")
+              (org-element-put-property link :path filename)
+              (org-element-put-property link :raw-link (concat "file:" filename))))))))
+  tree)
+(require 'ox)
+(require 'ox-html)
+(add-to-list 'org-export-filter-parse-tree-functions #'my/rewrite-id-links)
+
+;; --- Nav + CSS ---
+(defvar my/site-scss-file (expand-file-name "../assets/simple.scss" my/org-html-directory))
+(defvar my/site-css-output (expand-file-name "style.css" my/org-html-directory))
+
+(defun my/compile-site-css ()
+  "Compile simple.scss to style.css via dart-sass."
+  (call-process "sass" nil "*sass-compile*" nil my/site-scss-file my/site-css-output))
+
+(defun my/org-html-preamble (_info)
+  "Top nav bar, matching simple.scss's .topnav structure."
+  (concat
+   "<nav class=\"topnav\">\n"
+   "  <div class=\"topnav-links\">\n"
+   "    <a href=\"/index.html\" class=\"topnav-title\">Knowledge Garden</a>\n"
+   "    <a href=\"/notes.html\">Notes</a>\n"
+   "    <a href=\"/daily_journal.html\">Journal</a>\n"
+   "    <a href=\"/about.html\">About</a>\n"
+   "  </div>\n"
+   "</nav>\n"))
+
+;; --- Publish projects ---
+(setq org-publish-project-alist
+      `(("notes-html"
+         :base-directory ,org-roam-directory
+         :base-extension "org"
+         :publishing-directory ,my/org-html-directory
+         :publishing-function org-html-publish-to-html
+         :with-toc 3
+         :section-numbers nil
+         :html-preamble my/org-html-preamble
+         :html-head-include-default-style nil
+         :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">"
+         :auto-sitemap t
+         :sitemap-filename "notes.html"
+         :sitemap-title "Notes"
+         ;; :sitemap-sort-files anti-chronologically
+         :sitemap-function my/html-sitemap-function
+         :completion-function my/sitemap-cleanup-artifact)
+        ("notes-gemini"
+         :base-directory ,org-roam-directory
+         :base-extension "org"
+         :publishing-directory ,my/org-gemini-directory
+         :publishing-function org-gemini-publish-to-gemini
+         :with-broken-links t
+         :auto-sitemap t
+         :sitemap-filename "notes.gmi"
+         :sitemap-title "Notes"
+         ;; :sitemap-sort-files anti-chronologically
+         :sitemap-function my/gemini-sitemap-function
+         :completion-function my/sitemap-cleanup-artifact)))
+
+(defvar my/publish-site-script "/data/myhome/prabu/org/publish_site.sh")
+
+(defun my/trigger-syncthing-scan ()
+  "Asynchronously run publish_site.sh to trigger a Syncthing rescan."
+  (if (file-executable-p my/publish-site-script)
+      (start-process "publish-site-scan" "*publish-site-scan*"
+                      my/publish-site-script)
+    (message "my/trigger-syncthing-scan: %s not executable" my/publish-site-script)))
+
+(defun my/publish-complete-html-site ()
+  "Force-export every org-roam note to HTML site."
+  (interactive)
   (require 'org-id)
-  (let* ((source-file (plist-get info :input-file))
-         (source-base (and source-file
-                            (file-name-sans-extension (file-name-nondirectory source-file))))
-         (source-in-docs (and source-base
-                               (not (member source-base org-gemini-root-files)))))
-    (dolist (link links)
-      (when (string= (org-element-property :type link) "id")
-        (let* ((id (org-element-property :path link))
-               (file (org-id-find-id-file id))
-               (target-base (and file (file-name-sans-extension (file-name-nondirectory file))))
-               (target-in-docs (and target-base
-                                     (not (member target-base org-gemini-root-files))))
-               (prefix
-                (cond
-                 ((not target-base) nil)
-                 ((eq source-in-docs target-in-docs) "")
-                 ((and (not source-in-docs) target-in-docs) "docs/")
-                 ((and source-in-docs (not target-in-docs)) "../")))
-               (rel-org-path (and prefix (concat prefix target-base ".org"))))
-          (when rel-org-path
-            (org-element-put-property link :type "file")
-            (org-element-put-property link :path rel-org-path)
-            (org-element-put-property link :raw-link (concat "file:" rel-org-path)))))))
-  links)
+  (org-id-update-id-locations (org-roam--list-files org-roam-directory))
+  (org-publish "notes-html" t)
+  (my/compile-site-css)
+  (message "Published + compiled CSS to %s" my/site-css-output))
 
-(defun my/org-gemini-output-path (org-file target-dir)
-  (let ((base (file-name-sans-extension (file-name-nondirectory org-file))))
-    (if (member base org-gemini-root-files)
-        (expand-file-name (concat base ".gmi") target-dir)
-      (expand-file-name (concat base ".gmi")
-                         (expand-file-name "docs" target-dir)))))
-
-(defun my/org-gemini-site-url (org-file)
-  (let ((base (file-name-sans-extension (file-name-nondirectory org-file))))
-    (if (member base org-gemini-root-files)
-        (concat "/" base ".gmi")
-      (concat "/docs/" base ".gmi"))))
-
-(defun my/ox-gemini-export-all-org-to-gmi ()
-  "Force export all Org-roam notes to Gemini."
+(defun my/publish-complete-gemini-site ()
+  "Force-export every org-roam note to gemini."
   (interactive)
   (require 'org-id)
   (require 'ox-gemini)
-  (let* ((source-dir (file-name-as-directory org-roam-directory))
-         (target-dir (file-name-as-directory org-gemini-directory))
-         (org-files (directory-files-recursively source-dir "\\.org$")))
-    (org-id-update-id-locations org-files)
-    (dolist (org-file org-files)
-      (with-current-buffer (find-file-noselect org-file)
-        (let* ((relative (file-relative-name org-file source-dir))
-               (output (expand-file-name
-                        (concat (file-name-sans-extension relative) ".gmi")
-                        target-dir)))
-          (make-directory (file-name-directory output) t)
-          (message "[build] Exporting %s -> %s" org-file output)
-          (org-export-to-file 'gemini output nil nil nil nil))))))
+  (org-id-update-id-locations (org-roam--list-files org-roam-directory))
+  (org-publish "notes-gemini" t))
+
+(defun my/publish-all-sites ()
+  "Publish only changes to both the HTML site and Gemini."
+  (interactive)
+  (require 'org-id)
+  (org-id-update-id-locations (org-roam--list-files org-roam-directory))
+  (org-publish "notes-html")
+  (my/compile-site-css)
+  (org-publish "notes-gemini")
+  (my/trigger-syncthing-scan)
+  (message "Publishing to both html and gemini completed."))
+
+(defun my/gemini-nav-block ()
+  "Site nav block, gemtext link-line format."
+  (concat
+   "=> notes.gmi\tNotes\n"
+   "=> daily_journal.gmi\tJournal\n"
+   "=> about.gmi\tAbout\n"
+   "\n"))
+
+(defun my/org-gemini-add-nav (orig-fun contents info)
+  "Prepend the site nav block to every exported gemini page."
+  (concat (my/gemini-nav-block) (funcall orig-fun contents info)))
 
 (use-package ox-gemini
-  :ensure t   ;;Auto-install the package from Melpa
+  :ensure t
   :pin melpa
   :after ox
   :config
-  (require 'cl-lib)
-  (advice-add 'org-gemini--describe-links :filter-args
-              (lambda (args)
-                (cl-destructuring-bind (links width info) args
-                  (list (my/org-gemini--rewrite-id-links links info) width info)))))
+  (defun org-gemini-code-inline (input _contents _info)
+    "Generate inline code in Gemtext without the trailing space bug."
+    (format "`%s`" (org-element-property :value input)))
+  (advice-add 'org-gemini-template :around #'my/org-gemini-add-nav))
 
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
