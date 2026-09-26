@@ -399,7 +399,29 @@ e.g. Sunday, September 17, 2000."
   :ensure t)
 
 (defvar my/org-gemini-directory (file-truename "/data/myhome/prabu/org/gemini")
-  "Directory where exported Gemini files should be stored.")
+    "Directory where exported Gemini files should be stored.")
+
+(defun my/gemini-nav-block ()
+  "Site nav block, gemtext link-line format."
+  (concat
+   "=> notes.gmi\tNotes\n"
+   "=> daily_journal.gmi\tJournal\n"
+   "=> about.gmi\tAbout\n"
+   "\n"))
+
+(defun my/org-gemini-add-nav (orig-fun contents info)
+  "Prepend the site nav block to every exported gemini page."
+  (concat (my/gemini-nav-block) (funcall orig-fun contents info)))
+
+(use-package ox-gemini
+  :ensure t
+  :pin melpa
+  :after ox
+  :config
+  (defun org-gemini-code-inline (input _contents _info)
+    "Generate inline code in Gemtext without the trailing space bug."
+    (format "`%s`" (org-element-property :value input)))
+  (advice-add 'org-gemini-template :around #'my/org-gemini-add-nav))
 
 (defvar my/org-html-directory (file-truename "/data/myhome/prabu/org/html_site")
   "Directory where exported html files should be stored.")
@@ -457,36 +479,24 @@ which crashes org-publish-find-date."
       files "")
      "#+end_export\n")))
 
-(defun my/sitemap-cleanup-artifact (project-plist)
-  "Delete the raw sitemap source file org-publish leaves in :base-directory.
-`org-publish-sitemap' writes its Org-syntax sitemap directly into
-:base-directory using :sitemap-filename verbatim, before
-:publishing-function ever processes it. That leftover file then
-lingers in the source tree and can get picked up as a spurious
-entry in later sitemap runs. PROJECT-PLIST is the plist Org
-passes to :completion-function -- no per-project hardcoding needed."
-  (let* ((base (plist-get project-plist :base-directory))
-         (name (plist-get project-plist :sitemap-filename)))
-    (when (and base name)
-      (let ((f (expand-file-name name base)))
-        (when (file-exists-p f)
-          (delete-file f))))))
-
-
 (defun my/rewrite-id-links (tree backend _info)
-  "Rewrite id: links to file: links so HTML and Gemini exports can
-resolve links across files. Both backends only resolve id: links
-found within the file currently being exported (see
-org-export-resolve-id-link in ox.el) -- a link to a heading/file in
-a different file otherwise throws org-link-broken (html) or is left
-as a raw id: string (gemini). This filter runs on the parsed tree
-before either backend transcodes it, rewriting every id: link into
-a file: link pointing at the correct .org source file. The .org
-extension is kept deliberately: ox-html's
-org-html-link-org-files-as-html (on by default) swaps .org -> .html,
-and org-gemini--describe-links performs the equivalent .org -> .gmi
-swap -- both downstream, after this filter has already run."
-  (when (org-export-derived-backend-p backend 'html 'gemini)
+  "Rewrite id: links to file: links for backends that don't already
+resolve them correctly.
+
+This filter runs on the parsed tree before the gemini backend transcodes
+it, rewriting every id: link into a file: link pointing at the correct
+.org source file. The .org extension is kept deliberately:
+org-gemini--describe-links performs the equivalent .org -> .gmi swap
+after this filter has already run. Since gemtext has no fragment/anchor
+syntax at all, this is harmless.
+
+ox-html resolves cross-file id: links natively via
+org-export-resolve-id-link + org-id-locations. For a SAME-file id: link,
+the native resolution returns the actual headline element, letting
+org-html-link build a true in-page anchor (href=\"#heading-id\"). So
+using this filter degrades html experience."
+  (when (org-export-derived-backend-p backend 'gemini)
+  ;; (when (org-export-derived-backend-p backend 'html 'gemini)
     (require 'org-id)
     (org-element-map tree 'link
       (lambda (link)
@@ -541,9 +551,8 @@ swap -- both downstream, after this filter has already run."
          :auto-sitemap t
          :sitemap-filename "notes.html"
          :sitemap-title "Notes"
-         ;; :sitemap-sort-files anti-chronologically
          :sitemap-function my/html-sitemap-function
-         :completion-function my/sitemap-cleanup-artifact)
+         )
         ("notes-gemini"
          :base-directory ,org-roam-directory
          :base-extension "org"
@@ -553,12 +562,11 @@ swap -- both downstream, after this filter has already run."
          :auto-sitemap t
          :sitemap-filename "notes.gmi"
          :sitemap-title "Notes"
-         ;; :sitemap-sort-files anti-chronologically
          :sitemap-function my/gemini-sitemap-function
-         :completion-function my/sitemap-cleanup-artifact)
+         )
         ("all-sites"
-         :components ("notes-html" "notes-gemini"))
-        ))
+         :components ("notes-html" "notes-gemini")
+         )))
 
 (defvar my/publish-site-script "publish_site")
 
@@ -577,7 +585,8 @@ swap -- both downstream, after this filter has already run."
   (org-id-update-id-locations (org-roam--list-files org-roam-directory))
   (org-publish "notes-html" t)
   (my/compile-site-css)
-  (message "Published + compiled CSS to %s" my/site-css-output))
+  (my/trigger-syncthing-scan)
+  (message "Published complete HTML + compiled CSS to %s" my/site-css-output))
 
 (defun my/publish-complete-gemini-site ()
   "Force-export every org-roam note to gemini."
@@ -585,7 +594,9 @@ swap -- both downstream, after this filter has already run."
   (require 'org-id)
   (require 'ox-gemini)
   (org-id-update-id-locations (org-roam--list-files org-roam-directory))
-  (org-publish "notes-gemini" t))
+  (org-publish "notes-gemini" t)
+  (my/trigger-syncthing-scan)
+  (message "Published complete gemini site"))
 
 (defun my/publish-all-sites ()
   "Publish only changes to both the HTML site and Gemini."
@@ -621,28 +632,6 @@ so this Emacs session doesn't block while publishing."
           ((string-match-p "\\(exited abnormally\\|failed\\)" event)
            (message "Publish FAILED -- check %s" my/publish-log-buffer)))))
       (message "Publishing started in background..."))))
-
-(defun my/gemini-nav-block ()
-  "Site nav block, gemtext link-line format."
-  (concat
-   "=> notes.gmi\tNotes\n"
-   "=> daily_journal.gmi\tJournal\n"
-   "=> about.gmi\tAbout\n"
-   "\n"))
-
-(defun my/org-gemini-add-nav (orig-fun contents info)
-  "Prepend the site nav block to every exported gemini page."
-  (concat (my/gemini-nav-block) (funcall orig-fun contents info)))
-
-(use-package ox-gemini
-  :ensure t
-  :pin melpa
-  :after ox
-  :config
-  (defun org-gemini-code-inline (input _contents _info)
-    "Generate inline code in Gemtext without the trailing space bug."
-    (format "`%s`" (org-element-property :value input)))
-  (advice-add 'org-gemini-template :around #'my/org-gemini-add-nav))
 
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
