@@ -8,7 +8,12 @@
  '(custom-safe-themes
    '("5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64"
      default))
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(auto-dark cape corfu diminish embark-consult helpful hide-mode-line
+               htmlize live-py-mode magit marginalia markdown-mode
+               nord-theme orderless org-noter org-roam-ui
+               org-transclusion outshine ox-gemini ox-hugo pet
+               rainbow-delimiters ruff-format vertico))
  '(safe-local-variable-values '((org-hugo-auto-export-on-save . t))))
 
 (custom-set-faces

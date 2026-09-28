@@ -282,6 +282,7 @@ e.g. Sunday, September 17, 2000."
     "20260616190442-sway_configuration_file.org"
     "20260617160421-sway_theme_toggle_script.org"
     "20240317210436-btrbk.org"
+    "20260926215135-source_for_css.org"
     "20260529152048-graph_js.org"
     "20260529114550-gen_graph.org"
     "20260531212337-neighbour-loader_js.org"
@@ -300,7 +301,7 @@ e.g. Sunday, September 17, 2000."
   (org-return-follows-link t) ;;Allows links to be opened without C-c C-o in emacs
   (org-id-link-to-org-use-id t) ;; Adds properties to record org ID's to non-roam files too
   (org-agenda-files '("/data/myhome/prabu/org/agenda"
-                      "/data/myhome/prabu/org/Resources/daily_journal.org"))
+                      ))
   (org-log-done t)
   (org-todo-keywords '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
   (org-tag-alist '((:startgroup . nil)
@@ -348,13 +349,19 @@ e.g. Sunday, September 17, 2000."
   ;;     "* %^{Title}\n%?"
   ;;     :target (file+head "%<%Y-%m-%d>.org"
   ;;                        "#+title: %<%Y-%m-%d %A>\n"))))
+  ;; (org-roam-dailies-capture-templates
+  ;;  '(("d" "default" entry
+  ;;     "* %^{Title}\n%?"
+  ;;     ;; "* %^{Title}\n:PROPERTIES:\n:EXPORT_FILE_NAME: %(format-time-string \"%Y-%m-%d\" (org-capture-get :default-time))\n:END:\n%?"
+  ;;     :target (file+datetree "daily_journal.org" day)
+  ;;     :empty-lines 1
+  ;;     :no-id t)));;either day|week|month is allowed
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
       "* %^{Title}\n%?"
-      ;; "* %^{Title}\n:PROPERTIES:\n:EXPORT_FILE_NAME: %(format-time-string \"%Y-%m-%d\" (org-capture-get :default-time))\n:END:\n%?"
-      :target (file+datetree "daily_journal.org" day)
-      :empty-lines 1
-      :no-id t)));;either day|week|month is allowed
+      :target (file+head "%<%Y-%m-%d>.journal.org"
+                         "#+title: %<%Y-%m-%d>\n#+date: %<%Y-%m-%dT%H:%M:%S%:z>\n#+filetags: :journal:\n")
+      :empty-lines 1)))
   :bind
   (("C-c n f" . org-roam-node-find)
    ("C-c n r" . org-roam-node-random)
@@ -401,33 +408,45 @@ e.g. Sunday, September 17, 2000."
 (defvar my/org-gemini-directory (file-truename "/data/myhome/prabu/org/gemini")
     "Directory where exported Gemini files should be stored.")
 
+(defvar my/org-html-directory (file-truename "/data/myhome/prabu/org/html_site")
+  "Directory where exported html files should be stored.")
+
+(defvar my/sitemap-exclude-files '("20260517153259-index.org" "20260513193407-about.org")
+  "Files published normally, but omitted from auto-generated sitemaps.")
+
+(defvar my/publish-site-script "publish_site")
+
+(defvar my/site-scss-file (expand-file-name "css/simple.scss" org-roam-directory))
+
+(defvar my/site-css-output (expand-file-name "style.css" my/org-html-directory))
+
+(defun my/compile-site-css ()
+  "Compile simple.scss to style.css via dart-sass."
+  (call-process "sass" nil "*sass-compile*" nil my/site-scss-file my/site-css-output))
+
+(defun my/org-html-preamble (_info)
+  "Top nav bar, matching simple.scss's structure."
+  (concat
+   "<nav class=\"topnav\">\n"
+   "  <div class=\"topnav-links\">\n"
+   "    <a href=\"/index.html\" class=\"topnav-title\">Knowledge Garden</a>\n"
+   "    <a href=\"/notes.html\">Notes</a>\n"
+   "    <a href=\"/journal.html\">Journal</a>\n"
+   "    <a href=\"/about.html\">About</a>\n"
+   "  </div>\n"
+   "</nav>\n"))
+
 (defun my/gemini-nav-block ()
   "Site nav block, gemtext link-line format."
   (concat
    "=> notes.gmi\tNotes\n"
-   "=> daily_journal.gmi\tJournal\n"
+   "=> journal.gmi\tJournal\n"
    "=> about.gmi\tAbout\n"
    "\n"))
 
 (defun my/org-gemini-add-nav (orig-fun contents info)
   "Prepend the site nav block to every exported gemini page."
   (concat (my/gemini-nav-block) (funcall orig-fun contents info)))
-
-(use-package ox-gemini
-  :ensure t
-  :pin melpa
-  :after ox
-  :config
-  (defun org-gemini-code-inline (input _contents _info)
-    "Generate inline code in Gemtext without the trailing space bug."
-    (format "`%s`" (org-element-property :value input)))
-  (advice-add 'org-gemini-template :around #'my/org-gemini-add-nav))
-
-(defvar my/org-html-directory (file-truename "/data/myhome/prabu/org/html_site")
-  "Directory where exported html files should be stored.")
-
-(defvar my/sitemap-exclude-files '("20260517153259-index.org" "20260513193407-about.org" "daily_journal.org")
-  "Files published normally, but omitted from auto-generated sitemaps.")
 
 (defun my/sitemap-excluded-p (file)
   (member (file-name-nondirectory file) my/sitemap-exclude-files))
@@ -447,128 +466,169 @@ which crashes org-publish-find-date."
                  (org-publish-get-base-files project))))
     (cons project
           (sort files
-                (lambda (a b)
-                  (time-less-p
-                   ;; (org-publish-find-date b project)
-                   ;;             (org-publish-find-date a project)
-                   (file-attribute-modification-time (file-attributes b))
-                   (file-attribute-modification-time (file-attributes a))
-                               ))))))
+                (if (string-prefix-p "journal" project-name)
+                    (lambda (a b)
+                      (string> (file-name-nondirectory a) (file-name-nondirectory b)))
+                  (lambda (a b)
+                    (time-less-p
+                     ;; (org-publish-find-date b project)
+                     ;;             (org-publish-find-date a project)
+                     (file-attribute-modification-time (file-attributes b))
+                     (file-attribute-modification-time (file-attributes a))
+                     )))))))
 
-(defun my/html-sitemap-function (title _list)
-  (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files "notes-html")))
-    (concat
-     "#+title: " title "\n\n"
-     (mapconcat
-      (lambda (file)
-        (format "- [[file:%s][%s]]\n"
-                (file-name-nondirectory file)
-                (org-publish-find-title file project)))
-      files ""))))
+(defun my/html-sitemap-function-for (project-name)
+  "Return an html-syntax sitemap function bound to PROJECT-NAME."
+  (lambda (title _list)
+    (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files project-name)))
+      (concat
+       "#+title: " title "\n\n"
+       (mapconcat
+        (lambda (file)
+          (format "- [[file:%s][%s]]\n"
+                  (file-name-nondirectory file)
+                  (org-publish-find-title file project)))
+        files "")))))
 
-(defun my/gemini-sitemap-function (title _list)
-  (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files "notes-gemini")))
-    (concat
-     "#+title: " title "\n\n"
-     "#+begin_export gemini\n"
-     (mapconcat
-      (lambda (file)
-        (format "=> %s\t%s\n"
-                (concat (file-name-sans-extension (file-name-nondirectory file)) ".gmi")
-                (org-publish-find-title file project)))
-      files "")
-     "#+end_export\n")))
+(defun my/gemini-sitemap-function-for (project-name)
+  "Return a gemtext-syntax sitemap function bound to PROJECT-NAME."
+  (lambda (title _list)
+    (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files project-name)))
+      (concat
+       "#+title: " title "\n\n"
+       "#+begin_export gemini\n"
+       (mapconcat
+        (lambda (file)
+          (format "=> %s\t%s\n"
+                  (concat (file-name-sans-extension (file-name-nondirectory file)) ".gmi")
+                  (org-publish-find-title file project)))
+        files "")
+       "#+end_export\n"))))
 
-(defun my/rewrite-id-links (tree backend _info)
-  "Rewrite id: links to file: links for backends that don't already
+
+(defun my/rewrite-id-links-for-gemini (tree backend info)
+  "Rewrite or drop id: links in TREE, for backends that don't already
 resolve them correctly.
 
-This filter runs on the parsed tree before the gemini backend transcodes
-it, rewriting every id: link into a file: link pointing at the correct
-.org source file. The .org extension is kept deliberately:
-org-gemini--describe-links performs the equivalent .org -> .gmi swap
-after this filter has already run. Since gemtext has no fragment/anchor
-syntax at all, this is harmless.
+This filter runs on parsed tree before the gemini backend transcodes
+it, rewriting every id: link into a file:
 
-ox-html resolves cross-file id: links natively via
-org-export-resolve-id-link + org-id-locations. For a SAME-file id: link,
-the native resolution returns the actual headline element, letting
-org-html-link build a true in-page anchor (href=\"#heading-id\"). So
-using this filter degrades html experience."
+Since gemtext has no anchor syntax, if the link is to same file, drop
+it, keep the description as plain text.
+
+If the link is to a different file, it is rewritten to a file: link,
+keeping the .org extension deliberately -- org-gemini--describe-links
+performs the equivalent .org -> .gmi swap after this filter has
+already run.
+
+Using this for html degrades html experience as ox-html resolves
+cross-file id: links natively"
   (when (org-export-derived-backend-p backend 'gemini)
-  ;; (when (org-export-derived-backend-p backend 'html 'gemini)
     (require 'org-id)
-    (org-element-map tree 'link
-      (lambda (link)
-        (when (string= (org-element-property :type link) "id")
-          (let* ((id (org-element-property :path link))
-                 (file (org-id-find-id-file id))
-                 (filename (and file (file-name-nondirectory file))))
-            (when filename
-              (org-element-put-property link :type "file")
-              (org-element-put-property link :path filename)
-              (org-element-put-property link :raw-link (concat "file:" filename))))))))
+    (let ((current-file (plist-get info :input-file)))
+      (org-element-map tree 'link
+        (lambda (link)
+          (when (string= (org-element-property :type link) "id")
+            (let ((file (org-id-find-id-file (org-element-property :path link))))
+              (when file
+                (if (and current-file (file-equal-p file current-file))
+                    (let* ((desc (org-element-contents link))
+                           (post-blank (or (org-element-property :post-blank link) 0))
+                           (text (concat
+                                  (if desc
+                                      (org-element-interpret-data desc)
+                                    (org-element-property :raw-link link))
+                                  (make-string post-blank ?\s))))
+                      (org-element-set link (org-element-create 'plain-text nil text)))
+                  (let ((filename (file-name-nondirectory file)))
+                    (org-element-put-property link :type "file")
+                    (org-element-put-property link :path filename)
+                    (org-element-put-property link :raw-link (concat "file:" filename)))))))))))
   tree)
-(require 'ox)
-(require 'ox-html)
-(add-to-list 'org-export-filter-parse-tree-functions #'my/rewrite-id-links)
 
-;; --- Nav + CSS ---
-(defvar my/site-scss-file (expand-file-name "css/simple.scss" org-roam-directory))
-(defvar my/site-css-output (expand-file-name "style.css" my/org-html-directory))
+(use-feature ox
+  :config
+  (add-to-list 'org-export-filter-parse-tree-functions
+               #'my/rewrite-id-links-for-gemini))
 
-(defun my/compile-site-css ()
-  "Compile simple.scss to style.css via dart-sass."
-  (call-process "sass" nil "*sass-compile*" nil my/site-scss-file my/site-css-output))
+(use-package htmlize
+  :ensure t)
 
-(defun my/org-html-preamble (_info)
-  "Top nav bar, matching simple.scss's .topnav structure."
-  (concat
-   "<nav class=\"topnav\">\n"
-   "  <div class=\"topnav-links\">\n"
-   "    <a href=\"/index.html\" class=\"topnav-title\">Knowledge Garden</a>\n"
-   "    <a href=\"/notes.html\">Notes</a>\n"
-   "    <a href=\"/daily_journal.html\">Journal</a>\n"
-   "    <a href=\"/about.html\">About</a>\n"
-   "  </div>\n"
-   "</nav>\n"))
+(use-feature ox-html
+  :custom
+  (org-html-validation-link nil)
+  (org-html-htmlize-output-type 'css))
 
-;; --- Publish projects ---
-(setq org-publish-project-alist
-      `(("notes-html"
-         :base-directory ,org-roam-directory
-         :base-extension "org"
-         :publishing-directory ,my/org-html-directory
-         :publishing-function org-html-publish-to-html
-         :with-toc 3
-         :section-numbers nil
-         :html-preamble my/org-html-preamble
-         :html-head-include-default-style nil
-         :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">"
-         :html-divs ((preamble "div" "preamble")
-                     (content "div" "content")
-                     (postamble "div" "postamble"))
-         :auto-sitemap t
-         :sitemap-filename "notes.html"
-         :sitemap-title "Notes"
-         :sitemap-function my/html-sitemap-function
-         )
-        ("notes-gemini"
-         :base-directory ,org-roam-directory
-         :base-extension "org"
-         :publishing-directory ,my/org-gemini-directory
-         :publishing-function org-gemini-publish-to-gemini
-         :with-broken-links t
-         :auto-sitemap t
-         :sitemap-filename "notes.gmi"
-         :sitemap-title "Notes"
-         :sitemap-function my/gemini-sitemap-function
-         )
-        ("all-sites"
-         :components ("notes-html" "notes-gemini")
-         )))
+(use-package ox-gemini
+  :ensure t
+  :pin melpa
+  :after ox
+  :config
+  (defun org-gemini-code-inline (input _contents _info)
+    "Generate inline code in Gemtext without the trailing space bug."
+    (format "`%s`" (org-element-property :value input)))
+  (advice-add 'org-gemini-template :around #'my/org-gemini-add-nav))
 
-(defvar my/publish-site-script "publish_site")
+
+(use-feature ox-publish
+  :after ox
+  :config
+  (setq org-publish-project-alist
+        `(("notes-html"
+           :base-directory ,org-roam-directory
+           :base-extension "org"
+           :exclude "\\.journal\\.org\\'\\|\\.blog\\.org\\'"
+           :publishing-directory ,my/org-html-directory
+           :publishing-function org-html-publish-to-html
+           :with-broken-links mark
+           :with-toc 3
+           :section-numbers nil
+           :html-preamble my/org-html-preamble
+           :html-head-include-default-style nil
+           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">"
+           :auto-sitemap t
+           :sitemap-filename "notes.html"
+           :sitemap-title "Notes"
+           :sitemap-function ,(my/html-sitemap-function-for "notes-html"))
+          ("notes-gemini"
+           :base-directory ,org-roam-directory
+           :base-extension "org"
+           :exclude "\\.journal\\.org\\'\\|\\.blog\\.org\\'"
+           :publishing-directory ,my/org-gemini-directory
+           :publishing-function org-gemini-publish-to-gemini
+           :with-broken-links t
+           :auto-sitemap t
+           :sitemap-filename "notes.gmi"
+           :sitemap-title "Notes"
+           :sitemap-function ,(my/gemini-sitemap-function-for "notes-gemini"))
+          ("journal-html"
+           :base-directory ,org-roam-directory
+           :base-extension "journal\\.org"
+           :publishing-directory ,my/org-html-directory
+           :publishing-function org-html-publish-to-html
+           :with-broken-links mark
+           :with-toc 3
+           :section-numbers nil
+           :html-preamble my/org-html-preamble
+           :html-head-include-default-style nil
+           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">"
+           :auto-sitemap t
+           :sitemap-filename "journal.html"
+           :sitemap-title "Journal"
+           :sitemap-function ,(my/html-sitemap-function-for "journal-html"))
+          ("journal-gemini"
+           :base-directory ,org-roam-directory
+           :base-extension "journal\\.org"
+           :publishing-directory ,my/org-gemini-directory
+           :publishing-function org-gemini-publish-to-gemini
+           :with-broken-links t
+           :auto-sitemap t
+           :sitemap-filename "journal.gmi"
+           :sitemap-title "Journal"
+           :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini"))
+          ("all-sites"
+           :components ("notes-html" "notes-gemini" "journal-html" "journal-gemini")))))
+
 
 (defun my/trigger-syncthing-scan ()
   "Asynchronously run publish_site.sh to trigger a Syncthing rescan."
