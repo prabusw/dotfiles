@@ -820,6 +820,33 @@ so this Emacs session doesn't block while publishing."
 ;; Ensure APKBUILD files open in sh-mode so the hook above triggers
 (add-to-list 'auto-mode-alist '("APKBUILD\\'" . sh-mode))
 
+(defvar my/nord-rainbow-colors
+  '("#88c0d0"   ; 1 cyan
+    "#e07882"   ; 2 soft red
+    "#ebcb8b"   ; 3 yellow
+    "#a3be8c"   ; 4 green
+    "#b48ead"   ; 5 purple
+    "#8fbcbb"   ; 6 teal
+    "#d08770"   ; 7 orange
+    "#81a1c1"   ; 8 blue
+    "#a692cc")  ; 9 lavender
+  "Custom Rainbow-delimiters with depth colors for nord")
+
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode)
+  :config
+  (defun my/nord-rainbow-faces (&rest _)
+    "Give rainbow-delimiters distinct hues while nord is enabled."
+    (when (memq 'nord custom-enabled-themes)
+      (cl-loop for color in my/nord-rainbow-colors
+               for depth from 1
+               do (set-face-attribute
+                   (intern (format "rainbow-delimiters-depth-%d-face" depth))
+                   nil :foreground color))))
+  ;; Re-apply whenever auto-dark (or you) enables a theme
+  (add-hook 'enable-theme-functions #'my/nord-rainbow-faces))
+
 (defun my-c-common-setup ()
   "Standardized settings for C-family languages."
   ;; Standards: PEP 8 (Python) and modern C++ (LLVM/Google) prefer spaces.
@@ -848,10 +875,6 @@ so this Emacs session doesn't block while publishing."
 ;;   :bind (:map projectile-mode-map
 ;;               ("s-p" . projectile-command-map)
 ;;               ("C-c p" . projectile-command-map)))
-
-(use-package rainbow-delimiters
-  :ensure t
-  :hook (prog-mode . rainbow-delimiters-mode))
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
