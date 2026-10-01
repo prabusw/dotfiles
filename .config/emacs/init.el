@@ -1,21 +1,29 @@
 ;;; init.el -*- lexical-binding: t; -*-
 
+;; This file is maintained as a literate file in
+;; 20260510115218-emacs_config_file.org
+
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "better-defaults" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "beancount-mode" user-emacs-directory))
 
 (use-package better-defaults
   :ensure nil
-  :demand t)
+  :demand t
+  :config
+  ;; Overrides: these run after the package's own settings.
+  (ido-mode -1)                                   ; vertico replaces ido
+  (setq visible-bell nil)
+  (setq ring-bell-function #'ignore)
+  (global-set-key (kbd "C-x C-b") #'consult-buffer))
 
-;; Based on https://git.sr.ht/~technomancy/better-defaults
 (setq backup-directory-alist `(("." . ,(concat user-emacs-directory
-                                               "backups"))))
-(setq version-control t)
-(setq delete-old-versions t)
-(setq kept-new-versions 5)
-(setq backup-by-copying t)
-(setq create-lockfiles nil)         ;; Prevents .# creation
+                                               "backups")))
+      version-control t
+      delete-old-versions t
+      kept-new-versions 5
+      backup-by-copying t
+      create-lockfiles nil) ;; Prevents .# creation
 
 ;; define package-user-dir
 (setq package-user-dir
@@ -42,19 +50,8 @@ NAME and ARGS as in `use-package'."
      :ensure nil
      ,@args))
 
-;; Remove trailing whitespace before saving
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-
-;;https://batsov.com/articles/2021/12/19/building-emacs-from-source-with-pgtk/
 (pixel-scroll-precision-mode)
 
-(column-number-mode 1)
-
-;; To change default font or size in Emacs https://stackoverflow.com/questions/294664/how-to-set-the-font-size-in-emacs
-;; (set-face-attribute 'default nil :height 130)
-;; (set-face-attribute 'default nil :font "Monaco-16" )
-;; (set-face-attribute 'default nil :font "Hack-13:embolden=true" )
-;; (set-face-attribute 'default nil :font "Roboto Mono-13" )
 (set-face-attribute 'default nil :font "Hack-13" )
 
 ;; (advice-add 'ispell-completion-at-point :override #'ignore)
@@ -96,6 +93,24 @@ NAME and ARGS as in `use-package'."
   (auto-dark-themes '((nord) (modus-operandi)))
   :init (auto-dark-mode))
 
+(setq-default indent-tabs-mode nil)
+
+(defun my/untabify-buffer ()
+  "Untabify the whole buffer, unless this buffer is meant to use tabs."
+  (unless (or indent-tabs-mode buffer-read-only)
+    (untabify (point-min) (point-max))))
+
+(defun my-programming-setup ()
+  "General settings for ALL programming modes"
+  (column-number-mode 1)
+  (setq-local display-line-numbers-type 'relative)
+  (display-line-numbers-mode 1)
+  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+  (add-hook 'before-save-hook #'my/untabify-buffer nil t))
+
+;; Apply this to every programming language automatically
+(add-hook 'prog-mode-hook #'my-programming-setup)
+
 (defun now ()
   "Insert string for the current time formatted like '2:34 PM'."
   (interactive)                 ; permit invocation in minibuffer
@@ -124,26 +139,6 @@ e.g. Sunday, September 17, 2000."
   "Make org-roam node search case-insensitive."
   (let ((completion-ignore-case t))
     (apply orig-fn args)))
-
-;; (defun build/export-all ()
-;;   (dolist (org-file (directory-files-recursively org-roam-directory "\.org$"))
-;;      (with-current-buffer (find-file org-file)
-;; 			   (message (format "[build] Exporting %s" org-file))
-;; 			   (org-hugo-export-wim-to-md :all-subtrees nil nil nil))))
-
-
-;; Define a reusable function for general programming mode setup
-
-(defun my-programming-setup ()
-  "General settings for ALL programming modes"
-  (display-line-numbers-mode 1)
-  (setq-local display-line-numbers-type 'relative)
-  ;; The below two disabled as they break PEP
-  ;; (setq-local tab-width 4)
-  ;; (setq-local indent-tabs-mode t)
-  )
-;; Apply this to every programming language automatically
-(add-hook 'prog-mode-hook #'my-programming-setup)
 
 (use-package helpful
   :ensure t
@@ -607,7 +602,7 @@ cross-file id: links natively"
            :publishing-directory ,my/org-html-directory
            :publishing-function org-html-publish-to-html
            :with-broken-links mark
-           :with-toc 3
+           :with-toc nil
            :section-numbers nil
            :html-preamble my/org-html-preamble
            :html-head-include-default-style nil
@@ -639,22 +634,24 @@ cross-file id: links natively"
                my/publish-site-script))))
 
 (defun my/publish-complete-html-site ()
-  "Force-export every org-roam note to HTML site."
+  "Force-export every org-roam note, Journal to HTML site."
   (interactive)
   (require 'org-id)
   (org-id-update-id-locations (org-roam--list-files org-roam-directory))
   (org-publish "notes-html" t)
+  (org-publish "journal-html" t)
   (my/compile-site-css)
   (my/trigger-syncthing-scan)
   (message "Published complete HTML + compiled CSS to %s" my/site-css-output))
 
 (defun my/publish-complete-gemini-site ()
-  "Force-export every org-roam note to gemini."
+  "Force-export every org-roam note, Journal to gemini."
   (interactive)
   (require 'org-id)
   (require 'ox-gemini)
   (org-id-update-id-locations (org-roam--list-files org-roam-directory))
   (org-publish "notes-gemini" t)
+  (org-publish "journal-gemini" t)
   (my/trigger-syncthing-scan)
   (message "Published complete gemini site"))
 
@@ -735,6 +732,18 @@ so this Emacs session doesn't block while publishing."
               (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
   )
 
+;; From etc/emacsrc. Bind a key to reformat the entire file using
+;; bean-format. Fixed error in the original function
+(defun my/beancount-format-file ()
+  "Reformat the whole buffer with bean-format"
+  (interactive)
+  (let ((line-no (line-number-at-pos)))
+    (call-process-region (point-min) (point-max) "bean-format" t (current-buffer) nil "-")
+    (goto-char (point-min))
+    (forward-line (1- line-no))
+    (recenter)
+      ))
+
 (use-package beancount
   :ensure nil
   :commands beancount-mode
@@ -742,6 +751,7 @@ so this Emacs session doesn't block while publishing."
   :hook
   (beancount-mode . (lambda ()
                       (setq-local electric-indent-chars nil)
+                      (setq-local beancount-outline-regexp "\\(\\*+\\)")
                       (outline-minor-mode)
                       (flymake-mode) ; Enable flymake-mode here
                       (flymake-bean-check-enable)))
@@ -752,6 +762,7 @@ so this Emacs session doesn't block while publishing."
               ("C-c C-b" . outline-backward-same-level)
               ("C-c C-f" . outline-forward-same-level)
               ("C-c C-a" . outline-show-all)
+              ("C-c F" . my/beancount-format-file)
               ([backtab] . beancount-outline-cycle)))
 
 (use-package flymake-bean-check
@@ -781,8 +792,8 @@ so this Emacs session doesn't block while publishing."
 (use-package pet
   :ensure t
   :config
-  (add-hook 'python-base-mode-hook 'pet-mode +1)
-  (add-hook 'beancount-mode-hook 'pet-mode +1)
+  (add-hook 'python-base-mode-hook 'pet-mode)
+  (add-hook 'beancount-mode-hook 'pet-mode)
   (add-hook 'python-base-mode-hook
             (lambda ()
               (when-let* ((python (pet-executable-find "python")))
@@ -875,7 +886,3 @@ so this Emacs session doesn't block while publishing."
 ;;   :bind (:map projectile-mode-map
 ;;               ("s-p" . projectile-command-map)
 ;;               ("C-c p" . projectile-command-map)))
-
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(when (file-exists-p custom-file)
-  (load custom-file))
