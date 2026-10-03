@@ -424,7 +424,7 @@ e.g. Sunday, September 17, 2000."
   (concat
    "<nav class=\"topnav\">\n"
    "  <div class=\"topnav-links\">\n"
-   "    <a href=\"/index.html\" class=\"topnav-title\">Knowledge Garden</a>\n"
+   "    <a href=\"/index.html\" class=\"topnav-title\">Home</a>\n"
    "    <a href=\"/notes.html\">Notes</a>\n"
    "    <a href=\"/journal.html\">Journal</a>\n"
    "    <a href=\"/about.html\">About</a>\n"
@@ -439,38 +439,25 @@ e.g. Sunday, September 17, 2000."
    "=> about.gmi\tAbout\n"
    "\n"))
 
-(defun my/org-gemini-add-nav (orig-fun contents info)
-  "Prepend the site nav block to every exported gemini page."
-  (concat (my/gemini-nav-block) (funcall orig-fun contents info)))
-
-(defun my/sitemap-excluded-p (file)
-  (member (file-name-nondirectory file) my/sitemap-exclude-files))
+(defun my/org-gemini-add-nav (result)
+  "Prepend the site nav block to RESULT, an exported gemini page."
+  (concat (my/gemini-nav-block) result))
 
 (defun my/sitemap-sorted-files (project-name)
-  "Return (PROJECT . FILES) for PROJECT-NAME, filtered and sorted newest-first.
-Excludes the project's own :sitemap-filename, since org-publish-get-base-files
-can include it as an expected file even when it doesn't yet exist on disk --
-which crashes org-publish-find-date."
+  "Return (PROJECT . FILES) for PROJECT-NAME, newest first.
+Journals sort by filename (dates), other projects by modification time.
+Drops the project's own sitemap file, which `org-publish-get-base-files'
+always includes, plus `my/sitemap-exclude-files'."
   (let* ((project (assoc project-name org-publish-project-alist))
-         (sitemap-name (plist-get (cdr project) :sitemap-filename))
+         (excluded (cons (plist-get (cdr project) :sitemap-filename)
+                         my/sitemap-exclude-files))
          (files (seq-remove
-                 (lambda (f)
-                   (or (my/sitemap-excluded-p f)
-                       (and sitemap-name
-                            (string= (file-name-nondirectory f) sitemap-name))))
+                 (lambda (f) (member (file-name-nondirectory f) excluded))
                  (org-publish-get-base-files project))))
     (cons project
-          (sort files
-                (if (string-prefix-p "journal" project-name)
-                    (lambda (a b)
-                      (string> (file-name-nondirectory a) (file-name-nondirectory b)))
-                  (lambda (a b)
-                    (time-less-p
-                     ;; (org-publish-find-date b project)
-                     ;;             (org-publish-find-date a project)
-                     (file-attribute-modification-time (file-attributes b))
-                     (file-attribute-modification-time (file-attributes a))
-                     )))))))
+          (sort files (if (string-prefix-p "journal" project-name)
+                          #'string>
+                        #'file-newer-than-file-p)))))
 
 (defun my/html-sitemap-function-for (project-name)
   "Return an html-syntax sitemap function bound to PROJECT-NAME."
@@ -500,51 +487,35 @@ which crashes org-publish-find-date."
         files "")
        "#+end_export\n"))))
 
-
 (defun my/rewrite-id-links-for-gemini (tree backend info)
-  "Rewrite or drop id: links in TREE, for backends that don't already
-resolve them correctly.
-
-This filter runs on parsed tree before the gemini backend transcodes
-it, rewriting every id: link into a file:
-
-Since gemtext has no anchor syntax, if the link is to same file, drop
-it, keep the description as plain text.
-
-If the link is to a different file, it is rewritten to a file: link,
-keeping the .org extension deliberately -- org-gemini--describe-links
-performs the equivalent .org -> .gmi swap after this filter has
-already run.
-
-Using this for html degrades html experience as ox-html resolves
-cross-file id: links natively"
+  "Rewrite id: links in TREE for the gemini backend.
+Gemtext has no anchors, so same-file links become plain text.  Other-file
+links become file: links that keep the .org extension on purpose:
+`org-gemini--describe-links' swaps it to .gmi after this filter runs.
+Only active for gemini, since ox-html resolves id: links natively."
   (when (org-export-derived-backend-p backend 'gemini)
     (require 'org-id)
-    (let ((current-file (plist-get info :input-file)))
+    (let ((current (plist-get info :input-file)))
       (org-element-map tree 'link
         (lambda (link)
-          (when (string= (org-element-property :type link) "id")
-            (let ((file (org-id-find-id-file (org-element-property :path link))))
-              (when file
-                (if (and current-file (file-equal-p file current-file))
-                    (let* ((desc (org-element-contents link))
-                           (post-blank (or (org-element-property :post-blank link) 0))
-                           (text (concat
-                                  (if desc
-                                      (org-element-interpret-data desc)
-                                    (org-element-property :raw-link link))
-                                  (make-string post-blank ?\s))))
-                      (org-element-set link (org-element-create 'plain-text nil text)))
-                  (let ((filename (file-name-nondirectory file)))
-                    (org-element-put-property link :type "file")
-                    (org-element-put-property link :path filename)
-                    (org-element-put-property link :raw-link (concat "file:" filename)))))))))))
+          (when-let* (((equal (org-element-property :type link) "id"))
+                      (file (org-id-find-id-file (org-element-property :path link))))
+            (if (and current (file-equal-p file current))
+                ;; Same file: gemtext has no anchors, keep only the text.
+                (org-element-set
+                 link
+                 (org-element-create
+                  'plain-text nil
+                  (concat (org-element-interpret-data
+                           (or (org-element-contents link)
+                               (org-element-property :raw-link link)))
+                          (make-string (org-element-property :post-blank link) ?\s))))
+              ;; Other file: point at its filename.
+              (let ((name (file-name-nondirectory file)))
+                (org-element-put-property link :type "file")
+                (org-element-put-property link :path name)
+                (org-element-put-property link :raw-link (concat "file:" name)))))))))
   tree)
-
-(use-feature ox
-  :config
-  (add-to-list 'org-export-filter-parse-tree-functions
-               #'my/rewrite-id-links-for-gemini))
 
 (use-package htmlize
   :ensure t)
@@ -559,11 +530,26 @@ cross-file id: links natively"
   :pin melpa
   :after ox
   :config
+  (add-hook 'org-export-filter-parse-tree-functions
+            #'my/rewrite-id-links-for-gemini)
+  
   (defun org-gemini-code-inline (input _contents _info)
     "Generate inline code in Gemtext without the trailing space bug."
     (format "`%s`" (org-element-property :value input)))
-  (advice-add 'org-gemini-template :around #'my/org-gemini-add-nav))
-
+  
+  (defun org-gemini-code-block (src-block _contents info)
+    "Transcode SRC-BLOCK to a gemtext preformatted block.
+The alt text is the block's language, followed by its caption or name
+when present.  INFO is a plist."
+    (let* ((lang (org-element-property :language src-block))
+           (name (or (caaar (org-element-property :caption src-block))
+                     (org-element-property :name src-block)))
+           (alt (string-join (delq nil (list lang name)) " ")))
+      (org-remove-indentation
+       (format "```%s\n%s```"
+               alt
+               (org-export-format-code-default src-block info)))))
+  (advice-add 'org-gemini-template :filter-return #'my/org-gemini-add-nav))
 
 (use-feature ox-publish
   :after ox
