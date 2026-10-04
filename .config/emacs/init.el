@@ -337,25 +337,11 @@ e.g. Sunday, September 17, 2000."
   (org-roam-completion-everywhere t)
   (org-roam-directory (file-truename "/data/myhome/prabu/org/Resources"))
   (org-roam-dailies-directory ".")
-  ;; (org-roam-dailies-directory "daily/")
-  ;; ;; Daily Template
-  ;; (org-roam-dailies-capture-templates
-  ;;  '(("d" "default" entry
-  ;;     "* %^{Title}\n%?"
-  ;;     :target (file+head "%<%Y-%m-%d>.org"
-  ;;                        "#+title: %<%Y-%m-%d %A>\n"))))
-  ;; (org-roam-dailies-capture-templates
-  ;;  '(("d" "default" entry
-  ;;     "* %^{Title}\n%?"
-  ;;     ;; "* %^{Title}\n:PROPERTIES:\n:EXPORT_FILE_NAME: %(format-time-string \"%Y-%m-%d\" (org-capture-get :default-time))\n:END:\n%?"
-  ;;     :target (file+datetree "daily_journal.org" day)
-  ;;     :empty-lines 1
-  ;;     :no-id t)));;either day|week|month is allowed
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
       "* %^{Title}\n%?"
       :target (file+head "%<%Y-%m-%d>.journal.org"
-                         "#+title: %<%Y-%m-%d>\n#+date: %<%Y-%m-%dT%H:%M:%S%:z>\n#+filetags: :journal:\n")
+                         "#+title: %<%Y-%m-%d>\n#+date: %<[%Y-%m-%d %a]>\n#+filetags: :journal:\n")
       :empty-lines 1)))
   :bind
   (("C-c n f" . org-roam-node-find)
@@ -381,7 +367,7 @@ e.g. Sunday, September 17, 2000."
         '(("d" "default" plain
            "%?"
            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                              "#+title: ${title}\n#+date: %<%Y-%m-%dT%H:%M:%S%:z>\n#+filetags: :draft:\n")
+                              "#+title: ${title}\n#+date: %<[%Y-%m-%d %a %H:%M:%S]>\n#+filetags: :draft:\n")
            :unnarrowed t)))
   ;; org-Roam Database and Sync
   (org-roam-db-autosync-mode)
@@ -392,10 +378,8 @@ e.g. Sunday, September 17, 2000."
   (add-hook 'org-roam-db-sync-hook
             (lambda ()
               (setq org-id-extra-files (org-roam--list-files org-roam-directory))))
-  ;; (add-hook 'org-capture-before-finalize-hook #'my/set-daily-export-file-name)
   (advice-add 'org-roam-node-read :around #'case-insensitive-org-roam-node-read)
   (message "org-roam loaded"))
-;; #for ox-hugo# https://hugocisneros.com/org-config/#org-roam
 
 (use-package org-roam-ui
   :ensure t)
@@ -554,6 +538,7 @@ when present.  INFO is a plist."
 (use-feature ox-publish
   :after ox
   :config
+  (setq org-export-with-sub-superscripts '{})
   (setq org-publish-project-alist
         `(("notes-html"
            :base-directory ,org-roam-directory
@@ -566,11 +551,12 @@ when present.  INFO is a plist."
            :section-numbers nil
            :html-preamble my/org-html-preamble
            :html-head-include-default-style nil
-           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">"
+           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">\n<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Notes\" href=\"/notes-feed.xml\">"
            :auto-sitemap t
            :sitemap-filename "notes.html"
            :sitemap-title "Notes"
-           :sitemap-function ,(my/html-sitemap-function-for "notes-html"))
+           :sitemap-function ,(my/html-sitemap-function-for "notes-html")
+           :completion-function ,(lambda (_) (my/feed-write-atom "notes")))
           ("notes-gemini"
            :base-directory ,org-roam-directory
            :base-extension "org"
@@ -581,7 +567,8 @@ when present.  INFO is a plist."
            :auto-sitemap t
            :sitemap-filename "notes.gmi"
            :sitemap-title "Notes"
-           :sitemap-function ,(my/gemini-sitemap-function-for "notes-gemini"))
+           :sitemap-function ,(my/gemini-sitemap-function-for "notes-gemini")
+           :completion-function ,(lambda (_) (my/feed-write-gemini "notes")))
           ("journal-html"
            :base-directory ,org-roam-directory
            :base-extension "journal\\.org"
@@ -592,11 +579,12 @@ when present.  INFO is a plist."
            :section-numbers nil
            :html-preamble my/org-html-preamble
            :html-head-include-default-style nil
-           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">"
+           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">\n<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Journal\" href=\"/journal-feed.xml\">"
            :auto-sitemap t
            :sitemap-filename "journal.html"
            :sitemap-title "Journal"
-           :sitemap-function ,(my/html-sitemap-function-for "journal-html"))
+           :sitemap-function ,(my/html-sitemap-function-for "journal-html")
+           :completion-function ,(lambda (_) (my/feed-write-atom "journal")))
           ("journal-gemini"
            :base-directory ,org-roam-directory
            :base-extension "journal\\.org"
@@ -606,7 +594,8 @@ when present.  INFO is a plist."
            :auto-sitemap t
            :sitemap-filename "journal.gmi"
            :sitemap-title "Journal"
-           :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini"))
+           :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini")
+           :completion-function ,(lambda (_) (my/feed-write-gemini "journal")))
           ("all-sites"
            :components ("notes-html" "notes-gemini" "journal-html" "journal-gemini")))))
 
@@ -675,6 +664,125 @@ so this Emacs session doesn't block while publishing."
           ((string-match-p "\\(exited abnormally\\|failed\\)" event)
            (message "Publish FAILED -- check %s" my/publish-log-buffer)))))
       (message "Publishing started in background..."))))
+
+(require 'xml)
+
+(defvar my/site-host "prabu.freeddns.org"
+  "Public host name; the same for https:// and gemini://.")
+(defvar my/feed-limit 10 "Maximum number of entries in each feed.")
+(defvar my/feed-author "Prabu Anand Kalivaradhan")
+(defvar my/feed-titles
+  '(("notes" . "Prabu's Notes")
+    ("journal" . "Prabu's Journal"))
+  "Feed name -> feed title.  Gemsub readers use it as the author name.")
+
+(defun my/feed--first-heading (file)
+  "Text of the first headline in FILE, links reduced to their description, or nil."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (delay-mode-hooks (org-mode))
+    (when-let* ((h (org-element-map (org-element-parse-buffer 'headline)
+                       'headline #'identity nil t)))
+      (org-link-display-format (org-element-property :raw-value h)))))
+
+(defun my/feed--content (file)
+    "Body of FILE as HTML, exported by Org (no title, table of contents or page frame)."
+    (with-temp-buffer
+      (insert-file-contents file)
+      (setq default-directory (file-name-directory file))
+      (delay-mode-hooks (org-mode))
+      (org-export-as 'html nil nil t
+                     '(:with-toc nil :section-numbers nil :with-broken-links mark))))
+
+(defun my/feed-entries (name)
+  "Return the newest `my/feed-limit' entries of feed NAME as plists.
+This is the single source for every feed format.  NAME is \"notes\"
+or \"journal\"; the file list comes from the matching gemini project."
+  (pcase-let* ((`(,project . ,files)
+                (my/sitemap-sorted-files (concat name "-gemini")))
+               (entries
+                (mapcar
+                 (lambda (f)
+                   (let* ((created (org-publish-find-date f project))
+                          (mtime (file-attribute-modification-time (file-attributes f))))
+                     (list :file f
+                           :slug (file-name-sans-extension (file-name-nondirectory f))
+                           :created created
+                           :updated (if (time-less-p mtime created) created mtime))))
+                 files)))
+    (setq entries (sort entries (lambda (a b) (time-less-p (plist-get b :created)
+                                                           (plist-get a :created)))))
+    (when (> (length entries) my/feed-limit)
+      (setq entries (seq-take entries my/feed-limit)))
+    (mapcar
+     (lambda (e)
+       (let* ((title (org-publish-find-title (plist-get e :file) project))
+              (date (format-time-string "%F" (plist-get e :created))))
+         (plist-put e :content (my/feed--content (plist-get e :file)))
+         (plist-put e :title
+                    (or (and (string= name "journal")
+                             (my/feed--first-heading (plist-get e :file)))
+                        (if (string= title date) (capitalize name) title)))))
+     entries)))
+
+(defun my/feed--gemini-string (name)
+  "Render feed NAME as a gemsub page."
+  (concat
+   "# " (cdr (assoc name my/feed-titles)) "\n\n"
+   (mapconcat
+    (lambda (e)
+      (format "=> %s.gmi\t%s - %s\n" (plist-get e :slug)
+              (format-time-string "%F" (plist-get e :created))
+              (plist-get e :title)))
+    (my/feed-entries name) "")
+   "\n=> " name ".gmi\tAll " name "\n"))
+
+(defun my/feed--atom-string (name)
+  "Render feed NAME as an Atom document."
+  (let* ((base (format "https://%s/" my/site-host))
+         (entries (my/feed-entries name))
+         (stamp (lambda (time) (format-time-string "%FT%T%:z" time)))
+         (feed-updated (or (car (sort (mapcar (lambda (e) (plist-get e :updated)) entries)
+                                      (lambda (a b) (time-less-p b a))))
+                           (current-time))))
+    (concat
+     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+     "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n"
+     (format "  <title>%s</title>\n" (xml-escape-string (cdr (assoc name my/feed-titles))))
+     (format "  <link href=\"%s%s.html\"/>\n" base name)
+     (format "  <link rel=\"self\" type=\"application/atom+xml\" href=\"%s%s-feed.xml\"/>\n" base name)
+     (format "  <id>%s%s.html</id>\n" base name)
+     (format "  <updated>%s</updated>\n" (funcall stamp feed-updated))
+     (format "  <author><name>%s</name></author>\n" (xml-escape-string my/feed-author))
+     (mapconcat
+      (lambda (e)
+        (let ((url (format "%s%s.html" base (plist-get e :slug)))
+              (content (plist-get e :content))
+              )
+          (concat
+           "  <entry>\n"
+           (format "    <title>%s</title>\n" (xml-escape-string (plist-get e :title)))
+           (format "    <link rel=\"alternate\" type=\"text/html\" href=\"%s\"/>\n" url)
+           (format "    <id>%s</id>\n" url)
+           (format "    <published>%s</published>\n" (funcall stamp (plist-get e :created)))
+           (format "    <updated>%s</updated>\n" (funcall stamp (plist-get e :updated)))
+           (format "    <content type=\"html\" xml:base=\"%s\">%s</content>\n"
+                   url (xml-escape-string content))
+           "  </entry>\n")))
+      entries "")
+     "</feed>\n")))
+
+(defun my/feed--write (string directory filename)
+  (let ((coding-system-for-write 'utf-8-unix))
+    (write-region string nil (expand-file-name filename directory) nil 'silent)))
+
+(defun my/feed-write-gemini (name)
+  (my/feed--write (my/feed--gemini-string name) my/org-gemini-directory
+                  (concat name "-feed.gmi")))
+
+(defun my/feed-write-atom (name)
+  (my/feed--write (my/feed--atom-string name) my/org-html-directory
+                  (concat name "-feed.xml")))
 
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
