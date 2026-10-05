@@ -393,7 +393,8 @@ e.g. Sunday, September 17, 2000."
 (defvar my/sitemap-exclude-files '("20260517153259-index.org" "20260513193407-about.org")
   "Files published normally, but omitted from auto-generated sitemaps.")
 
-(defvar my/publish-site-script "publish_site")
+(defvar my/publish-site-script "publish_site"
+  "This is a shell script to push changes to the server.")
 
 (defvar my/site-scss-file (expand-file-name "css/simple.scss" org-roam-directory))
 
@@ -456,18 +457,28 @@ always includes, plus `my/sitemap-exclude-files'."
                   (org-publish-find-title file project)))
         files "")))))
 
-(defun my/gemini-sitemap-function-for (project-name)
-  "Return a gemtext-syntax sitemap function bound to PROJECT-NAME."
+(defun my/gemini-sitemap-function-for (project-name &optional subtitle)
+  "Return a gemtext sitemap function bound to PROJECT-NAME.
+Each label starts with an ISO date, so the page is also a valid gemsub feed.
+SUBTITLE, if given, is emitted as a ## line right after the title."
   (lambda (title _list)
     (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files project-name)))
       (concat
        "#+title: " title "\n\n"
        "#+begin_export gemini\n"
+       (when subtitle (concat "## " subtitle "\n\n"))
+       (unless (string-prefix-p "journal" project-name)
+         "The date listed here is the original published date. However the notes are sorted by last updated date.\n\n")
        (mapconcat
         (lambda (file)
-          (format "=> %s\t%s\n"
-                  (concat (file-name-sans-extension (file-name-nondirectory file)) ".gmi")
-                  (org-publish-find-title file project)))
+          (let* ((date (format-time-string "%F" (org-publish-find-date file project)))
+                 (found (org-publish-find-title file project))
+                 (label (if (string= found date)
+                            (my/feed--first-heading file)
+                          found)))
+            (format "=> %s.gmi\t%s\n"
+                    (file-name-sans-extension (file-name-nondirectory file))
+                    (if label (concat date " - " label) date))))
         files "")
        "#+end_export\n"))))
 
@@ -551,7 +562,7 @@ when present.  INFO is a plist."
            :section-numbers nil
            :html-preamble my/org-html-preamble
            :html-head-include-default-style nil
-           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">\n<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Notes\" href=\"/notes-feed.xml\">"
+           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">\n<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Notes\" href=\"/notes.xml\">"
            :auto-sitemap t
            :sitemap-filename "notes.html"
            :sitemap-title "Notes"
@@ -567,8 +578,7 @@ when present.  INFO is a plist."
            :auto-sitemap t
            :sitemap-filename "notes.gmi"
            :sitemap-title "Notes"
-           :sitemap-function ,(my/gemini-sitemap-function-for "notes-gemini")
-           :completion-function ,(lambda (_) (my/feed-write-gemini "notes")))
+           :sitemap-function ,(my/gemini-sitemap-function-for "notes-gemini"))
           ("journal-html"
            :base-directory ,org-roam-directory
            :base-extension "journal\\.org"
@@ -579,7 +589,7 @@ when present.  INFO is a plist."
            :section-numbers nil
            :html-preamble my/org-html-preamble
            :html-head-include-default-style nil
-           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">\n<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Journal\" href=\"/journal-feed.xml\">"
+           :html-head-extra "<link rel=\"stylesheet\" href=\"/style.css\">\n<link rel=\"alternate\" type=\"application/atom+xml\" title=\"Journal\" href=\"/journal.xml\">"
            :auto-sitemap t
            :sitemap-filename "journal.html"
            :sitemap-title "Journal"
@@ -594,8 +604,8 @@ when present.  INFO is a plist."
            :auto-sitemap t
            :sitemap-filename "journal.gmi"
            :sitemap-title "Journal"
-           :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini")
-           :completion-function ,(lambda (_) (my/feed-write-gemini "journal")))
+           ;; :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini" "Daily entries, newest first"))
+           :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini"))
           ("all-sites"
            :components ("notes-html" "notes-gemini" "journal-html" "journal-gemini")))))
 
@@ -665,7 +675,7 @@ so this Emacs session doesn't block while publishing."
            (message "Publish FAILED -- check %s" my/publish-log-buffer)))))
       (message "Publishing started in background..."))))
 
-(require 'xml)
+(use-feature xml)
 
 (defvar my/site-host "prabu.freeddns.org"
   "Public host name; the same for https:// and gemini://.")
@@ -725,64 +735,38 @@ or \"journal\"; the file list comes from the matching gemini project."
                         (if (string= title date) (capitalize name) title)))))
      entries)))
 
-(defun my/feed--gemini-string (name)
-  "Render feed NAME as a gemsub page."
-  (concat
-   "# " (cdr (assoc name my/feed-titles)) "\n\n"
-   (mapconcat
-    (lambda (e)
-      (format "=> %s.gmi\t%s - %s\n" (plist-get e :slug)
-              (format-time-string "%F" (plist-get e :created))
-              (plist-get e :title)))
-    (my/feed-entries name) "")
-   "\n=> " name ".gmi\tAll " name "\n"))
-
-(defun my/feed--atom-string (name)
-  "Render feed NAME as an Atom document."
+(defun my/feed-write-atom (name)
+  "Write the Atom feed for NAME (\"notes\" or \"journal\") to `my/org-html-directory'."
   (let* ((base (format "https://%s/" my/site-host))
          (entries (my/feed-entries name))
          (stamp (lambda (time) (format-time-string "%FT%T%:z" time)))
          (feed-updated (or (car (sort (mapcar (lambda (e) (plist-get e :updated)) entries)
                                       (lambda (a b) (time-less-p b a))))
-                           (current-time))))
-    (concat
-     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-     "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n"
-     (format "  <title>%s</title>\n" (xml-escape-string (cdr (assoc name my/feed-titles))))
-     (format "  <link href=\"%s%s.html\"/>\n" base name)
-     (format "  <link rel=\"self\" type=\"application/atom+xml\" href=\"%s%s-feed.xml\"/>\n" base name)
-     (format "  <id>%s%s.html</id>\n" base name)
-     (format "  <updated>%s</updated>\n" (funcall stamp feed-updated))
-     (format "  <author><name>%s</name></author>\n" (xml-escape-string my/feed-author))
-     (mapconcat
-      (lambda (e)
-        (let ((url (format "%s%s.html" base (plist-get e :slug)))
-              (content (plist-get e :content))
-              )
-          (concat
-           "  <entry>\n"
-           (format "    <title>%s</title>\n" (xml-escape-string (plist-get e :title)))
-           (format "    <link rel=\"alternate\" type=\"text/html\" href=\"%s\"/>\n" url)
-           (format "    <id>%s</id>\n" url)
-           (format "    <published>%s</published>\n" (funcall stamp (plist-get e :created)))
-           (format "    <updated>%s</updated>\n" (funcall stamp (plist-get e :updated)))
-           (format "    <content type=\"html\" xml:base=\"%s\">%s</content>\n"
-                   url (xml-escape-string content))
-           "  </entry>\n")))
-      entries "")
-     "</feed>\n")))
-
-(defun my/feed--write (string directory filename)
-  (let ((coding-system-for-write 'utf-8-unix))
-    (write-region string nil (expand-file-name filename directory) nil 'silent)))
-
-(defun my/feed-write-gemini (name)
-  (my/feed--write (my/feed--gemini-string name) my/org-gemini-directory
-                  (concat name "-feed.gmi")))
-
-(defun my/feed-write-atom (name)
-  (my/feed--write (my/feed--atom-string name) my/org-html-directory
-                  (concat name "-feed.xml")))
+                           (current-time)))
+         (coding-system-for-write 'utf-8-unix))
+    (with-temp-file (expand-file-name (concat name ".xml") my/org-html-directory)
+      (insert "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+      (xml-print
+       `((feed ((xmlns . "http://www.w3.org/2005/Atom"))
+               (title nil ,(cdr (assoc name my/feed-titles)))
+               (link ((href . ,(format "%s%s.html" base name))))
+               (link ((rel . "self") (type . "application/atom+xml")
+                      (href . ,(format "%s%s.xml" base name))))
+               (id nil ,(format "%s%s.html" base name))
+               (updated nil ,(funcall stamp feed-updated))
+               (author nil (name nil ,my/feed-author))
+               ,@(mapcar
+                  (lambda (e)
+                    (let ((url (format "%s%s.html" base (plist-get e :slug))))
+                      `(entry nil
+                              (title nil ,(plist-get e :title))
+                              (link ((rel . "alternate") (type . "text/html") (href . ,url)))
+                              (id nil ,url)
+                              (published nil ,(funcall stamp (plist-get e :created)))
+                              (updated nil ,(funcall stamp (plist-get e :updated)))
+                              (content ((type . "html") (xml:base . ,url))
+                                       ,(plist-get e :content)))))
+                  entries)))))))
 
 (use-package org-transclusion
   :ensure t   ;;Auto-install the package from Melpa
@@ -951,6 +935,16 @@ or \"journal\"; the file list comes from the matching gemini project."
                    nil :foreground color))))
   ;; Re-apply whenever auto-dark (or you) enables a theme
   (add-hook 'enable-theme-functions #'my/nord-rainbow-faces))
+
+(use-package elfeed
+  :ensure t
+  :config
+  (setq elfeed-feeds
+        '(
+          ("https://nullprogram.com/feed/" test)
+          ("https://planet.emacslife.com/atom.xml" emacs)
+          ("https://prabu.freeddns.org/notes.xml" prabu notes)
+          )))
 
 (defun my-c-common-setup ()
   "Standardized settings for C-family languages."
