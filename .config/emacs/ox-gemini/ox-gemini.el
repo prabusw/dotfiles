@@ -35,7 +35,8 @@
 ;;   files, and search options (::) are ignored.
 ;; - A list item that is only a link becomes a Gemtext link line.
 ;; - No trailing space after inline code.
-;; - Code block alt text is the language plus the caption or name.
+;; - Preformatted blocks (source, example, fixed-width and table) get
+;;   the caption or name as alt text; source blocks also the language.
 ;;
 ;; Gemtext limitations:
 ;; - No nested lists, so sublists are flattened.
@@ -43,6 +44,8 @@
 ;;   the same document are exported as plain text.
 ;; - Links in titles and footnote definitions are not clickable, so
 ;;   the target is printed after the text, as "[text] (target)".
+;; - No escape for fences, so a line starting with ``` inside a source,
+;;   example or fixed-width block ends the preformatted block early.
 
 ;;; Code:
 
@@ -55,46 +58,23 @@
         (?f "To file"
             (lambda (a s v b)
               (org-gemini-export-to-file a s v b nil)))))
-  :translate-alist '((quote-block . org-gemini-quote-block)
-                     (code . org-gemini-code-inline)
+  :translate-alist '((code . org-gemini-code-inline)
+                     (example-block . org-gemini-pre-formatted-block)
                      (export-block . org-gemini-export-block)
-                     (example-block . org-gemini-example-block)
-                     (fixed-width . org-gemini-fixed-width-block)
-                     (paragraph . org-gemini-paragraph)
+                     (fixed-width . org-gemini-pre-formatted-block)
                      (headline . org-gemini-headline)
-                     (link . org-gemini-link)
-                     (section . org-gemini-section)
-                     (src-block . org-gemini-code-block)
                      (item . org-gemini-item)
-                     (template . org-gemini-template)
-                     (table . org-gemini-table)))
+                     (link . org-gemini-link)
+                     (paragraph . org-gemini-paragraph)
+                     (quote-block . org-gemini-quote-block)
+                     (section . org-gemini-section)
+                     (src-block . org-gemini-pre-formatted-block)
+                     (table . org-gemini-table)
+                     (template . org-gemini-template)))
 
 (defun org-gemini-paragraph (_paragraph contents _info)
   "CONTENTS is the text of the paragraph."
-  (concat (replace-regexp-in-string "\n" " " contents)
-          "\n"))
-
-(defun org-gemini-item (item contents info)
-  "Generate a Gemtext item from the org CONTENTS.
-CONTENTS is the text of the individual item.
-ITEM is the parsed-org element with all properties.
-An item that is nothing but a link becomes a Gemtext link line,
-followed by its sublist, if any."
-  (if-let* ((link (org-gemini--sole-link item info)))
-      (concat (string-trim-right (org-gemini--describe-links (list link) info))
-              ;; the sublist, if any, follows the link line
-              (when-let* ((sublist (nth 1 (org-element-contents item))))
-                (concat "\n" (string-trim-right (org-export-data sublist info)))))
-    (concat "* "
-            ;; vv Code from ox-md! vv
-            (pcase (org-element-property :checkbox item)
-              (`on "[X] ")
-              (`trans "[-] ")
-              (`off "[ ] "))
-            (let ((tag (org-element-property :tag item)))
-              (and tag (format "%s :: " (org-export-data tag info))))
-            ;; ^^ ^^
-            contents)))
+  (concat (string-replace "\n" " " contents) "\n"))
 
 (defun org-gemini-quote-block (_input contents _info)
   "CONTENTS is the text of the quote."
@@ -102,41 +82,53 @@ followed by its sublist, if any."
    "^" "> "
    (replace-regexp-in-string "\n\\'" "" contents)))
 
-(defun org-gemini-example-block (example-block _contents info)
-  "Transcode an EXAMPLE-BLOCK element from Org to a Gemtext preformatted block."
-  (org-remove-indentation
-   (format "```\n%s```" (org-export-format-code-default example-block info))))
-
-(defun org-gemini-fixed-width (fixed-width _contents _info)
-  "Transcode a FIXED-WIDTH element from Org to a Gemtext preformatted block."
-  (format "```\n%s```"
-          (org-element-normalize-string
-           (org-remove-indentation (org-element-property :value fixed-width)))))
-
 (defun org-gemini-code-inline (input _contents _info)
   "Generate an inline code in Gemtext from the parsed INPUT.
 INPUT is a `code' object.  A line break in it becomes a space, since
 Gemtext reads each line on its own."
   (format "`%s`" (string-replace "\n" " " (org-element-property :value input))))
 
-(defun org-gemini-code-block (src-block _contents info)
-  "SRC-BLOCK is a codeblock.  INFO is a plist.
-The alt text is the language followed by the caption or name."
-  (let* ((caption (org-export-get-caption src-block))
+(defun org-gemini--alt-text (element info)
+  "Return the alt text for ELEMENT's preformatted block.
+It is the language, if any, followed by the caption or name.
+INFO is a plist."
+  (let* ((caption (org-export-get-caption element))
          (name (if caption
                    (org-export-data caption info)
-                 (org-element-property :name src-block)))
-         (alt (string-join (delq nil (list (org-element-property :language src-block)
-                                           name))
-                           " ")))
-    (org-remove-indentation
-     (format "```%s\n%s```"
-             alt
-             (org-export-format-code-default src-block info)))))
+                 (org-element-property :name element))))
+    (string-join (delq nil (list (org-element-property :language element)
+                                 name))
+                 " ")))
 
-;;; Links
-;;
-;; Gemtext has no inline links, so each link is exported as its
+(defun org-gemini-pre-formatted-block (element _contents info)
+  "Transcode ELEMENT to a Gemtext preformatted block.
+ELEMENT is a `src-block', `example-block' or `fixed-width'.  The alt
+text is the language, if any, followed by the caption or name.  INFO
+is a plist."
+  (format "```%s\n%s```"
+          (org-gemini--alt-text element info)
+          (if (org-element-type-p element 'fixed-width)
+              (org-element-normalize-string
+               (org-remove-indentation (org-element-property :value element)))
+            (org-export-format-code-default element info))))
+
+(defun org-gemini-export-block (export-block _contents _info)
+  "Transcode a EXPORT-BLOCK element from Org to gemtext.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (when (member (org-element-property :type export-block)
+                '("GEMINI" "GMI" "GEMTEXT"))
+    (org-remove-indentation (org-element-property :value export-block))))
+
+(defun org-gemini-table (table contents info)
+  "Generate a Gemtext table from the parsed Org.
+Use the `org-ascii-table' but surrounded by backticks.
+Parameters: TABLE is the parsed org-element table.  CONTENTS is the text with
+properties.  INFO is a plist with export options."
+  (format "```%s\n%s\n```\n"
+          (org-gemini--alt-text table info)
+          (org-ascii-table table contents info)))
+
+;; Links: Gemtext has no inline links, so each link is exported as its
 ;; description in brackets, and the targets are listed as `=>' lines
 ;; after the section.  A list item that is only a link is exported as
 ;; that `=>' line directly and left out of the section's list.
@@ -230,7 +222,6 @@ of links.  INFO is a plist."
    (when (car links)
      "\n")))
 
-
 (defun org-gemini-link (link desc info)
   "Transcode a LINK object from Org to Gemtext.
 DESC is its description, if any.  INFO is a plist.
@@ -253,6 +244,28 @@ plain text.  An id that cannot be resolved is handled as
           (if (equal text target)
               (format "[%s]" text)
             (format "[%s] (%s)" text (url-encode-url target))))))))
+
+(defun org-gemini-item (item contents info)
+  "Generate a Gemtext item from the org CONTENTS.
+CONTENTS is the text of the individual item.
+ITEM is the parsed-org element with all properties.
+An item that is nothing but a link becomes a Gemtext link line,
+followed by its sublist, if any."
+  (if-let* ((link (org-gemini--sole-link item info)))
+      (concat (string-trim-right (org-gemini--describe-links (list link) info))
+              ;; the sublist, if any, follows the link line
+              (when-let* ((sublist (nth 1 (org-element-contents item))))
+                (concat "\n" (string-trim-right (org-export-data sublist info)))))
+    (concat "* "
+            ;; vv Code from ox-md! vv
+            (pcase (org-element-property :checkbox item)
+              (`on "[X] ")
+              (`trans "[-] ")
+              (`off "[ ] "))
+            (let ((tag (org-element-property :tag item)))
+              (and tag (format "%s :: " (org-export-data tag info))))
+            ;; ^^ ^^
+            contents)))
 
 (defun org-gemini-section (section contents info)
   "Transcode a SECTION element from Org to GEMINI.
@@ -310,7 +323,7 @@ holding contextual information."
             (if (not (org-string-nw-p links)) contents
               (let* ((contents (org-element-contents headline))
                      (section (let ((first (car contents)))
-                                (and (eq (org-element-type first) 'section)
+                                (and (org-element-type-p first 'section)
                                      first))))
                 (concat (and section
                              (concat (org-element-normalize-string
@@ -409,25 +422,6 @@ publishing directory.
 Return output file name."
   (org-publish-org-to
    'gemini filename ".gmi" plist pub-dir))
-
-(defun org-gemini-export-block (export-block _contents _info)
-  "Transcode a EXPORT-BLOCK element from Org to gemtext.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (member (org-element-property :type export-block)
-                '("GEMINI" "GMI" "GEMTEXT"))
-    (org-remove-indentation (org-element-property :value export-block))))
-
-(defun org-gemini-table (table contents info)
-  "Generate a Gemtext table from the parsed Org.
-Use the `org-ascii-table' but surrounded by backticks.
-Parameters: TABLE is the parsed org-element table.  CONTENTS is the text with
-properties.  INFO is a plist with export options."
-  (let ((name (or (caaar (org-element-property :caption table))
-                  (org-element-property :name table))))
-    (format "```%s\n%s\n```\n"
-            (or name "")
-            (org-ascii-table table contents info))))
-
 
 (provide 'ox-gemini)
 ;;; ox-gemini.el ends here
