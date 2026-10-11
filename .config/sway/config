@@ -1,3 +1,5 @@
+# This file is maintained as a literate file in
+# 20260616190442-sway_configuration_file.org
 exec dbus-update-activation-environment WAYLAND_DISPLAY
 
 set $config_dir /home/prabu/.config/sway

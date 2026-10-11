@@ -6,6 +6,7 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "better-defaults" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "beancount-mode" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "ox-gemini" user-emacs-directory))
 
 (use-package better-defaults
   :ensure nil
@@ -111,17 +112,14 @@ NAME and ARGS as in `use-package'."
 ;; Apply this to every programming language automatically
 (add-hook 'prog-mode-hook #'my-programming-setup)
 
-(defun now ()
+(defun my/now ()
   "Insert string for the current time formatted like '2:34 PM'."
-  (interactive)                 ; permit invocation in minibuffer
-  ;; (insert (format-time-string "%-I:%M %p"))
+  (interactive)
   (insert (format-time-string "%R")))
 
-(defun today ()
-  "Insert string for today's date nicely formatted in American style,
-e.g. Sunday, September 17, 2000."
-  (interactive)                 ; permit invocation in minibuffer
-  ;; (insert (format-time-string "%A, %B %e, %Y"))
+(defun my/today ()
+  "Insert string for today's date nicely formatted YYYY-MM-DD."
+  (interactive) 
   (insert (format-time-string "%F")))
 
 (defun my/doasedit ()
@@ -133,12 +131,6 @@ e.g. Sunday, September 17, 2000."
         (find-alternate-file (concat "/doas::" truename))
         (goto-char cursor-pos))
     (message "This buffer is not visiting a file!")))
-
-;; https://emacs.stackexchange.com/questions/77295/org-roam-case-insensitive-search
-(defun case-insensitive-org-roam-node-read (orig-fn &rest args)
-  "Make org-roam node search case-insensitive."
-  (let ((completion-ignore-case t))
-    (apply orig-fn args)))
 
 (use-package helpful
   :ensure t
@@ -328,6 +320,12 @@ e.g. Sunday, September 17, 2000."
 (use-feature org-tempo
   :after org)
 
+;; https://emacs.stackexchange.com/questions/77295/org-roam-case-insensitive-search
+(defun my/case-insensitive-org-roam-node-read (orig-fn &rest args)
+  "Make org-roam node search case-insensitive."
+  (let ((completion-ignore-case t))
+    (apply orig-fn args)))
+
 (use-package org-roam
   :ensure t
   :init
@@ -378,7 +376,7 @@ e.g. Sunday, September 17, 2000."
   (add-hook 'org-roam-db-sync-hook
             (lambda ()
               (setq org-id-extra-files (org-roam--list-files org-roam-directory))))
-  (advice-add 'org-roam-node-read :around #'case-insensitive-org-roam-node-read)
+  (advice-add 'org-roam-node-read :around #'my/case-insensitive-org-roam-node-read)
   (message "org-roam loaded"))
 
 (use-package org-roam-ui
@@ -465,52 +463,18 @@ SUBTITLE, if given, is emitted as a ## line right after the title."
     (pcase-let ((`(,project . ,files) (my/sitemap-sorted-files project-name)))
       (concat
        "#+title: " title "\n\n"
-       "#+begin_export gemini\n"
-       (when subtitle (concat "## " subtitle "\n\n"))
+       (when subtitle (concat "** " subtitle "\n\n"))
        (unless (string-prefix-p "journal" project-name)
          "The date listed here is the original published date. However the notes are sorted by last updated date.\n\n")
        (mapconcat
         (lambda (file)
           (let* ((date (format-time-string "%F" (org-publish-find-date file project)))
                  (found (org-publish-find-title file project))
-                 (label (if (string= found date)
-                            (my/feed--first-heading file)
-                          found)))
-            (format "=> %s.gmi\t%s\n"
-                    (file-name-sans-extension (file-name-nondirectory file))
+                 (label (if (string= found date) (my/feed--first-heading file) found)))
+            (format "- [[file:%s][%s]]\n"
+                    (file-name-nondirectory file)
                     (if label (concat date " - " label) date))))
-        files "")
-       "#+end_export\n"))))
-
-(defun my/rewrite-id-links-for-gemini (tree backend info)
-  "Rewrite id: links in TREE for the gemini backend.
-Gemtext has no anchors, so same-file links become plain text.  Other-file
-links become file: links that keep the .org extension on purpose:
-`org-gemini--describe-links' swaps it to .gmi after this filter runs.
-Only active for gemini, since ox-html resolves id: links natively."
-  (when (org-export-derived-backend-p backend 'gemini)
-    (require 'org-id)
-    (let ((current (plist-get info :input-file)))
-      (org-element-map tree 'link
-        (lambda (link)
-          (when-let* (((equal (org-element-property :type link) "id"))
-                      (file (org-id-find-id-file (org-element-property :path link))))
-            (if (and current (file-equal-p file current))
-                ;; Same file: gemtext has no anchors, keep only the text.
-                (org-element-set
-                 link
-                 (org-element-create
-                  'plain-text nil
-                  (concat (org-element-interpret-data
-                           (or (org-element-contents link)
-                               (org-element-property :raw-link link)))
-                          (make-string (org-element-property :post-blank link) ?\s))))
-              ;; Other file: point at its filename.
-              (let ((name (file-name-nondirectory file)))
-                (org-element-put-property link :type "file")
-                (org-element-put-property link :path name)
-                (org-element-put-property link :raw-link (concat "file:" name)))))))))
-  tree)
+        files "")))))
 
 (use-package htmlize
   :ensure t)
@@ -521,29 +485,12 @@ Only active for gemini, since ox-html resolves id: links natively."
   (org-html-htmlize-output-type 'css))
 
 (use-package ox-gemini
-  :ensure t
-  :pin melpa
+  :ensure nil
   :after ox
   :config
-  (add-hook 'org-export-filter-parse-tree-functions
-            #'my/rewrite-id-links-for-gemini)
-  
-  (defun org-gemini-code-inline (input _contents _info)
-    "Generate inline code in Gemtext without the trailing space bug."
-    (format "`%s`" (org-element-property :value input)))
-  
-  (defun org-gemini-code-block (src-block _contents info)
-    "Transcode SRC-BLOCK to a gemtext preformatted block.
-The alt text is the block's language, followed by its caption or name
-when present.  INFO is a plist."
-    (let* ((lang (org-element-property :language src-block))
-           (name (or (caaar (org-element-property :caption src-block))
-                     (org-element-property :name src-block)))
-           (alt (string-join (delq nil (list lang name)) " ")))
-      (org-remove-indentation
-       (format "```%s\n%s```"
-               alt
-               (org-export-format-code-default src-block info)))))
+  ;; Verbatim text and inline source use same backticks as inline
+  ;; code.
+  (setq org-ascii-verbatim-format "`%s`")
   (advice-add 'org-gemini-template :filter-return #'my/org-gemini-add-nav))
 
 (use-feature ox-publish
@@ -574,7 +521,7 @@ when present.  INFO is a plist."
            :exclude "\\.journal\\.org\\'\\|\\.blog\\.org\\'"
            :publishing-directory ,my/org-gemini-directory
            :publishing-function org-gemini-publish-to-gemini
-           :with-broken-links t
+           :with-broken-links mark
            :auto-sitemap t
            :sitemap-filename "notes.gmi"
            :sitemap-title "Notes"
@@ -600,7 +547,7 @@ when present.  INFO is a plist."
            :base-extension "journal\\.org"
            :publishing-directory ,my/org-gemini-directory
            :publishing-function org-gemini-publish-to-gemini
-           :with-broken-links t
+           :with-broken-links mark
            :auto-sitemap t
            :sitemap-filename "journal.gmi"
            :sitemap-title "Journal"
@@ -945,32 +892,3 @@ or \"journal\"; the file list comes from the matching gemini project."
           ("https://planet.emacslife.com/atom.xml" emacs)
           ("https://prabu.freeddns.org/notes.xml" prabu notes)
           )))
-
-(defun my-c-common-setup ()
-  "Standardized settings for C-family languages."
-  ;; Standards: PEP 8 (Python) and modern C++ (LLVM/Google) prefer spaces.
-  ;; Install clangd or clang-extra-tools package for LSP features with eglot
-  (setq-local indent-tabs-mode nil)
-  (setq-local c-basic-offset 4) ; 4 is the modern industry standard
-  (when (executable-find "clangd")
-    (eglot-ensure)))
-(add-hook 'c-mode-common-hook #'my-c-common-setup)
-
-;; (use-package arduino-mode
-;;   :ensure t
-;;   :mode ("\\.ino$" . arduino-mode)
-;;   )
-
-;; (use-package platformio-mode
-;;   :ensure t
-;;   :hook ((c-mode . platformio-conditionally-enable)
-;;          (c++-mode . platformio-conditionally-enable))
-;;   )
-
-;; (use-package projectile
-;;   :ensure t
-;;   :init
-;;   (projectile-mode +1)
-;;   :bind (:map projectile-mode-map
-;;               ("s-p" . projectile-command-map)
-;;               ("C-c p" . projectile-command-map)))
