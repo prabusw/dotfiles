@@ -6,7 +6,6 @@
 ;; Package-Requires: ((emacs "28.1") (org "9.7"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
-
 ;;; Commentary:
 ;;
 ;; There's a web-alternative that's similar to the gopher protocol
@@ -22,9 +21,7 @@
 (require 'url-util)
 (require 'subr-x)
 
-;; This is a fork of ox-gemini (20240221.2127, revision 50818de823b7),
-;; made to work with `org-publish', so publishing to gemini is done
-;; with `org-gemini-publish-to-gemini'.
+;; This is a fork of ox-gemini (20240221.2127, revision 50818de823b7).
 
 ;; Changes in this fork:
 ;; - id: links resolve to the target file (.gmi).  An unresolvable id
@@ -38,7 +35,7 @@
 ;; - Preformatted blocks (source, example, fixed-width and table) get
 ;;   the caption or name as alt text; source blocks also the language.
 ;;
-;; Gemtext limitations:
+;; The following artifacts are due to Gemtext format limitations:
 ;; - No nested lists, so sublists are flattened.
 ;; - No anchors, so links to headings, targets, code lines and ids in
 ;;   the same document are exported as plain text.
@@ -385,7 +382,6 @@ file-local settings."
   (interactive)
   (org-export-to-buffer 'gemini "*Org Gemini Export*" async subtreep visible-only body-only ext-plist (lambda () (text-mode))))
 
-
 (defun org-gemini-export-to-file (&optional async subtreep visible-only body-only ext-plist)
   "Export an org file to a gemini file.
 
@@ -410,7 +406,6 @@ file-local settings."
   (let ((file (org-export-output-file-name ".gmi" subtreep)))
     (org-export-to-file 'gemini file
       async subtreep visible-only body-only ext-plist)))
-
 
 (defun org-gemini-publish-to-gemini (plist filename pub-dir)
   "Publish an org file to a gemini file.

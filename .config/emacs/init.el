@@ -270,6 +270,7 @@ NAME and ARGS as in `use-package'."
     "20260617160421-sway_theme_toggle_script.org"
     "20240317210436-btrbk.org"
     "20260926215135-source_for_css.org"
+    "20261011150111-ox_gemini.org"
     "20260529152048-graph_js.org"
     "20260529114550-gen_graph.org"
     "20260531212337-neighbour-loader_js.org"
@@ -524,7 +525,7 @@ SUBTITLE, if given, is emitted as a ## line right after the title."
            :with-broken-links mark
            :auto-sitemap t
            :sitemap-filename "notes.gmi"
-           :sitemap-title "Notes"
+           :sitemap-title "Prabu's Notes"
            :sitemap-function ,(my/gemini-sitemap-function-for "notes-gemini"))
           ("journal-html"
            :base-directory ,org-roam-directory
@@ -550,7 +551,7 @@ SUBTITLE, if given, is emitted as a ## line right after the title."
            :with-broken-links mark
            :auto-sitemap t
            :sitemap-filename "journal.gmi"
-           :sitemap-title "Journal"
+           :sitemap-title "Prabu's Journal"
            ;; :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini" "Daily entries, newest first"))
            :sitemap-function ,(my/gemini-sitemap-function-for "journal-gemini"))
           ("all-sites"
